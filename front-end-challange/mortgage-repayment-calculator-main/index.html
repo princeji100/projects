@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+  <link rel="stylesheet" href="style.css">
+
+  <title>Mortgage repayment calculator</title>
+</head>
+
+<body>
+
+  <div class="cantenor">
+    <div class="calculator">
+      <div class="title">
+        <h1>Mortgage Calculator</h1>
+        <input type="reset" value="Clear All" onclick="reset()" id="reset">
+      </div>
+      <div class="main">
+        <label for="mamount">
+          Mortgage Amount
+          <div class="input">
+            <span class="red">₹</span>
+            <input type="number" id="mamount" aria-label="Mortgage amount in rupees" tabindex="1" required>
+          </div>
+          <div class="requerd">This field is required</div>
+        </label>
+        <div class="second">
+          <label for="mterm">
+            Mortgage Term
+            <div class="input">
+              <input type="number" id="mterm" aria-label="Mortgage term in years" tabindex="2" required>
+              <span class="red">years</span>
+            </div>
+            <div class="requerd">This field is required</div>
+          </label>
+          <label for="mrate">
+            Interest Rate
+            <div class="input">
+              <input type="number" id="mrate" aria-label="Interest rate as a percentage" tabindex="3" required>
+              <span class="red">%</span>
+            </div>
+            <div class="requerd">This field is required</div>
+          </label>
+        </div>
+        <div class="third">
+          <label for="">
+            Mortgage Type
+            <label for="repayment">
+              <div class="input"><input type="radio" tabindex="4" id="repayment" name="MortgageType" required>Repayment</div>
+            </label>
+            <label for="interestonly">
+              <div class="input"><input type="radio" id="interestonly" tabindex="5" name="MortgageType" required>Interest Only</div>
+            </label>
+            <div class="requerd">This field is required</div>
+          </label>
+        </div>
+        <label for="submit" id="comp">
+          <div class="submit">
+            <img src="assets/icon-calculator.svg" alt="">
+            <input type="button" id="submit" onclick="requerd()" tabindex="6" value="Calculate Repayments">
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="cover active">
+      <img src="assets/illustration-empty.svg" alt="">
+      <h2>Results shown here</h2>
+      <p>Complete the form and click “calculate repayments” to see what your monthly repayments would be.</p>
+    </div>
+  </div>
+  <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,367 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+:root {
+    --Lime: hsl(61, 70%, 52%);
+    --Red: hsl(4, 69%, 50%);
+    --white: #ffffff;
+    --Slate100: hsl(202, 86%, 94%);
+    --Slate300: hsl(203, 41%, 72%);
+    --Slate500: hsl(200, 26%, 54%);
+    --Slate700: hsl(200, 24%, 40%);
+    --Slate900: hsl(202, 55%, 16%);
+}
+
+body {
+    background-color: var(--Slate100);
+}
+
+.cantenor {
+    width: 70vw;
+    height: 80vh;
+    margin: 10vh auto;
+    background-color: var(--white);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-radius: 20px 20px 20px 20px;
+}
+
+.calculator {
+    background-color: var(--white);
+    border-radius: 20px 0px 0px 20px;
+    padding: 50px;
+}
+
+.cover {
+    background-color: var(--Slate900);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 0 20px 20px 80px;
+}
+
+.cover h2 {
+    margin: 15px;
+    color: var(--Slate100);
+}
+
+.cover p {
+    padding: 0 45px;
+    color: var(--Slate300);
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 15px;
+}
+
+.title>h1 {
+    font-size: 24px;
+}
+
+.title>input {
+    color: var(--Slate700);
+}
+
+#reset {
+    border: none;
+    height: min-content;
+    background-color: transparent;
+    text-decoration: underline;
+    font-weight: 600;
+
+    &:hover {
+        cursor: pointer;
+        color: red;
+    }
+}
+
+.input {
+    width: 100%;
+    height: 40px;
+    margin: 12px 0 0 0;
+    border: 1px solid var(--Slate700);
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.input>span {
+    padding: 12px 18px 12px 18px;
+    background-color: var(--Slate100);
+    color: var(--Slate700);
+    font-weight: 600;
+}
+
+.main {
+    margin-top: 30px;
+}
+
+.second {
+    display: flex;
+    gap: 20px;
+}
+
+label,
+.third {
+    color: var(--Slate700);
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+label:hover {
+    cursor: pointer;
+}
+
+#mamount {
+    width: 85%;
+    height: 38px;
+    border: none;
+    background-color: var(--white);
+    color: var(--Slate900);
+    font-weight: 600;
+    font-size: 16px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+#mrate,
+#mterm {
+    width: 120px;
+    height: 38px;
+    border: none;
+    background-color: var(--white);
+    color: var(--Slate900);
+    font-weight: 600;
+    font-size: 16px;
+    padding-left: 5px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+#repayment,
+#interestonly {
+    margin: 13px;
+}
+
+.third label label div {
+    font-weight: 600;
+    color: var(--Slate900);
+}
+#comp{
+    display: contents;
+}
+.submit {
+    width: 75%;
+    height: 40px;
+    background-color: var(--Lime);
+    margin: 30px 0 0 0;
+    overflow: hidden;
+    border-radius: 5px;
+    border-radius: 30px;
+    padding: 7px 15px;
+    display: flex;
+    align-items: self-end;
+    justify-content: center;
+    gap: 10px;
+}
+
+#submit {
+    border: none;
+    height: min-content;
+    background-color: transparent;
+    font-weight: 600;
+    font-size: 16px;
+    padding-bottom: 2px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.requerd {
+    font-size: 12px;
+    margin-top: 12px;
+    visibility: hidden;
+    color: var(--Red);
+    font-weight: 600;
+}
+
+.results {
+    display: flex;
+    flex-direction: column;
+    align-items: baseline;
+    background-color: var(--Slate900);
+    border-radius: 0 20px 20px 80px;
+    padding: 50px;
+}
+
+.results>h2 {
+    font-size: 24px;
+    color: var(--white);
+    padding-bottom: 25px;
+}
+
+.results>p {
+    color: var(--Slate300);
+    padding-bottom: 30px;
+}
+
+.amt {
+    border-top: 5px solid var(--Lime);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    height: 60%;
+    background-color: black;
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    justify-content: space-between;
+    overflow-x: auto;
+}
+
+.cfirst span {
+    color: var(--Slate300);
+}
+
+.cfirst div {
+    color: var(--Lime);
+    font-size: 45px;
+    font-weight: 500;
+    display: ruby-text;
+    padding-top: 15px;
+}
+
+.cfirst {
+    border-bottom: 2px solid var(--Slate500);
+    height: inherit;
+}
+
+.csecond span {
+    color: var(--Slate300);
+}
+
+.csecond {
+    height: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.csecond div {
+    color: var(--white);
+    font-size: 24px;
+    font-weight: 500;
+}
+
+@media screen and (max-width:1024px) {
+    .cantenor {
+        width: 90vw;
+        height: 90vh;
+        margin: 5vh auto;
+    }
+
+    #mrate,
+    #mterm {
+        width: 99px;
+    }
+    .amt{
+        max-width: 360px;
+    }
+}
+@media screen and (max-width:768px) {
+    .cantenor{
+        grid-template-columns: none;
+        grid-template-rows: 1fr 1fr;
+        height: auto;
+        background-color: transparent;
+    }
+    .second{
+        justify-content: space-between;
+    }
+    #mrate{
+        width: 79%;
+    }
+    #mterm{
+        width: 72%;
+    }
+    .submit{
+        margin: 10px auto 0px;
+    }
+    .calculator{
+        border-radius: 20px 80px 0 0;
+    }
+    .results{
+        align-items: center;
+    }
+    .amt{
+        max-width: none;
+        height: 100%;
+        /* padding: 5px; */
+    }
+    .cover{
+        height: 575px;
+        max-height: 575px;
+    }
+    .cfirst div{
+        display:block;
+    }
+}
+@media screen and (max-width:425px) {
+    .title h1{
+        font-size: 18px;
+    }
+    .cantenor{
+        margin: 0;
+        width: 100vw;
+        border-radius: 0px;
+    }
+    .calculator,.cover,.results{
+        border-radius: 0px;
+    }
+    #mamount{
+        width: 84%;
+    }
+    #mrate{
+        width: 61%;
+    }
+    #mterm{
+        width: 47%;
+    }
+    .results{
+        padding: 20px;
+    }
+}
+@media screen and (max-width:375px) {
+    #mamount{
+        width: 80%;
+    }
+    #mrate{
+        width: 59%;
+    }
+    #mterm{
+        width: 46%;
+    }
+    .calculator{
+        padding: 30px;
+    }
+    .results{
+        padding: 20px;
+    }
+}

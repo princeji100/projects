@@ -1,0 +1,345 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Rubik", sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+:root {
+    --PaleViolet: hsl(276, 100%, 81%);
+    --ModerateViolet: hsl(276, 55%, 52%);
+    --DesaturatedDarkViolet: hsl(271, 15%, 43%);
+    --GrayishBlue: hsl(206, 6%, 79%);
+    --VeryDarkDesaturatedViolet: hsl(271, 36%, 24%);
+    --DarkGrayishViolet: hsl(270, 7%, 64%);
+    --lightViolet: hsl(264, 100%, 61%);
+    --lightMeganta: hsl(293, 100%, 63%);
+    --lightGrayishViolet: hsl(270, 20%, 96%);
+    --white: hsl(0, 0%, 100%);
+    --VeryLightMagenta: hsl(289, 100%, 72%);
+}
+
+body {
+    position: relative;
+    background-color: var(--lightGrayishViolet);
+}
+
+.background {
+    width: 500px;
+    height: 800px;
+    position: fixed;
+}
+
+.back1 {
+    background-image: linear-gradient(var(--lightMeganta), var(--lightViolet));
+    left: -110px;
+    top: -150px;
+    border-radius: 0px 0px 350px 350px;
+}
+
+.back2 {
+    background-color: rgba(163, 157, 170, .1);
+    right: -200px;
+    bottom: -150px;
+    border-radius: 350px 350px 0px 0px;
+
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+    position: absolute;
+    align-items: center;
+    z-index: 1;
+}
+
+.contaner {
+    position: relative;
+}
+
+.text {
+    width: 68%;
+    color: white;
+}
+
+.text>h1 {
+    font-size: 35px;
+    font-weight: 700;
+    padding-bottom: 40px;
+    color: var(--VeryDarkDesaturatedViolet);
+}
+
+.text>p {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: left;
+    color: var(--DarkGrayishViolet);
+}
+
+.phone {
+    width: 245px;
+    height: 475px;
+    background-color: var(--white);
+    position: absolute;
+    right: 135px;
+    padding: 10px;
+    border-radius: 30px;
+    top: -250px;
+    box-shadow: 3px 1px 14px 0px black;
+}
+
+.inner {
+    background-color: var(--lightGrayishViolet);
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+}
+
+.phheader {
+    background-image: linear-gradient(to right, var(--lightViolet), var(--lightMeganta));
+    height: 15%;
+    width: 100%;
+    border-radius: 20px 20px 4px 4px;
+    position: relative;
+}
+
+.camra {
+    width: 50%;
+    height: 20px;
+    background-color: var(--white);
+    border-radius: 0px 0px 15px 15px;
+    position: absolute;
+    left: 24%;
+}
+
+.headcon {
+    display: grid;
+    grid-template-columns: 1fr 1fr 10fr 1fr;
+    align-items: center;
+    padding: 30px 5px 0px 5px;
+    color: var(--white);
+}
+
+.headcon i {
+    font-size: 20px;
+}
+
+.fa-angle-left {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.name {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    align-items: start;
+}
+
+.name h1 {
+    font-size: 15px;
+}
+
+.name span {
+    font-size: 10px;
+    color: var(--lightGrayishViolet);
+    opacity: .7;
+}
+
+.headcon img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    outline: 1px solid var(--white);
+}
+
+.msgsection {
+    display: grid;
+    grid-template-rows: 2fr 3fr 3fr 1fr;
+    font-size: 9.5px;
+    padding: 5px;
+}
+
+.input {
+    background-color: var(--white);
+    display: flex;
+    height: 35px;
+    margin-top: 8px;
+    border-radius: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+.msgsection input[type="text"] {
+    border-radius: 15px;
+    background-color: var(--white);
+    /* background-color: red; */
+    /* width: 100%; */
+    height: 25px;
+    padding: 5px 15px;
+    border: none;
+}
+
+.msgsection input[type="text"]::placeholder {
+    color: var(--DarkGrayishViolet);
+}
+
+.fa-angle-right {
+    width: 15px;
+    height: 17px;
+    padding: 4px 4px 4px 10px;
+    font-size: 16px;
+    color: white;
+    background-color: var(--VeryDarkDesaturatedViolet);
+    border-radius: 50%;
+}
+
+.msgsection input::placeholder {
+    font-size: 11px;
+}
+
+.receved {
+    max-width: 55%;
+    background-color: var(--GrayishBlue);
+    margin: 5px 0px;
+    padding: 7px;
+    border-radius: 10px 10px 10px 5px;
+    color: var(--ModerateViolet);
+    font-weight: 500;
+}
+
+.sec2 {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+
+.img>img {
+    width: 45px;
+    border-radius: 10px;
+    margin-left: 5px;
+}
+
+.send {
+    max-width: 55%;
+    background-color: var(--white);
+    margin: 5px 0px;
+    padding: 7px;
+    border-radius: 10px 10px 5px 10px;
+    color: var(--DesaturatedDarkViolet);
+    font-weight: 500;
+}
+
+.call {
+    width: 66%;
+    height: 15px;
+    background-image: linear-gradient(to right, var(--lightMeganta), var(--lightViolet));
+    margin: 5px 0px;
+    padding: 7px 9px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px 10px 10px 5px;
+    color: var(--white);
+    font-weight: 500;
+}
+
+.call>span:first-child {
+    color: var(--GrayishBlue);
+}
+
+.price {
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+input[type="radio"] {
+    appearance: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    padding: 5px;
+    margin: 0 2px -2px 0;
+    background-color: transparent;
+    border: 1px solid var(--PaleViolet);
+}
+
+input[type="radio"]:checked {
+    background-color: var(--white);
+}
+
+@media screen and (max-width:1024px) {
+    .back1 {
+        left: -242px;
+    }
+
+    .back2 {
+        right: -242px;
+    }
+}
+
+@media screen and (max-width:768px) {
+    main {
+        grid-template-rows: 2fr 1fr;
+        grid-template-columns: none;
+        height: auto;
+        gap: 200px;
+    }
+    .back1 {
+        left: -200px;
+        top: -275px;
+    }
+    .back2 {
+        right: -200px;
+        top: 90px;
+    }
+    .phone{
+        top: -160px;
+        right: 255px;
+    }
+    .text{
+        text-align: center;
+        margin: 10px auto;
+    }
+    .text>p {
+        text-align: center;
+    }
+}
+@media screen and (max-width:425px) {
+    .background{
+        width: 300px;
+        height: 500px;
+    }
+    .back1{
+        left: -110px;
+        top: -8px;
+    }
+    .back2{
+        visibility:hidden;
+    }
+    main{
+        gap: 30px;
+    }
+    .text{
+        margin: 30px auto;
+    }
+    .phone{
+        right: 75px;
+        top: -215px;
+    }
+}
+@media screen and (max-width:375px){
+    .text>h1{
+        font-size: 30px;
+    }
+    .phone{
+        right: 50px;
+    }
+    .text > p{
+        font-size: 16px;
+    }
+}
