@@ -10,17 +10,35 @@ function calculateAge() {
   const yearValue = parseInt(yearinput.value);
 
   const birthDate = new Date(yearValue, monthValue - 1, dayValue);
-
   if (checkvalue()) {
-    let year = document.getElementById("yearr")
+    let year = document.getElementById("yearr");
+    let month = document.getElementById("monthr");
+    let day = document.getElementById("dayr");
+
     let yearold = currentDate.getFullYear() - birthDate.getFullYear();
-    let month = document.getElementById("monthr")
     let monthold = currentDate.getMonth() - birthDate.getMonth();
-    let day = document.getElementById("dayr")
     let dayold = currentDate.getDate() - birthDate.getDate();
-    year.innerText = yearold
-    month.innerText = monthold
-    day.innerText = dayold
+
+    // Adjust year and month if the current date is before the birth date
+    if (monthold < 0 || (monthold === 0 && dayold < 0)) {
+      yearold--;
+      monthold += 12; // Adjust monthold to be positive
+    }
+
+    // Adjust dayold if it's negative
+    if (dayold < 0) {
+      const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+      dayold += lastMonth.getDate(); // Add days from the last month
+      monthold--; // Decrement monthold since we're borrowing days from the previous month
+      if (monthold < 0) {
+        monthold += 12; // Adjust monthold to be positive
+        yearold--; // Decrement yearold since we borrowed from the previous year
+      }
+    }
+
+    year.innerText = yearold;
+    month.innerText = monthold;
+    day.innerText = dayold;
   }
 }
 
@@ -77,7 +95,7 @@ function checkvalue() {
   return valid
 }
 button.addEventListener("click", checkvalue)
-button.addEventListener("click",calculateAge)
+button.addEventListener("click", calculateAge)
 
 dayinput.addEventListener("input", () => {
   spans[0].style.color = "";
