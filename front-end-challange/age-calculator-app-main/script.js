@@ -96,6 +96,12 @@ function checkvalue() {
 }
 button.addEventListener("click", checkvalue)
 button.addEventListener("click", calculateAge)
+document.addEventListener("keyup",(e)=>{
+  if(e.key == "Enter"){
+    checkvalue();
+    calculateAge();
+  }
+})
 
 dayinput.addEventListener("input", () => {
   spans[0].style.color = "";
