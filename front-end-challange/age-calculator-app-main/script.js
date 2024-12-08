@@ -41,63 +41,115 @@ function calculateAge() {
     day.innerText = dayold;
   }
 }
-
 function checkvalue() {
   let valid = true;
+  const dayValue = parseInt(dayinput.value);
+  const monthValue = parseInt(monthinput.value);
+  const yearValue = parseInt(yearinput.value);
+
+  // Check for day input
   if (dayinput.value == "") {
-    let span = spans[0]
-    const red = document.querySelectorAll(".red")
-    dayinput.style.borderColor = "red"
-    span.style.color = "red"
-    red[0].style.visibility = "visible"
+    let span = spans[0];
+    const red = document.querySelectorAll(".red");
+    dayinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[0].style.visibility = "visible";
     valid = false;
-  } else if (dayinput.value < 1 || dayinput.value > 31) {
-    let span = spans[0]
-    const red = document.querySelectorAll(".red")
-    dayinput.style.borderColor = "red"
-    span.style.color = "red"
-    red[0].style.visibility = "visible"
-    red[0].innerHTML = "Must be a valid day"
+  } else if (dayValue < 1 || dayValue > 31) {
+    let span = spans[0];
+    const red = document.querySelectorAll(".red");
+    dayinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[0].style.visibility = "visible";
+    red[0].innerHTML = "Must be a valid day";
+    valid = false;
+  } else if (monthValue === 2) { // February
+    const isLeapYear = (yearValue % 4 === 0 && (yearValue % 100 !== 0 || yearValue % 400 === 0));
+    if (dayValue > (isLeapYear ? 29 : 28)) {
+      let span = spans[0];
+      const red = document.querySelectorAll(".red");
+      dayinput.style.borderColor = "red";
+      span.style.color = "red";
+      red[0].style.visibility = "visible";
+      red[0].innerHTML = isLeapYear ? "February has only 29 days" : "February has only 28 days";
+      valid = false;
+    }
+  } else if (monthValue === 4 && dayValue > 30) { // April has 30 days
+    let span = spans[0];
+    const red = document.querySelectorAll(".red");
+    dayinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[0].style.visibility = "visible";
+    red[0].innerHTML = "April has only 30 days";
+    valid = false;
+  } else if (monthValue === 6 && dayValue > 30) { // June has 30 days
+    let span = spans[0];
+    const red = document.querySelectorAll(".red");
+    dayinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[0].style.visibility = "visible";
+    red[0].innerHTML = "June has only 30 days";
+    valid = false;
+  } else if (monthValue === 9 && dayValue > 30) { // September has 30 days
+    let span = spans[0];
+    const red = document.querySelectorAll(".red");
+    dayinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[0].style.visibility = "visible";
+    red[0].innerHTML = "September has only 30 days";
+    valid = false;
+  } else if (monthValue === 11 && dayValue > 30) { // November has 30 days
+    let span = spans[0];
+    const red = document.querySelectorAll(".red");
+    dayinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[0].style.visibility = "visible";
+    red[0].innerHTML = "November has only 30 days";
     valid = false;
   }
+
+  // Check for month input
   if (monthinput.value == "") {
-    let span = spans[2]
-    const red = document.querySelectorAll(".red")
-    monthinput.style.borderColor = "red"
-    span.style.color = "red"
-    red[1].style.visibility = "visible"
+    let span = spans[2];
+    const red = document.querySelectorAll(".red");
+    monthinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[1].style.visibility = "visible";
     valid = false;
-  } else if (monthinput.value < 1 || monthinput.value > 12) {
-    let span = spans[2]
-    const red = document.querySelectorAll(".red")
-    monthinput.style.borderColor = "red"
-    span.style.color = "red"
-    red[1].style.visibility = "visible"
-    red[1].innerHTML = "Must be a valid month"
+  } else if (monthValue < 1 || monthValue > 12) {
+    let span = spans[2];
+    const red = document.querySelectorAll(".red");
+    monthinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[1].style.visibility = "visible";
+    red[1].innerHTML = "Must be a valid month";
     valid = false;
   }
+
+  // Check for year input
   if (yearinput.value == "") {
-    let span = spans[4]
-    const red = document.querySelectorAll(".red")
-    yearinput.style.borderColor = "red"
-    span.style.color = "red"
-    red[2].style.visibility = "visible"
+    let span = spans[4];
+    const red = document.querySelectorAll(".red");
+    yearinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[2].style.visibility = "visible";
     valid = false;
-  } else if (yearinput.value < 1 || yearinput.value > currentDate.getFullYear()) {
-    let span = spans[4]
-    const red = document.querySelectorAll(".red")
-    yearinput.style.borderColor = "red"
-    span.style.color = "red"
-    red[2].style.visibility = "visible"
-    red[2].innerHTML = "Must be in the past"
+  } else if (yearValue < 1 || yearValue > currentDate.getFullYear()) {
+    let span = spans[4];
+    const red = document.querySelectorAll(".red");
+    yearinput.style.borderColor = "red";
+    span.style.color = "red";
+    red[2].style.visibility = "visible";
+    red[2].innerHTML = "Must be in the past";
     valid = false;
   }
-  return valid
+
+  return valid;
 }
 button.addEventListener("click", checkvalue)
 button.addEventListener("click", calculateAge)
-document.addEventListener("keyup",(e)=>{
-  if(e.key == "Enter"){
+document.addEventListener("keyup", (e) => {
+  if (e.key == "Enter") {
     checkvalue();
     calculateAge();
   }
