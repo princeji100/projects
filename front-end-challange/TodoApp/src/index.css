@@ -3,3 +3,8 @@
 body{
     font-family: "Josefin Sans", serif;
 }
+/* Scrollbar styles for light mode */
+
+::-webkit-scrollbar{
+    width:0px
+}
