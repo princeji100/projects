@@ -8,3 +8,20 @@ body{
 ::-webkit-scrollbar{
     width:0px
 }
+@media screen and (max-width: 426px) {
+
+    .down{
+        z-index: 1;
+        position: fixed;
+        padding: 5px 10px;
+        border-radius: 5px;
+        width: 100%;
+        left:0px;
+        background-color: inherit;
+        bottom:-50px;
+        justify-content: space-between;
+    }
+    .main{
+        max-height: 50vh;
+    }
+}
