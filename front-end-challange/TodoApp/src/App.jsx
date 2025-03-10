@@ -103,7 +103,7 @@ function App() {
             <div className={`min-w-6 h-6 ${isChecked ? 'bg-gradient-to-r from-[#57ddff] to-[#c058f3]' : 'border'} ${isDarkMode ? 'border-[#343642]' : 'border-[#e4e5f1]'} flex items-center justify-center rounded-full hover:cursor-pointer transition hover:border-[#3a7bfd]`} onClick={() => setIsChecked(!isChecked)}>
               {isChecked && <img src={check} className='w-4' alt="tick" />}
             </div>
-            <input ref={inputRef} autoFocus type="text" onChange={handleChange} placeholder='Create a new todo...' onKeyUp={handleAdd} className={`w-full h-6 focus:outline-none pl-6 text-2xl ${isDarkMode ? 'text-[#d3d4e0]' : 'text-[#484b6a]'}`} />
+            <input ref={inputRef} autoFocus type="text" onChange={handleChange} placeholder='Create a new todo...' onKeyUp={handleAdd} className={`w-full h-6 focus:outline-none pl-6 lg:text-2xl ${isDarkMode ? 'text-[#d3d4e0]' : 'text-[#484b6a]'}`} />
           </div>
           <div className={`flex main flex-col ${isDarkMode ? 'bg-[#25273c] shadow-xl shadow-black' : 'bg-[#fafafa]'} max-h-[60vh] overflow-y-scroll rounded-md`}>
             {getFilteredTodos().map(item => (
@@ -112,7 +112,7 @@ function App() {
                   {item.isChecked && <img src={check} className='w-4' alt="tick" />}
                 </div>
                 <div className='flex ml-6 justify-between items-center w-full'>
-                  <h1 className={`${item.isChecked ? "line-through" : ""} cursor-pointer ${isDarkMode ? item.isChecked ? 'text-[#3a3d52]' : 'text-[#d3d4e0]' : item.isChecked ? 'text-[#d3d4e0]' : 'text-[#484b6a]'} max-w-[85%] font-medium lg:text-xl`}>{item.todo}</h1>
+                  <h1 className={`${item.isChecked ? "line-through" : ""} cursor-pointer ${isDarkMode ? item.isChecked ? 'text-[#3a3d52]' : 'text-[#d3d4e0]' : item.isChecked ? 'text-[#d3d4e0]' : 'text-[#484b6a]'} max-w-[85%] font-medium text-sm lg:text-xl`}>{item.todo}</h1>
                   <div className='flex gap-4 h-7'>
                     <img src={iconPencil} className={`cursor-pointer text-red-500 transition lg:group-hover:block lg:hidden ${isDarkMode ? 'invert opacity-20' : ''}`} onClick={handleEdit} alt="edit" />
                     <img src={iconCross} className='cursor-pointer transition lg:group-hover:block lg:hidden' onClick={handleDelete} alt="delete" />
