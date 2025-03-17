@@ -10,10 +10,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const url = document.location.pathname.split('/')[1];
-
 export const metadata = {
-  title:url,
+  title:'Linktree',
   description: "linktree whrere you can find all my social media links",
 };
 
