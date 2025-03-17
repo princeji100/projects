@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const url = window.location.pathname.split('/')[1];
+const url = document.location.pathname.split('/')[1];
 
 export const metadata = {
   title:url,
