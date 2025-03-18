@@ -9,9 +9,9 @@ import AppSidebar from "@/components/layout/AppSidebar";
 import { ToastContainer } from 'react-toastify';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink } from "@fortawesome/free-solid-svg-icons";
+import mongoose from "mongoose";
 import Page from "@/models/Page";
 import Link from "next/link";
-import connectToDatabase from "@/lib/connectToDB";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,7 +32,7 @@ export default async function AppLayout({ children }) {
   if (!session) {
     return redirect('/login')
   }
-  await connectToDatabase();
+  mongoose.connect(process.env.MONGODB_URI);
   const page = await Page.findOne({ owner: session?.user?.email })
   return (
     <html lang="en">

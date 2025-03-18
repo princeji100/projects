@@ -10,7 +10,7 @@ import { toast } from "react-toastify"
 import { ReactSortable } from "react-sortablejs";
 
 const PageButtonForm = ({ page }) => {
-    
+
     const allButton = [
         { key: 'email', label: 'e-mail', icon: faEnvelope, placeholder: 'test@gmail.com' },
         { key: 'mobile', label: 'mobile', icon: faMobile, placeholder: '+91 91526 54562' },
@@ -30,15 +30,21 @@ const PageButtonForm = ({ page }) => {
         { key: 'github', label: 'github', icon: faGithub, placeholder: 'github.com/yourusername' },
     ];
     const pageSavedButtonsKeys = Object.keys(page?.buttons || {});
-    
+
     const pageSavedButtonsData = pageSavedButtonsKeys.map(key => (
         allButton.find(b => b.key === key)
-    ))
-    const [activeButtons, setActiveButtons] = useState(pageSavedButtonsData);
+    )).filter(button => button);
+    const [activeButtons, setActiveButtons] = useState(pageSavedButtonsData || []);
+
+    // Add this new state to track button values
+    const [buttonValues, setButtonValues] = useState(page?.buttons || {});
+
     const addButtonToProfile = (button) => {
         setActiveButtons(previousButtons => {
             return [...previousButtons, button]
-        })
+        });
+        // Initialize empty value for new button
+        setButtonValues(prev => ({ ...prev, [button.key]: '' }));
     }
     const availableButtons = allButton.filter(b1 => !activeButtons.find(b2 => b1.key === b2.key));
     const saveButton = async (e) => {
@@ -67,11 +73,22 @@ const PageButtonForm = ({ page }) => {
                                 </span>
                             </div>
                             <div className="flex grow">
-                                
-                            <input defaultValue={page?.buttons[b.key]} spellCheck="false" data-ms-editor="true" name={b.key} placeholder={b.placeholder} type="text" />
-                            <button type="button" onClick={() => removeButton(b)} className="px-4 py-2 mb-2 cursor-pointer bg-gray-300">
-                                <FontAwesomeIcon icon={faTrash} />
-                            </button>
+
+                                <input
+                                    value={buttonValues[b.key] || ''}
+                                    onChange={(e) => setButtonValues(prev => ({
+                                        ...prev,
+                                        [b.key]: e.target.value
+                                    }))}
+                                    spellCheck="false"
+                                    data-ms-editor="true"
+                                    name={b.key}
+                                    placeholder={b.placeholder}
+                                    type="text"
+                                />
+                                <button type="button" onClick={() => removeButton(b)} className="px-4 py-2 mb-2 cursor-pointer bg-gray-300">
+                                    <FontAwesomeIcon icon={faTrash} />
+                                </button>
                             </div>
                         </div>
                     ))}

@@ -8,7 +8,7 @@ let isConnected = false; // Track the MongoDB connection status
 const handleFormSubmit = async (formdata) => {
     const session = await getServerSession(authOptions);
 
-    const username = formdata.get('username');
+    const username = formdata.get('username')?.toLowerCase(); // Convert to lowercase
     if (!username) {
         console.error('No username provided.');
         return; // Exit if no username is provided

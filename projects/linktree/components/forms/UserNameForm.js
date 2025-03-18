@@ -15,6 +15,7 @@ const UserNameForm = () => {
   const onSubmit = async (event) => {
     event.preventDefault();
     const formdata = new FormData(event.target);
+    
     event.target.reset();
 
     try {

@@ -28,12 +28,14 @@ const HeroForm = () => {
         }
     }
     return (
-        <form onSubmit={handleSubmit} className='inline-flex items-center shadow-lg shadow-gray-500/20'>
-            <span className='bg-white py-4 pl-4'>
-                linktree.to/
+        <form onSubmit={handleSubmit} className='flex-col gap-2 md:gap-0 flex md:flex-row items-center w-fit md:shadow-lg md:shadow-gray-500/20'>
+            <div className="flex">
+            <span className='bg-white min-w-fit py-4 pl-4'>
+            linktree-princeji.vercel.app/
             </span>
             <input type="text" value={Username} onChange={e => setUsername(e.target.value)} className='py-4 bg-white focus:outline-none' placeholder='Username' spellCheck="false" data-ms-editor="true" />
-            <button type='submit' className='bg-blue-600 text-white py-4 px-6 cursor-pointer'>Join for Free</button>
+            </div>
+            <button type='submit' className='bg-blue-600 rounded-xl md:rounded-none text-white py-4 px-6 cursor-pointer'>Join for Free</button>
         </form>
     )
 }
