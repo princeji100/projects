@@ -22,7 +22,7 @@ const UserNameForm = () => {
       const result = await handleFormSubmit(formdata);
       setUsername(!result.success);
       if (result) {
-        router.push('/account?created=' + formdata.get('username')); // Redirect to the username page
+        router.push('/account?created=' + formdata.get('username'));
       }
     } catch (err) {
       console.error(err);
@@ -30,15 +30,41 @@ const UserNameForm = () => {
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <h1 className='text-4xl font-bold text-center mb-6'>Grab Your username</h1>
-      <p className='text-center mb-6 text-gray-500'>Choose your username</p>
-      <div className='max-w-xs mx-auto'>
-        <input className='block p-2 mx-auto bg-white w-full text-center mb-2' defaultValue={searchParams.get('Choiceusername')} type="text" name='username' placeholder='username' />
-        {username && <UserNameFormResult />}
-        <SubmitButton>
-          <span>Claim your username</span>
-          <FontAwesomeIcon className='text-xl' icon={faArrowRight} />
+    <form onSubmit={onSubmit} className="max-w-md mx-auto p-6">
+      <h1 className="text-4xl font-bold text-slate-800 text-center mb-4">
+        Grab Your Username
+      </h1>
+      <p className="text-center mb-8 text-slate-600 leading-relaxed">
+        Choose a unique username for your Linktree profile
+      </p>
+      
+      <div className="max-w-xs mx-auto space-y-4">
+        <div className="relative">
+          <input 
+            className="block w-full px-4 py-3 rounded-lg border border-slate-200 
+                     text-center text-slate-700 font-medium
+                     focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                     transition-all duration-200 placeholder:text-slate-400"
+            defaultValue={searchParams.get('Choiceusername')}
+            type="text"
+            name="username"
+            placeholder="Enter username"
+            spellCheck={false}
+            autoComplete="off"
+          />
+          {username && (
+            <div className="mt-2">
+              <UserNameFormResult />
+            </div>
+          )}
+        </div>
+
+        <SubmitButton className="w-full">
+          <span className="text-base">Claim your username</span>
+          <FontAwesomeIcon 
+            icon={faArrowRight} 
+            className="text-lg transition-transform group-hover:translate-x-1" 
+          />
         </SubmitButton>
       </div>
     </form>

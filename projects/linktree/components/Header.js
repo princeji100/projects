@@ -18,8 +18,6 @@ const Header = () => {
           </Link>
           <nav className='flex items-center gap-3 text-slate-500 text-sm'>
             <Link href={'/about'}>About</Link>
-            <Link href={'/priceing'}>Priceing </Link>
-            <Link href={'/contact'}>Contact</Link>
           </nav>
         </div>
         <nav className='flex justify-center items-center gap-3 text-sm text-slate-500'>

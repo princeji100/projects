@@ -7,10 +7,9 @@ import { useState } from "react"
 import SubmitButton from "../buttons/SubmitButton"
 import { SavePageButton } from "@/action/PageAction"
 import { toast } from "react-toastify"
-import { ReactSortable } from "react-sortablejs";
+import { ReactSortable } from "react-sortablejs"
 
 const PageButtonForm = ({ page }) => {
-
     const allButton = [
         { key: 'email', label: 'e-mail', icon: faEnvelope, placeholder: 'test@gmail.com' },
         { key: 'mobile', label: 'mobile', icon: faMobile, placeholder: '+91 91526 54562' },
@@ -28,83 +27,114 @@ const PageButtonForm = ({ page }) => {
         { key: 'reddit', label: 'reddit', icon: faReddit, placeholder: 'reddit.com/user/yourusername' },
         { key: 'website', label: 'website', icon: faInternetExplorer, placeholder: 'https://yourwebsite.com' },
         { key: 'github', label: 'github', icon: faGithub, placeholder: 'github.com/yourusername' },
-    ];
-    const pageSavedButtonsKeys = Object.keys(page?.buttons || {});
+    ]
 
-    const pageSavedButtonsData = pageSavedButtonsKeys.map(key => (
-        allButton.find(b => b.key === key)
-    )).filter(button => button);
-    const [activeButtons, setActiveButtons] = useState(pageSavedButtonsData || []);
+    const pageSavedButtonsKeys = Object.keys(page?.buttons || {})
+    const pageSavedButtonsData = pageSavedButtonsKeys
+        .map(key => allButton.find(b => b.key === key))
+        .filter(button => button)
 
-    // Add this new state to track button values
-    const [buttonValues, setButtonValues] = useState(page?.buttons || {});
+    const [activeButtons, setActiveButtons] = useState(pageSavedButtonsData || [])
+    const [buttonValues, setButtonValues] = useState(page?.buttons || {})
 
     const addButtonToProfile = (button) => {
-        setActiveButtons(previousButtons => {
-            return [...previousButtons, button]
-        });
-        // Initialize empty value for new button
-        setButtonValues(prev => ({ ...prev, [button.key]: '' }));
+        setActiveButtons(prev => [...prev, button])
+        setButtonValues(prev => ({ ...prev, [button.key]: '' }))
     }
-    const availableButtons = allButton.filter(b1 => !activeButtons.find(b2 => b1.key === b2.key));
+
+    const availableButtons = allButton.filter(b1 => !activeButtons.find(b2 => b1.key === b2.key))
+
     const saveButton = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        await SavePageButton(formData);
-        toast.success('Button saved successfully');
+        e.preventDefault()
+        const formData = new FormData(e.target)
+        await SavePageButton(formData)
+        toast.success('Button saved successfully')
     }
+
     const removeButton = (button) => {
-        setActiveButtons(previousButtons => {
-            return previousButtons.filter(b => b.key !== button.key)
+        setActiveButtons(prev => prev.filter(b => b.key !== button.key))
+        setButtonValues(prev => {
+            const newValues = { ...prev }
+            delete newValues[button.key]
+            return newValues
         })
     }
+
     return (
         <SectionBox>
-            <form onSubmit={saveButton}>
-                <h2 className="text-2xl font-bold mb-4">Buttons</h2>
-                <ReactSortable handle=".grip" list={activeButtons} setList={setActiveButtons} className="mb-4">
+            <form onSubmit={saveButton} className="space-y-6">
+                <h2 className="text-2xl font-bold text-slate-800 mb-6">Buttons</h2>
+                
+                <ReactSortable 
+                    handle=".grip" 
+                    list={activeButtons} 
+                    setList={setActiveButtons} 
+                    className="space-y-4"
+                >
                     {activeButtons.map(b => (
-                        <div className="form mb-4 md:flex items-center" key={b.key}>
-                            <div className="w-50 p-2 pl-0 mb-2 text-gray-700 flex gap-2 items-center">
-                                <FontAwesomeIcon className="cursor-move grip text-gray-500 pr-2" icon={faGripLines} />
-                                <FontAwesomeIcon icon={b.icon} />
-                                <span className="capitalize">
-                                    {b.label}:
+                        <div key={b.key} className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white rounded-lg shadow-sm border border-slate-100">
+                            <div className="flex items-center gap-3 min-w-[150px]">
+                                <FontAwesomeIcon 
+                                    className="cursor-move grip text-slate-400 hover:text-slate-600 transition-colors" 
+                                    icon={faGripLines} 
+                                />
+                                <FontAwesomeIcon 
+                                    icon={b.icon} 
+                                    className={`text-${b.key}-500`}
+                                />
+                                <span className="capitalize font-medium text-slate-700">
+                                    {b.label}
                                 </span>
                             </div>
-                            <div className="flex grow">
-
+                            
+                            <div className="flex grow w-full md:w-auto">
                                 <input
                                     value={buttonValues[b.key] || ''}
                                     onChange={(e) => setButtonValues(prev => ({
                                         ...prev,
                                         [b.key]: e.target.value
                                     }))}
-                                    spellCheck="false"
-                                    data-ms-editor="true"
                                     name={b.key}
                                     placeholder={b.placeholder}
                                     type="text"
+                                    className="w-full px-4 py-2 rounded-l-lg border border-slate-200 
+                                             focus:ring-2 focus:ring-blue-500 focus:border-transparent 
+                                             transition-all"
+                                    spellCheck="false"
                                 />
-                                <button type="button" onClick={() => removeButton(b)} className="px-4 py-2 mb-2 cursor-pointer bg-gray-300">
+                                <button 
+                                    type="button" 
+                                    onClick={() => removeButton(b)} 
+                                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 
+                                             rounded-r-lg border-y border-r border-slate-200
+                                             transition-colors duration-200"
+                                >
                                     <FontAwesomeIcon icon={faTrash} />
                                 </button>
                             </div>
                         </div>
                     ))}
                 </ReactSortable>
-                <div className="flex flex-wrap gap-2 mt-4 border-y-2 border-gray-100 py-4">
+
+                <div className="flex flex-wrap gap-2 mt-6 border-y border-slate-100 py-6">
                     {availableButtons.map(b => (
-                        <button key={b.key} type="button" onClick={() => addButtonToProfile(b)} className={`flex gap-2 p-2 bg-gray-200 items-center`}>
-                            <FontAwesomeIcon icon={b.icon} />
+                        <button 
+                            key={b.key} 
+                            type="button" 
+                            onClick={() => addButtonToProfile(b)} 
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 
+                                     text-slate-700 rounded-lg transition-colors duration-200"
+                        >
+                            <FontAwesomeIcon icon={b.icon} className={`text-${b.key}-500`} />
                             <span className="capitalize">{b.label}</span>
                         </button>
                     ))}
                 </div>
-                <div className="max-w-xs mx-auto mt-8">
-                    <SubmitButton>
-                        <FontAwesomeIcon icon={faSave} />
-                        <span>Save</span>
+
+                <div className="flex justify-center pt-4">
+                    <SubmitButton className="px-6">
+                        <FontAwesomeIcon icon={faSave} className="text-lg" />
+                        <span>Save Changes</span>
                     </SubmitButton>
                 </div>
             </form>

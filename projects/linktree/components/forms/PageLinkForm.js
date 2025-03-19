@@ -12,102 +12,166 @@ import { toast } from 'react-toastify';
 
 const PageLinkForm = ({ page }) => {
     const [links, setLinks] = useState(page.links || [])
+    
     const save = async (e) => {
         e.preventDefault();
         await SavePageLinks(links);
         toast.success('Links saved successfully');
     }
+
     const addNewLink = () => {
-        setLinks(prevs => {
-            return [...prevs, { title: '', subtitle: '', icon: '', url: '' }];
-        })
+        setLinks(prevs => [...prevs, { title: '', subtitle: '', icon: '', url: '' }]);
     }
+
     const handelUpload = async (e, index) => {
         await upload(e, uplodedImageUrl => {
-            setLinks(prevs => {
-                return prevs.map((link, i) => {
-                    if (i === index) {
-                        return {
-                            ...link,
-                            icon: uplodedImageUrl
-                        }
-                    }
-                    return link;
-                })
-            })
-        })
+            setLinks(prevs => prevs.map((link, i) => 
+                i === index ? { ...link, icon: uplodedImageUrl } : link
+            ));
+        });
     }
+
     const handelLinkChange = (index, props, e) => {
-        setLinks(prevs => {
-            return prevs.map((link, i) => {
-                if (i === index) {
-                    return {
-                        ...link,
-                        [props]: e.target.value
-                    }
-                }
-                return link;
-            })
-        })
+        setLinks(prevs => prevs.map((link, i) => 
+            i === index ? { ...link, [props]: e.target.value } : link
+        ));
     }
+
     const removeLink = (indexToRemove) => {
         setLinks(prevLinks => prevLinks.filter((_, index) => index !== indexToRemove));
     };
-return (
-    <SectionBox>
-        <form onSubmit={save}>
-            <h2 className='text-2xl font-bold mb-4'>Links</h2>
-            <button type='button' onClick={addNewLink} className='text-blue-500 cursor-pointer text-lg flex gap-2 items-center'>
-                <FontAwesomeIcon className='bg-blue-500 text-white p-1 rounded-full aspect-square' icon={faPlus} />
-                <span>Add new</span>
-            </button>
-            <div>
-                <ReactSortable handle={'.my-handle'} list={links} setList={setLinks}>
+
+    return (
+        <SectionBox>
+            <form onSubmit={save} className="space-y-8">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold text-slate-800">Links</h2>
+                    <button 
+                        type="button" 
+                        onClick={addNewLink} 
+                        className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                    >
+                        <FontAwesomeIcon 
+                            className="bg-blue-600 text-white p-1.5 rounded-full w-5 h-5" 
+                            icon={faPlus} 
+                        />
+                        <span className="font-medium">Add new</span>
+                    </button>
+                </div>
+
+                <ReactSortable 
+                    handle=".handle" 
+                    list={links} 
+                    setList={setLinks}
+                    className="space-y-6"
+                >
                     {links.map((link, index) => (
-                        <div key={index} className='md:flex gap-6 items-center mt-8'>
-                            <div className='my-handle'>
-                                <FontAwesomeIcon className='cursor-move text-gray-500 mr-2' icon={faGripLines} />
-                            </div>
-                            <div className='flex flex-col items-center gap-2'>
-                                <div className="bg-gray-300 w-fit overflow-hidden flex items-center rounded-full aspect-square">
-                                    {link.icon && <Image className='rounded-full' src={link.icon} width={64} height={64} alt='icon' />}
-                                    {!link.icon && <FontAwesomeIcon className='p-4 text-2xl' icon={faLink} />}
+                        <div key={index} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <div className="handle cursor-move text-slate-400 hover:text-slate-600 transition-colors">
+                                    <FontAwesomeIcon icon={faGripLines} className="text-xl" />
                                 </div>
-                                <input onChange={e => handelUpload(e, index)} id={`input-${index}`} className='hidden' type="file" />
-                                <label htmlFor={`input-${index}`} className='border w-full border-gray-300 text-gray-600 justify-center items-center p-2 capitalize flex gap-2 cursor-pointer' type='button'>
-                                    <FontAwesomeIcon icon={faCloudArrowUp} />
-                                    <span>
-                                        Change icon
-                                    </span>
-                                </label>
-                                <button type='button' onClick={() => removeLink(index)} className= 'w-full bg-gray-300 py-2 px-3 mb-2 flex gap-2 justify-center items-center cursor-pointer'>
-                                    <FontAwesomeIcon icon={faTrash} />
-                                    <span>Remove this link</span>
-                                </button>
-                            </div>
-                            <div className='form grow'>
-                                <label className='text-gray-700' htmlFor={`title-${index}`}>Title</label>
-                                <input id={`title-${index}`} value={link.title} onChange={e => handelLinkChange(index, 'title', e)} spellCheck="false" data-ms-editor="true" type="text" placeholder='title' />
-                                <label className='text-gray-700' htmlFor={`subtitle-${index}`}>Subtitle</label>
-                                <input id={`subtitle-${index}`} type="text" value={link.subtitle} onChange={e => handelLinkChange(index, 'subtitle', e)} spellCheck="false" data-ms-editor="true" placeholder='subtitle (optional)' />
-                                <label className='text-gray-700' htmlFor={`url-${index}`}>Url</label>
-                                <input id={`url-${index}`} value={link.url} onChange={e => handelLinkChange(index, 'url', e)} type="text" spellCheck="false" data-ms-editor="true" placeholder='url' />
+
+                                <div className="flex flex-col items-center gap-3 min-w-[200px]">
+                                    <div className="relative w-16 h-16 bg-slate-100 rounded-full overflow-hidden">
+                                        {link.icon ? (
+                                            <Image 
+                                                src={link.icon} 
+                                                fill
+                                                className="object-cover" 
+                                                alt={link.title || 'Link icon'} 
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <FontAwesomeIcon icon={faLink} className="text-2xl text-slate-400" />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <label className="w-full">
+                                        <input 
+                                            onChange={e => handelUpload(e, index)} 
+                                            id={`icon-${index}`} 
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden" 
+                                        />
+                                        <span className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors">
+                                            <FontAwesomeIcon icon={faCloudArrowUp} />
+                                            Change icon
+                                        </span>
+                                    </label>
+
+                                    <button 
+                                        type="button" 
+                                        onClick={() => removeLink(index)}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    >
+                                        <FontAwesomeIcon icon={faTrash} />
+                                        Remove link
+                                    </button>
+                                </div>
+
+                                <div className="grow space-y-4">
+                                    <div>
+                                        <label htmlFor={`title-${index}`} className="block text-sm font-medium text-slate-700 mb-1">
+                                            Title
+                                        </label>
+                                        <input 
+                                            id={`title-${index}`}
+                                            type="text"
+                                            value={link.title}
+                                            onChange={e => handelLinkChange(index, 'title', e)}
+                                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            placeholder="Enter link title"
+                                            spellCheck="false"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor={`subtitle-${index}`} className="block text-sm font-medium text-slate-700 mb-1">
+                                            Subtitle
+                                        </label>
+                                        <input 
+                                            id={`subtitle-${index}`}
+                                            type="text"
+                                            value={link.subtitle}
+                                            onChange={e => handelLinkChange(index, 'subtitle', e)}
+                                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            placeholder="Enter link subtitle (optional)"
+                                            spellCheck="false"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor={`url-${index}`} className="block text-sm font-medium text-slate-700 mb-1">
+                                            URL
+                                        </label>
+                                        <input 
+                                            id={`url-${index}`}
+                                            type="url"
+                                            value={link.url}
+                                            onChange={e => handelLinkChange(index, 'url', e)}
+                                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            placeholder="https://example.com"
+                                            spellCheck="false"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </ReactSortable>
-            </div>
-            <div className='border-t-2 border-gray-100 pt-4 mt-4 '>
-                <SubmitButton className={'max-w-xs mx-auto'}>
-                    <FontAwesomeIcon icon={faSave} />
-                    <span>
-                        Save
-                    </span>
-                </SubmitButton>
-            </div>
-        </form>
-    </SectionBox>
-)
+
+                <div className="border-t border-slate-100 pt-6">
+                    <SubmitButton className="mx-auto max-w-xs flex items-center justify-center gap-2">
+                        <FontAwesomeIcon icon={faSave} />
+                        <span>Save Changes</span>
+                    </SubmitButton>
+                </div>
+            </form>
+        </SectionBox>
+    );
 }
 
-export default PageLinkForm
+export default PageLinkForm;

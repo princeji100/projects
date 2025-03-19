@@ -1,7 +1,13 @@
-
-const SectionBox = ({ children }) => {
+const SectionBox = ({ children, className = '' }) => {
   return (
-    <div className="bg-white m-8 p-4 shadow">
+    <div className={`
+      bg-white 
+      rounded-xl
+      border border-slate-100
+      shadow-sm
+      p-6 md:p-8 
+      ${className}
+    `}>
       {children}
     </div>
   )

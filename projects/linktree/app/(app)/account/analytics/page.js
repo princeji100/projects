@@ -88,45 +88,59 @@ const AnalyticsPage = async () => {
     return clicks.filter(c => c.url === linkUrl).length;
   };
   return (
-    <div>
+    <div className="space-y-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">Analytics</h1>
+        <p className="text-slate-600">Track your page views and link clicks</p>
+      </div>
+
       <SectionBox>
-        <h2 className="text-xl mb-4 text-center">
-          Views
+        <h2 className="text-xl font-semibold text-slate-800 mb-6 text-center">
+          Page Views
         </h2>
         <Graf data={grafData} />
       </SectionBox>
+
       <SectionBox>
-        <h2 className="text-xl mb-4 text-center">Clicks</h2>
-        {page.links.map(link => (
-          <div key={uuidv4()} className='border-t gap-4 items-center md:flex border-gray-200 py-4'>
-            <div className='text-blue-500 pl-4'>
-              <FontAwesomeIcon icon={faLink} />
-            </div>
-            <div className='grow'>
-              <h3>{link.title || 'No Title'}</h3>
-              <p className='text-gray-700 text-md'>{link.subtitle || 'No Subtitle'}</p>
-              <Link className='text-xs text-blue-400' target='_blank' href={link.url}>{link.url}</Link>
-            </div>
-            <div className='border border-gray-100  rounded-md mt-1 md:mt-0 p-2'>
+        <h2 className="text-xl font-semibold text-slate-800 mb-6 text-center">Link Analytics</h2>
+        <div className="space-y-4">
+          {page.links.map(link => (
+            <div key={uuidv4()} 
+                 className="flex flex-col md:flex-row items-center gap-4 p-4 border-t border-slate-100 first:border-t-0">
+              <div className="text-blue-500">
+                <FontAwesomeIcon icon={faLink} className="text-lg" />
+              </div>
+              
+              <div className="grow text-center md:text-left">
+                <h3 className="font-medium text-slate-800">{link.title || 'No Title'}</h3>
+                <p className="text-slate-600 text-sm">{link.subtitle || 'No Subtitle'}</p>
+                <Link 
+                  className="text-xs text-blue-500 hover:text-blue-600 transition-colors" 
+                  target="_blank" 
+                  href={link.url}
+                >
+                  {link.url}
+                </Link>
+              </div>
 
-
-              <div className='text-center'>
-                <div className="text-3xl">
-                  {getTodayClicks(link.url)}
+              <div className="flex gap-4">
+                <div className="bg-white px-6 py-3 rounded-lg border border-slate-100 shadow-sm">
+                  <div className="text-3xl font-semibold text-slate-800 mb-1">
+                    {getTodayClicks(link.url)}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 uppercase">Today</div>
                 </div>
-                <div className="text-gray-400 text-xs font-bold uppercase">Today Clicks</div>
+
+                <div className="bg-white px-6 py-3 rounded-lg border border-slate-100 shadow-sm">
+                  <div className="text-3xl font-semibold text-slate-800 mb-1">
+                    {getAllTimeClicks(link.url)}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 uppercase">Total</div>
+                </div>
               </div>
             </div>
-            <div className='border border-gray-100  rounded-md mt-1 md:mt-0 p-2'>
-              <div className="text-center">
-                <div className="text-3xl">
-                  {getAllTimeClicks(link.url)}
-                </div>
-                <div className="text-gray-400 text-xs font-bold uppercase">All time Clicks</div>
-              </div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </SectionBox>
     </div>
   );
