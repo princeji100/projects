@@ -1,19 +1,16 @@
-'use server';
-export const dynamic = 'force-dynamic';
-
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import UserNameForm from '@/components/forms/UserNameForm';
+'use client'
+import UserNameForm from '@/components/forms/UserNameForm'
 import Page from "@/models/Page";
 import { redirect } from "next/navigation";
 import PageSettingForm from "@/components/forms/PageSettingForm";
 import PageButtonForm from "@/components/forms/PageButtonForm";
 import PageLinkForm from "@/components/forms/PageLinkForm";
 import connectToDatabase from "@/lib/connectToDB";
+import { useSession } from 'next-auth/react'
 
-export default async function AccountPage() {
+const AccountPage = async () => {
     try {
-        const session = await getServerSession(authOptions);
+        const { data: session } = useSession()
 
         if (!session) {
             redirect('/login');
@@ -30,6 +27,7 @@ export default async function AccountPage() {
             );
         }
 
+        // Convert Mongoose documents to plain JavaScript objects
         const plainPage = JSON.parse(JSON.stringify(page));
         const plainUser = JSON.parse(JSON.stringify(session.user));
 
@@ -57,3 +55,5 @@ export default async function AccountPage() {
         );
     }
 }
+
+export default AccountPage;
