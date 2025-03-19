@@ -1,7 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 'use server';
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import UserNameForm from '@/components/forms/UserNameForm'
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import UserNameForm from '@/components/forms/UserNameForm';
 import Page from "@/models/Page";
 import { redirect } from "next/navigation";
 import PageSettingForm from "@/components/forms/PageSettingForm";
@@ -28,7 +30,6 @@ const AccountPage = async () => {
             );
         }
 
-        // Convert Mongoose documents to plain JavaScript objects
         const plainPage = JSON.parse(JSON.stringify(page));
         const plainUser = JSON.parse(JSON.stringify(session.user));
 
@@ -55,6 +56,6 @@ const AccountPage = async () => {
             </div>
         );
     }
-}
+};
 
 export default AccountPage;
