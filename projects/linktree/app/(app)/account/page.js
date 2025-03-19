@@ -1,52 +1,44 @@
 'use client'
+import { useEffect, useState } from 'react'
 import UserNameForm from '@/components/forms/UserNameForm'
-import Page from "@/models/Page";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import PageSettingForm from "@/components/forms/PageSettingForm";
 import PageButtonForm from "@/components/forms/PageButtonForm";
 import PageLinkForm from "@/components/forms/PageLinkForm";
-import connectToDatabase from "@/lib/connectToDB";
 import { useSession } from 'next-auth/react'
 
-const AccountPage = async () => {
-    try {
-        const { data: session } = useSession()
+const AccountPage = () => {
+    const router = useRouter();
+    const { data: session, status } = useSession();
+    const [pageData, setPageData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-        if (!session) {
-            redirect('/login');
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/login');
+            return;
         }
 
-        await connectToDatabase();
-        const page = await Page.findOne({ owner: session?.user?.email });
-
-        if (!page) {
-            return (
-                <div className="max-w-xl mx-auto mt-8">
-                    <UserNameForm />
-                </div>
-            );
+        if (status === 'authenticated') {
+            fetch('/api/page')  // You'll need to create this API route
+                .then(res => res.json())
+                .then(data => {
+                    setPageData(data);
+                    setLoading(false);
+                })
+                .catch(err => {
+                    setError(err);
+                    setLoading(false);
+                });
         }
+    }, [status, router]);
 
-        // Convert Mongoose documents to plain JavaScript objects
-        const plainPage = JSON.parse(JSON.stringify(page));
-        const plainUser = JSON.parse(JSON.stringify(session.user));
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
-        return (
-            <div className="space-y-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-800 mb-2">Account Settings</h1>
-                    <p className="text-slate-600">Manage your profile and customize your Linktree page</p>
-                </div>
-
-                <div className="space-y-6">
-                    <PageSettingForm page={plainPage} user={plainUser} />
-                    <PageButtonForm page={plainPage} />
-                    <PageLinkForm page={plainPage} user={plainUser} />
-                </div>
-            </div>
-        );
-    } catch (error) {
-        console.error('Error in AccountPage:', error);
+    if (error) {
         return (
             <div className="text-center p-8">
                 <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
@@ -54,6 +46,29 @@ const AccountPage = async () => {
             </div>
         );
     }
+
+    if (!pageData) {
+        return (
+            <div className="max-w-xl mx-auto mt-8">
+                <UserNameForm />
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-8">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-slate-800 mb-2">Account Settings</h1>
+                <p className="text-slate-600">Manage your profile and customize your Linktree page</p>
+            </div>
+
+            <div className="space-y-6">
+                <PageSettingForm page={pageData} user={session.user} />
+                <PageButtonForm page={pageData} />
+                <PageLinkForm page={pageData} user={session.user} />
+            </div>
+        </div>
+    );
 }
 
 export default AccountPage;
