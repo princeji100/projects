@@ -20,9 +20,9 @@ const AboutPage = () => {
 
                 <div className="bg-white shadow-sm rounded-xl p-8 mb-8">
                     <div className="prose max-w-none">
-                        <h2 className="text-2xl font-semibold mb-4 text-slate-800">Hello, I'm Prince</h2>
+                        <h2 className="text-2xl font-semibold mb-4 text-slate-800">Hello, I&#39;m Prince</h2>
                         <p className="text-slate-600 leading-relaxed mb-8">
-                            I'm a fresh graduate and aspiring developer with a passion for creating 
+                            I&#39;m a fresh graduate and aspiring developer with a passion for creating 
                             modern web experiences. I specialize in building responsive and user-friendly 
                             web applications using cutting-edge technologies, constantly expanding my 
                             knowledge to stay at the forefront of web development.
@@ -52,7 +52,7 @@ const AboutPage = () => {
 
                         <h3 className="text-xl font-semibold mb-4 text-slate-700">Get in Touch</h3>
                         <p className="text-slate-600">
-                            I'm always open to new opportunities and collaborations. Feel free to reach out at{' '}
+                            I&#39;m always open to new opportunities and collaborations. Feel free to reach out at{' '}
                             <Link 
                                 href="mailto:Princesrivastav216@gmail.com" 
                                 className="text-blue-600 hover:text-blue-800 transition duration-200 font-medium"
