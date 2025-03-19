@@ -11,7 +11,7 @@ import PageButtonForm from "@/components/forms/PageButtonForm";
 import PageLinkForm from "@/components/forms/PageLinkForm";
 import connectToDatabase from "@/lib/connectToDB";
 
-async function AccountPage() {
+export default async function AccountPage() {
     try {
         const session = await getServerSession(authOptions);
 
@@ -57,5 +57,3 @@ async function AccountPage() {
         );
     }
 }
-
-export default AccountPage;
