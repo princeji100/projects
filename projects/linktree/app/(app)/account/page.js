@@ -1,6 +1,6 @@
+'use server';
 export const dynamic = 'force-dynamic';
 
-'use server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import UserNameForm from '@/components/forms/UserNameForm';
