@@ -12,8 +12,8 @@ layout, responsive behaviour, and state management.
 
 | Project | Stack | Live | Source |
 |---|---|---|---|
-| **Linktree clone** | React · Tailwind | [Demo](#) <!-- TODO: live URL --> | [`projects/linktree`](./projects/linktree) |
-| **Portfolio site** | HTML · CSS · JS | [Demo](#) <!-- TODO: live URL --> | [`projects/portfolio`](./projects/portfolio) |
+| **Linktree clone** | React · Tailwind | [Demo](https://linktree-princeji.vercel.app/) | [`projects/linktree`](./projects/linktree) |
+| **Portfolio site** | HTML · CSS · JS | — | [`projects/portfolio`](./projects/portfolio) |
 | **Todo app** | React · Vite | [Demo](https://projects-rho-seven.vercel.app) | [`front-end-challange/TodoApp`](./front-end-challange/TodoApp) |
 | **Movie app** | React Native | — | [`ReactNative/MovieApp`](./ReactNative/MovieApp) |
 
@@ -23,12 +23,12 @@ Frontend Mentor–style challenges, built from design specs.
 
 | Project | Stack | Live | Source |
 |---|---|---|---|
-| **Easybank landing page** | HTML · CSS · JS | [Demo](#) <!-- TODO: live URL --> | [`projects/easybank`](./projects/easybank) |
-| **Mortgage repayment calculator** | HTML · CSS · JS | [Demo](#) <!-- TODO: live URL --> | [`front-end-challange/mortgage-repayment-calculator-main`](./front-end-challange/mortgage-repayment-calculator-main) |
-| **Age calculator** | HTML · CSS · JS | [Demo](#) <!-- TODO: live URL --> | [`front-end-challange/age-calculator-app-main`](./front-end-challange/age-calculator-app-main) |
-| **Testimonials grid** | HTML · CSS Grid | [Demo](#) <!-- TODO: live URL --> | [`front-end-challange/testimonials-grid-section-main`](./front-end-challange/testimonials-grid-section-main) |
-| **Fylo data storage component** | HTML · CSS | [Demo](#) <!-- TODO: live URL --> | [`front-end-challange/fylo-data-storage-component-master`](./front-end-challange/fylo-data-storage-component-master) |
-| **Chat app CSS illustration** | HTML · CSS | [Demo](#) <!-- TODO: live URL --> | [`front-end-challange/chat-app-css-illustration-master`](./front-end-challange/chat-app-css-illustration-master) |
+| **Easybank landing page** | HTML · CSS · JS | [Demo](https://euphonious-elf-c2f696.netlify.app) | [`projects/easybank`](./projects/easybank) |
+| **Mortgage repayment calculator** | HTML · CSS · JS | [Demo](https://bespoke-sfogliatella-08aaf3.netlify.app/) | [`front-end-challange/mortgage-repayment-calculator-main`](./front-end-challange/mortgage-repayment-calculator-main) |
+| **Age calculator** | HTML · CSS · JS | [Demo](https://idyllic-manatee-26ecd2.netlify.app) | [`front-end-challange/age-calculator-app-main`](./front-end-challange/age-calculator-app-main) |
+| **Testimonials grid** | HTML · CSS Grid | [Demo](https://sparkly-sopapillas-920edf.netlify.app/) | [`front-end-challange/testimonials-grid-section-main`](./front-end-challange/testimonials-grid-section-main) |
+| **Fylo data storage component** | HTML · CSS | [Demo](https://aesthetic-concha-b15ae2.netlify.app/) | [`front-end-challange/fylo-data-storage-component-master`](./front-end-challange/fylo-data-storage-component-master) |
+| **Chat app CSS illustration** | HTML · CSS | [Demo](https://chipper-cranachan-4c1ac1.netlify.app/) | [`front-end-challange/chat-app-css-illustration-master`](./front-end-challange/chat-app-css-illustration-master) |
 
 ## Running locally
 
