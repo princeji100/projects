@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
+  <link rel="stylesheet" href="./output.css">
+  <title>Calculator app</title>
+
+</head>
+<body>
+  <div class="bg-slate-600 flex flex-col items-center justify-center h-screen" id="container">
+    <div class="flex items-center w-1/2 justify-between py-8">
+      <div class="text-white font-bold text-xl">calc</div>
+      <div class="flex items-center text-center gap-3">
+        <div class="text-white font-semibold">Theme</div>
+        <div class="flex gap-2 w-20 rounded-full h-6 py-1 text-white relative bg-slate-700">
+          <div></div>
+          <div class="h-4 w-4 rounded-full bg-red-600 hover:cursor-pointer hover:bg-red-500" id="them1"></div>
+          <div class="h-4 w-4 rounded-full bg-orange-600 hover:cursor-pointer hover:bg-orange-500" id="them2"></div>
+          <div class="h-4 w-4 rounded-full bg-cyan-400 hover:cursor-pointer hover:bg-cyan-300" id="them3"></div>
+        </div>
+      </div>
+    </div>
+    <div class="w-1/2 mb-5"><input class="w-full text-right focus:outline-none bg-slate-800 text-5xl font-extrabold p-5 text-white rounded-lg" type="text" pattern="[0-9]" required id="display" autocomplete="off"></div>
+    <div class="w-1/2 p-5 flex flex-col gap-4 bg-slate-700 rounded-lg">
+       <div class="flex gap-4">
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="7">7</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="8">8</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="9">9</div>
+        <div class="w-full bg-gray-500 text-center hover:cursor-pointer text-white text-4xl font-bold py-3 rounded-lg border-b-4 border-gray-400/50 hover:bg-gray-500/50 " id="del">DEL</div>
+       </div>
+       <div class="flex gap-4">
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="4">4</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="5">5</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="6">6</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="add">+</div>
+       </div>
+       <div class="flex gap-4">
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="1">1</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="2">2</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="3">3</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="minus">-</div>
+       </div>
+       <div class="flex gap-4">
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="point">.</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="0">0</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="divide">/</div>
+        <div class="w-full bg-white text-center hover:cursor-pointer text-gray-700 text-4xl font-bold py-3 rounded-lg border-b-4 border-black/50 hover:bg-white/80" id="multiply">x</div>
+       </div>
+       <div class="flex gap-4">
+        <div class= "w-full bg-gray-500 text-center text-white text-4xl font-bold py-3 rounded-lg hover:cursor-pointer border-gray-400/50 border-b-4 hover:bg-gray-500/50" id="reset" >RESET</div>
+        <div class="w-full bg-red-600 text-center hover:bg-red-500 text-white text-4xl font-bold py-3 rounded-lg hover:cursor-pointer border-b-4 border-red-500" id="equal">=</div>
+       </div>
+    </div>
+  </div>
+  <script src="../main.js"></script>
+</body>
+</html>
