@@ -1,0 +1,22 @@
+node_modules/
+.next/
+dist/
+build/
+.expo/
+
+.env
+.env.local
+.env*.local
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Prisma client output — regenerate with `prisma generate`
+projects/generated/
+
+# Scratch/learning folders, not part of this collection
+New/
+TypeScript/
+cs500/
