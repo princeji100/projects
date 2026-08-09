@@ -20,6 +20,7 @@ the live link.
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Lock Down Write Paths** - Close the unauthenticated upload endpoint and every other write a stranger can reach
+- [ ] **Phase 1.5: Admin & Upload Management** (INSERTED) - Screens to manage the allowlist and the uploads Phase 1 starts tracking
 - [ ] **Phase 2: Fix the Broken Paths** - Clear the nine confirmed defects in the public page, claim flow, and dashboard
 - [ ] **Phase 3: Link Lifecycle Control** - Owners toggle links on/off and schedule them without deleting anything
 - [ ] **Phase 4: Themes & QR Sharing** - One-click theme presets plus a downloadable QR code for the profile
@@ -31,18 +32,41 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Phase 1: Lock Down Write Paths
 **Goal**: Every write endpoint refuses strangers, oversized payloads, and abuse — the S3 bill stops being exposed to the internet
 **Depends on**: Nothing (first phase)
-**Requirements**: SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08
+**Requirements**: SEC-11, SEC-12, SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08
 **Success Criteria** (what must be TRUE):
-  1. Nothing reaches S3 without a valid session, an allowlisted image content type, and a size under the server-enforced cap
-  2. An account that hits its upload quota gets a clear refusal instead of another S3 object
-  3. Rapid repeat writes to upload, page save, and username claim are throttled per user
-  4. Reserved names (`api`, `account`, `login`, `about`, admin-ish words) and malformed usernames are refused at claim time with the reason shown
-  5. A malformed `/api/click` request returns a 4xx, never a 500
+  1. An email that is not on the allowlist cannot sign in, and is told the app is invite-only
+  2. The pre-existing Pages, Users, Events, adapter collections, and S3 objects are gone — the app starts from an empty state
+  3. Nothing reaches S3 without a valid session, an allowlisted image content type verified by magic bytes, and a size under the server-enforced cap
+  4. An account that hits its upload quota gets a clear refusal instead of another S3 object
+  5. Rapid repeat writes to upload, page save, and username claim are throttled per user
+  6. Reserved names (`api`, `account`, `login`, `about`, admin-ish words) and malformed usernames are refused at claim time with the reason shown
+  7. A malformed `/api/click` request returns a 4xx, never a 500
 **Plans**: TBD
 
 Notes:
-- Vercel free tier is serverless with no background workers and no Redis, so rate limiting (SEC-05) has to be backed by something already in the stack — a MongoDB counter/TTL collection is the obvious fit. Do not introduce infrastructure for this.
+- Backend gates only. The admin allowlist page and the upload manager UI were split into Phase 1.5 during discussion. Phase 1 ships the `AllowedUser`, `Upload`, and `RateLimit` collections; Phase 1.5 ships the screens.
+- SEC-12 (the wipe) runs FIRST, before any gate. It is irreversible and removes the owner's own page, which is re-claimed afterwards. It also removes any need for an upload backfill.
+- Vercel free tier is serverless with no background workers and no Redis, so rate limiting (SEC-05) has to be backed by something already in the stack — a MongoDB TTL collection is the obvious fit. Do not introduce infrastructure for this.
+- Gates go in shared `lib/` helpers, not `middleware.js`: server actions bypass middleware and mongoose does not run on the Edge runtime.
 - SEC-06/07 also constrain the claim flow that Phase 2 fixes (FIX-02); keep the validation server-side so both the action and the form agree.
+- Full decision record: `.planning/phases/01-lock-down-write-paths/01-CONTEXT.md` (D-01 … D-30).
+
+### Phase 1.5: Admin & Upload Management (INSERTED)
+**Goal**: The owner manages who gets in and what is stored, without touching the database by hand
+**Depends on**: Phase 1
+**Requirements**: ADMIN-01, ADMIN-02, UPLOAD-01, UPLOAD-02
+**Success Criteria** (what must be TRUE):
+  1. The admin (matched against `ADMIN_EMAIL`) can see the allowlist and add or remove an email from a page in the app
+  2. A signed-in non-admin who navigates to the admin page is refused, not shown the controls
+  3. The owner sees their own uploads with thumbnail, size, and total usage against the 25 MB quota
+  4. Deleting an upload removes the S3 object and the `Upload` record, and the freed quota is immediately usable
+  5. Deleting an image still referenced by the page warns before it happens
+**Plans**: TBD
+**UI hint**: yes
+
+Notes:
+- Inserted 2026-08-09 during the Phase 1 discussion, to keep Phase 1 a backend-security phase. Every collection these screens read (`AllowedUser`, `Upload`) is created in Phase 1.
+- Until this phase ships, allowlist entries are inserted manually via Atlas or a script.
 
 ### Phase 2: Fix the Broken Paths
 **Goal**: A visitor and an owner can walk the whole app without hitting a crash, a lie, or a silent miscount
@@ -123,11 +147,12 @@ Notes:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Lock Down Write Paths | 0/TBD | Not started | - |
+| 1.5. Admin & Upload Management | 0/TBD | Not started | - |
 | 2. Fix the Broken Paths | 0/TBD | Not started | - |
 | 3. Link Lifecycle Control | 0/TBD | Not started | - |
 | 4. Themes & QR Sharing | 0/TBD | Not started | - |
@@ -136,17 +161,19 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 ## Coverage
 
-All 33 v1 requirements are mapped to exactly one phase each.
+All 39 v1 requirements are mapped to exactly one phase each.
 
 | Phase | Requirements | Count |
 |-------|--------------|-------|
-| 1 | SEC-01 … SEC-08 | 8 |
+| 1 | SEC-01 … SEC-08, SEC-11, SEC-12 | 10 |
+| 1.5 | ADMIN-01/02, UPLOAD-01/02 | 4 |
 | 2 | FIX-01 … FIX-09 | 9 |
 | 3 | LINK-01 … LINK-04 | 4 |
 | 4 | THEME-01 … THEME-03, QR-01, QR-02 | 5 |
 | 5 | ANA-01 … ANA-04 | 4 |
 | 6 | DOC-01 … DOC-03 | 3 |
-| | **Total** | **33** |
+| | **Total** | **39** |
 
 ---
-*Roadmap created: 2026-08-09*
+*Roadmap created: 2026-08-09 | Amended 2026-08-09 after the Phase 1 discussion: Phase 1.5 inserted,
+SEC-11/SEC-12 added to Phase 1.*

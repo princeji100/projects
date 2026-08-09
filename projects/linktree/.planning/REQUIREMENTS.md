@@ -9,8 +9,14 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Security
 
-Signup is open to anyone with a Google account, so every write path is reachable by strangers.
+Signup is gated by an email allowlist (decided 2026-08-09, reversing the earlier open-signup
+decision). Public profile pages stay public; only account creation is invite-only.
 
+- [ ] **SEC-11**: An email that is not on the allowlist cannot sign in, and sees a clear
+  invite-only message rather than a generic error
+- [ ] **SEC-12**: All pre-existing data (Pages, Users, Events, NextAuth adapter collections, and
+  every S3 object) is wiped once before the gates go live — a clean slate with no migration or
+  backfill path
 - [ ] **SEC-01**: `/api/upload` rejects requests without a valid session
 - [ ] **SEC-02**: Uploads are rejected above a size cap (server-enforced, not just client-side)
 - [ ] **SEC-03**: Uploads are rejected unless the content type is an allowlisted image format
@@ -33,6 +39,18 @@ Confirmed defects, each located in the codebase.
 - [ ] **FIX-07**: Analytics link rows use stable keys, not a fresh `uuidv4()` per render (`app/(app)/account/analytics/page.js:108`)
 - [ ] **FIX-08**: Social button icons render their intended colors — the dynamic `text-${key}-500` classes are purged at build (`components/forms/PageButtonForm.js:83,128`)
 - [ ] **FIX-09**: One MongoDB connection path — `action/grabusername.js` drops its private `mongoose.connect` in favour of `lib/connectToDB.js`
+
+### Admin & Upload Management
+
+Phase 1 ships the collections; these are the screens that manage them.
+
+- [ ] **ADMIN-01**: An admin-only page (gated on `ADMIN_EMAIL`) lists allowlisted emails and can
+  add or remove them
+- [ ] **ADMIN-02**: A non-admin who reaches the admin page is refused, not shown the controls
+- [ ] **UPLOAD-01**: The dashboard lists the owner's uploads with a thumbnail, size, and total
+  against the 25 MB quota
+- [ ] **UPLOAD-02**: Deleting an upload removes both the S3 object and the `Upload` record, freeing
+  quota, and warns when the image is still in use on the page
 
 ### QR Code
 
@@ -101,6 +119,8 @@ Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| SEC-11 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-12 | Phase 1 — Lock Down Write Paths | Pending |
 | SEC-01 | Phase 1 — Lock Down Write Paths | Pending |
 | SEC-02 | Phase 1 — Lock Down Write Paths | Pending |
 | SEC-03 | Phase 1 — Lock Down Write Paths | Pending |
@@ -118,6 +138,10 @@ Which phases cover which requirements.
 | FIX-07 | Phase 2 — Fix the Broken Paths | Pending |
 | FIX-08 | Phase 2 — Fix the Broken Paths | Pending |
 | FIX-09 | Phase 2 — Fix the Broken Paths | Pending |
+| ADMIN-01 | Phase 1.5 — Admin & Upload Management | Pending |
+| ADMIN-02 | Phase 1.5 — Admin & Upload Management | Pending |
+| UPLOAD-01 | Phase 1.5 — Admin & Upload Management | Pending |
+| UPLOAD-02 | Phase 1.5 — Admin & Upload Management | Pending |
 | LINK-01 | Phase 3 — Link Lifecycle Control | Pending |
 | LINK-02 | Phase 3 — Link Lifecycle Control | Pending |
 | LINK-03 | Phase 3 — Link Lifecycle Control | Pending |
@@ -136,9 +160,11 @@ Which phases cover which requirements.
 | DOC-03 | Phase 6 — Portfolio Presentation | Pending |
 
 **Coverage:**
-- v1 requirements: 33 total
-- Mapped to phases: 33 ✓
+- v1 requirements: 39 total
+- Mapped to phases: 39 ✓
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-08-08 | Traceability filled: 2026-08-09*
+*Amended 2026-08-09 after Phase 1 discussion: +SEC-11 (allowlist), +SEC-12 (data wipe),
++ADMIN-01/02 and UPLOAD-01/02 (new Phase 1.5).*

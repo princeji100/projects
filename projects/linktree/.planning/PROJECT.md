@@ -2,9 +2,10 @@
 
 ## What This Is
 
-A multi-tenant link-in-bio app — anyone signs in with Google, claims a username, and gets a public
-profile page at `/username` with their links, social buttons, avatar, and background. Owners get a
-dashboard to edit the page and see view/click analytics.
+A multi-tenant link-in-bio app — an invited user signs in with Google, claims a username, and gets a
+public profile page at `/username` with their links, social buttons, avatar, and background. Owners
+get a dashboard to edit the page and see view/click analytics. Signup is gated by an email
+allowlist; the pages themselves are public to anyone.
 
 It serves two purposes at once: a portfolio piece that recruiters and freelance clients will open
 and judge, and an app Prince actually uses in place of the real Linktree.
@@ -34,8 +35,10 @@ every time, without the owner having to check on it.
 
 ### Active
 
-**Security — the app is publicly open to signup, so these gate everything else**
+**Security — every write path is reachable by strangers today, so these gate everything else**
 
+- [ ] Signup is gated by an email allowlist (invite-only)
+- [ ] All existing data is wiped once before the gates go live (clean slate)
 - [ ] `/api/upload` requires an authenticated session
 - [ ] Uploads enforce a file size cap and an image MIME allowlist
 - [ ] Per-user upload quota so one account cannot drain the S3 bucket
@@ -114,7 +117,8 @@ bumped 15.2.0 → 15.2.8 for the React Server Components CVE.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Keep signup open to everyone rather than locking to one email | User wants it to work as a real multi-tenant product, not a personal page | — Pending |
+| ~~Keep signup open to everyone~~ → **invite-only allowlist** | Reversed 2026-08-09 during Phase 1 discussion. Everything runs on free tiers (Vercel, personal S3, Atlas); per-user quotas bound cost per user but leave the user count unbounded. The architecture stays multi-tenant — only the door is gated, and public pages stay public. | — Pending |
+| Wipe all existing data once at the start of Phase 1 | Live Pages/Users/Events predate every gate and were claimed under no validation rules. A clean slate removes the need for migration and backfill code entirely. Confirmed irreversible by the owner. | — Pending |
 | Security work comes before features | Open signup + unauthenticated upload endpoint is an active liability | — Pending |
 | Keep the single-repo structure (`projects/linktree` inside the monorepo) | Splitting would break the Vercel deployment for zero user benefit | — Pending |
 | Stay on JavaScript | ~2000 lines of working code; a TS rewrite delivers nothing to users | — Pending |

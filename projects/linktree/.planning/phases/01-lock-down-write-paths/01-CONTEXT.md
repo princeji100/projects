@@ -219,17 +219,18 @@ No external ADRs or specs exist for this project — decisions above are the con
 
 ---
 
-## Roadmap Amendments Required
+## Roadmap Amendments — APPLIED 2026-08-09
 
-These follow from the discussion and must be applied before planning:
+1. **PROJECT.md** ✓ — "What This Is" now says invite-only; the open-signup Key Decision is struck
+   through and replaced with the allowlist decision plus the wipe decision.
+2. **REQUIREMENTS.md** ✓ — added `SEC-11` (allowlist) and `SEC-12` (wipe) to the Security section,
+   added an "Admin & Upload Management" section (`ADMIN-01/02`, `UPLOAD-01/02`), traceability rows
+   for all six, coverage count 33 → 39.
+3. **ROADMAP.md** ✓ — **Phase 1.5: Admin & Upload Management (INSERTED)** added with goal, success
+   criteria, and `UI hint: yes`. Phase 1's requirement list, success criteria, and notes updated;
+   execution order and coverage table updated.
 
-1. **PROJECT.md** — flip the "Keep signup open to everyone" Key Decision to invite-only, with the
-   free-tier cost rationale. Update "What This Is" ("anyone signs in with Google" is no longer true).
-2. **REQUIREMENTS.md** — add `SEC-11` (invite-only allowlist gate) and `SEC-12` (destructive data
-   wipe / clean slate) to Phase 1; add the Phase 1.5 requirements for the admin page and upload
-   manager; update the traceability table and the 33-requirement coverage count.
-3. **ROADMAP.md** — insert **Phase 1.5: Admin & Upload Management (INSERTED)**, depends on Phase 1,
-   `UI hint: yes`. Add the allowlist and wipe to Phase 1's success criteria.
+**Phase 1 requirement IDs are now:** SEC-11, SEC-12, SEC-01…SEC-08 (10 total).
 
 ---
 
