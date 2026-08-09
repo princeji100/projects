@@ -1,0 +1,118 @@
+# Requirements: Linktree
+
+**Defined:** 2026-08-08
+**Core Value:** A stranger opens `/username` and sees a page that loads fast, looks good, and whose links work — every time, without the owner having to check on it.
+
+## v1 Requirements
+
+Requirements for this milestone. Each maps to roadmap phases.
+
+### Security
+
+Signup is open to anyone with a Google account, so every write path is reachable by strangers.
+
+- [ ] **SEC-01**: `/api/upload` rejects requests without a valid session
+- [ ] **SEC-02**: Uploads are rejected above a size cap (server-enforced, not just client-side)
+- [ ] **SEC-03**: Uploads are rejected unless the content type is an allowlisted image format
+- [ ] **SEC-04**: A single account cannot exceed a per-user upload quota
+- [ ] **SEC-05**: Write endpoints (upload, page save, username claim) are rate limited per user
+- [ ] **SEC-06**: Reserved usernames (`api`, `account`, `login`, `about`, admin-ish words) cannot be claimed
+- [ ] **SEC-07**: Usernames are validated for charset and length before becoming a public URL
+- [ ] **SEC-08**: `/api/click` handles malformed input without throwing a 500
+
+### Correctness
+
+Confirmed defects, each located in the codebase.
+
+- [ ] **FIX-01**: `SavePageLinks` returns true on success — today it returns false either way, so the caller cannot tell (`action/PageAction.js:63`)
+- [ ] **FIX-02**: A taken username does not redirect to the success page — checks `result.success`, not `result` (`components/forms/UserNameForm.js:24`)
+- [ ] **FIX-03**: An unknown `/username` renders a 404 page instead of crashing with a 500 (`app/(page)/[uri]/page.js`)
+- [ ] **FIX-04**: No view Event is written for a profile that does not exist (`app/(page)/[uri]/page.js:35`)
+- [ ] **FIX-05**: A missing avatar or background image renders a fallback instead of throwing in `next/image` (`app/(page)/[uri]/page.js:66`, `components/forms/PageSettingForm.js:106`)
+- [ ] **FIX-06**: `params` is awaited per the Next 15 async API (`app/(page)/[uri]/page.js:31`)
+- [ ] **FIX-07**: Analytics link rows use stable keys, not a fresh `uuidv4()` per render (`app/(app)/account/analytics/page.js:108`)
+- [ ] **FIX-08**: Social button icons render their intended colors — the dynamic `text-${key}-500` classes are purged at build (`components/forms/PageButtonForm.js:83,128`)
+- [ ] **FIX-09**: One MongoDB connection path — `action/grabusername.js` drops its private `mongoose.connect` in favour of `lib/connectToDB.js`
+
+### QR Code
+
+- [ ] **QR-01**: The dashboard displays a QR code that resolves to the owner's public page
+- [ ] **QR-02**: The QR code can be downloaded as an image file
+
+### Themes
+
+- [ ] **THEME-01**: A set of preset themes is offered in the page settings form
+- [ ] **THEME-02**: Selecting a preset applies it in one action, with a live preview before saving
+- [ ] **THEME-03**: Custom color and custom background image keep working alongside presets
+
+### Link Management
+
+- [ ] **LINK-01**: Each link can be toggled active or inactive without deleting it
+- [ ] **LINK-02**: Inactive links are hidden from the public page but preserved in the dashboard
+- [ ] **LINK-03**: A link can carry an optional publish window (start and/or end date)
+- [ ] **LINK-04**: The public page respects the publish window when deciding what to render
+
+### Analytics
+
+- [ ] **ANA-01**: Click events capture referrer and device so the data exists to report on
+- [ ] **ANA-02**: The analytics page offers a 7-day and 30-day view of the trend
+- [ ] **ANA-03**: Links are ranked by click count over the selected window
+- [ ] **ANA-04**: A profile with no events yet shows an empty state, not a broken chart
+
+### Presentation
+
+This is a portfolio piece; the repo is read by the same people who open the live link.
+
+- [ ] **DOC-01**: README covers what the app is, the live link, the stack, and local setup
+- [ ] **DOC-02**: README includes screenshots of the public page and the dashboard
+- [ ] **DOC-03**: `.env.example` documents every environment variable the app reads
+
+## v2 Requirements
+
+Deferred. Tracked but not in this roadmap.
+
+### Security
+
+- **SEC-09**: Abuse reporting and takedown flow for public pages
+- **SEC-10**: Content moderation on uploaded images
+
+### Analytics
+
+- **ANA-05**: Geographic breakdown of views
+- **ANA-06**: CSV export of analytics data
+
+### Link Management
+
+- **LINK-05**: Link grouping and section headers on the public page
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Custom domains | Needs DNS plumbing and a paid Vercel tier; the `/username` URL is enough |
+| Payments / pro tier | No monetization intent; Stripe surface area for nothing |
+| Email/password auth | Google OAuth works and adds no password-reset burden |
+| TypeScript migration | ~2000 lines of working JS; a rewrite delivers nothing to users |
+| Team / multi-editor pages | One page, one owner; nobody has asked for more |
+
+## Traceability
+
+Which phases cover which requirements. Filled in during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SEC-01 — SEC-08 | TBD | Pending |
+| FIX-01 — FIX-09 | TBD | Pending |
+| QR-01 — QR-02 | TBD | Pending |
+| THEME-01 — THEME-03 | TBD | Pending |
+| LINK-01 — LINK-04 | TBD | Pending |
+| ANA-01 — ANA-04 | TBD | Pending |
+| DOC-01 — DOC-03 | TBD | Pending |
+
+**Coverage:**
+- v1 requirements: 33 total
+- Mapped to phases: 0 ⚠️ (roadmap not yet created)
+- Unmapped: 33
+
+---
+*Requirements defined: 2026-08-08*
