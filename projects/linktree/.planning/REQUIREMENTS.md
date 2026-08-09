@@ -97,22 +97,48 @@ Deferred. Tracked but not in this roadmap.
 
 ## Traceability
 
-Which phases cover which requirements. Filled in during roadmap creation.
+Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SEC-01 — SEC-08 | TBD | Pending |
-| FIX-01 — FIX-09 | TBD | Pending |
-| QR-01 — QR-02 | TBD | Pending |
-| THEME-01 — THEME-03 | TBD | Pending |
-| LINK-01 — LINK-04 | TBD | Pending |
-| ANA-01 — ANA-04 | TBD | Pending |
-| DOC-01 — DOC-03 | TBD | Pending |
+| SEC-01 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-02 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-03 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-04 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-05 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-06 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-07 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-08 | Phase 1 — Lock Down Write Paths | Pending |
+| FIX-01 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-02 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-03 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-04 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-05 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-06 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-07 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-08 | Phase 2 — Fix the Broken Paths | Pending |
+| FIX-09 | Phase 2 — Fix the Broken Paths | Pending |
+| LINK-01 | Phase 3 — Link Lifecycle Control | Pending |
+| LINK-02 | Phase 3 — Link Lifecycle Control | Pending |
+| LINK-03 | Phase 3 — Link Lifecycle Control | Pending |
+| LINK-04 | Phase 3 — Link Lifecycle Control | Pending |
+| THEME-01 | Phase 4 — Themes & QR Sharing | Pending |
+| THEME-02 | Phase 4 — Themes & QR Sharing | Pending |
+| THEME-03 | Phase 4 — Themes & QR Sharing | Pending |
+| QR-01 | Phase 4 — Themes & QR Sharing | Pending |
+| QR-02 | Phase 4 — Themes & QR Sharing | Pending |
+| ANA-01 | Phase 5 — Analytics Worth Reading | Pending |
+| ANA-02 | Phase 5 — Analytics Worth Reading | Pending |
+| ANA-03 | Phase 5 — Analytics Worth Reading | Pending |
+| ANA-04 | Phase 5 — Analytics Worth Reading | Pending |
+| DOC-01 | Phase 6 — Portfolio Presentation | Pending |
+| DOC-02 | Phase 6 — Portfolio Presentation | Pending |
+| DOC-03 | Phase 6 — Portfolio Presentation | Pending |
 
 **Coverage:**
 - v1 requirements: 33 total
-- Mapped to phases: 0 ⚠️ (roadmap not yet created)
-- Unmapped: 33
+- Mapped to phases: 33 ✓
+- Unmapped: 0
 
 ---
-*Requirements defined: 2026-08-08*
+*Requirements defined: 2026-08-08 | Traceability filled: 2026-08-09*
