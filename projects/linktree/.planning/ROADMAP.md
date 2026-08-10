@@ -14,6 +14,7 @@ the live link.
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -30,10 +31,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Lock Down Write Paths
+
 **Goal**: Every write endpoint refuses strangers, oversized payloads, and abuse — the S3 bill stops being exposed to the internet
 **Depends on**: Nothing (first phase)
 **Requirements**: SEC-11, SEC-12, SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08
 **Success Criteria** (what must be TRUE):
+
   1. An email that is not on the allowlist cannot sign in, and is told the app is invite-only
   2. The pre-existing Pages, Users, Events, adapter collections, and S3 objects are gone — the app starts from an empty state
   3. Nothing reaches S3 without a valid session, an allowlisted image content type verified by magic bytes, and a size under the server-enforced cap
@@ -41,9 +44,32 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Rapid repeat writes to upload, page save, and username claim are throttled per user
   6. Reserved names (`api`, `account`, `login`, `about`, admin-ish words) and malformed usernames are refused at claim time with the reason shown
   7. A malformed `/api/click` request returns a 4xx, never a 500
-**Plans**: TBD
+
+**Plans**: 8 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 01-01-PLAN.md — SEC-12 destructive wipe (Mongo collections + S3 bucket), `lib/s3.js` extraction
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 01-02-PLAN.md — magic-byte sniffing, username validator, and the `verify-phase1.js` harness
+- [ ] 01-03-PLAN.md — Upload/RateLimit/AllowedUser models plus the shared session and rate-limit helpers
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 01-04-PLAN.md — all five upload gates on `/api/upload` (session, size, MIME, quota, rate limit)
+- [ ] 01-05-PLAN.md — invite-only `signIn` allowlist, the `/login` AccessDenied message, allowlist seed script
+- [ ] 01-06-PLAN.md — username claim: charset, length, reserved words, 5/hour limit
+- [ ] 01-07-PLAN.md — `/api/click` hardening (both verified bugs) plus the 60/min per-IP limit
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 01-08-PLAN.md — page-save throttling and the refusal toasts across every write surface
 
 Notes:
+
 - Backend gates only. The admin allowlist page and the upload manager UI were split into Phase 1.5 during discussion. Phase 1 ships the `AllowedUser`, `Upload`, and `RateLimit` collections; Phase 1.5 ships the screens.
 - SEC-12 (the wipe) runs FIRST, before any gate. It is irreversible and removes the owner's own page, which is re-claimed afterwards. It also removes any need for an upload backfill.
 - Vercel free tier is serverless with no background workers and no Redis, so rate limiting (SEC-05) has to be backed by something already in the stack — a MongoDB TTL collection is the obvious fit. Do not introduce infrastructure for this.
@@ -52,96 +78,120 @@ Notes:
 - Full decision record: `.planning/phases/01-lock-down-write-paths/01-CONTEXT.md` (D-01 … D-30).
 
 ### Phase 1.5: Admin & Upload Management (INSERTED)
+
 **Goal**: The owner manages who gets in and what is stored, without touching the database by hand
 **Depends on**: Phase 1
 **Requirements**: ADMIN-01, ADMIN-02, UPLOAD-01, UPLOAD-02
 **Success Criteria** (what must be TRUE):
+
   1. The admin (matched against `ADMIN_EMAIL`) can see the allowlist and add or remove an email from a page in the app
   2. A signed-in non-admin who navigates to the admin page is refused, not shown the controls
   3. The owner sees their own uploads with thumbnail, size, and total usage against the 25 MB quota
   4. Deleting an upload removes the S3 object and the `Upload` record, and the freed quota is immediately usable
   5. Deleting an image still referenced by the page warns before it happens
+
 **Plans**: TBD
 **UI hint**: yes
 
 Notes:
+
 - Inserted 2026-08-09 during the Phase 1 discussion, to keep Phase 1 a backend-security phase. Every collection these screens read (`AllowedUser`, `Upload`) is created in Phase 1.
 - Until this phase ships, allowlist entries are inserted manually via Atlas or a script.
 
 ### Phase 2: Fix the Broken Paths
+
 **Goal**: A visitor and an owner can walk the whole app without hitting a crash, a lie, or a silent miscount
 **Depends on**: Phase 1
 **Requirements**: FIX-01, FIX-02, FIX-03, FIX-04, FIX-05, FIX-06, FIX-07, FIX-08, FIX-09
 **Success Criteria** (what must be TRUE):
+
   1. Visiting an unclaimed `/username` returns a 404 page, and no view Event is recorded for it
   2. A profile whose avatar or background image is missing renders a fallback instead of throwing in `next/image`
   3. Saving links and claiming a username both report their true outcome — a taken name stays on the form with an error, a successful link save reports success
   4. Social button icons render their intended colors in a production build, not the purged-class default
   5. A full walkthrough of public page, dashboard, and analytics produces no server or console errors — no async-`params` warning, no unstable-key remounts, one MongoDB connection path
+
 **Plans**: TBD
 
 Notes:
+
 - All nine defects have known file:line locations in REQUIREMENTS.md and are one-to-a-few-line changes. Keep this as a small number of plans; do not split per defect.
 
 ### Phase 3: Link Lifecycle Control
+
 **Goal**: Owners decide which links are live and when, without losing the link
 **Depends on**: Phase 2
 **Requirements**: LINK-01, LINK-02, LINK-03, LINK-04
 **Success Criteria** (what must be TRUE):
+
   1. Owner can toggle a link inactive and it disappears from the public page while staying editable in the dashboard
   2. Owner can set an optional start date, end date, or both on a link
   3. The public page renders only links whose publish window includes the current time
   4. Pages saved before this change render exactly as they did — a link with no active flag and no window is treated as live
+
 **Plans**: TBD
 **UI hint**: yes
 
 Notes:
+
 - `Page.links` is a loosely-typed Object today and the public reader at `app/(page)/[uri]/page.js` consumes it directly. Live documents exist, so the new fields must be optional with live-by-default semantics — no migration step, no required fields.
 
 ### Phase 4: Themes & QR Sharing
+
 **Goal**: Owners restyle the page in one click and hand out a scannable link to it
 **Depends on**: Phase 2
 **Requirements**: THEME-01, THEME-02, THEME-03, QR-01, QR-02
 **Success Criteria** (what must be TRUE):
+
   1. Owner can pick a preset theme in page settings and see the change previewed before saving
   2. A saved preset is what a visitor actually sees on the public page
   3. Custom background color and custom background image still work unchanged alongside presets
   4. Owner sees a QR code in the dashboard that scans to their own public page URL
   5. Owner can download that QR code as an image file
+
 **Plans**: TBD
 **UI hint**: yes
 
 Notes:
+
 - The Page model has no theme field today and existing documents use `bgType`/`bgColor`/`bgImage`. A preset has to resolve into (or sit alongside) those existing fields so pages saved before this phase keep rendering.
 
 ### Phase 5: Analytics Worth Reading
+
 **Goal**: Owners can tell where their traffic came from and which links earn the clicks
 **Depends on**: Phase 2
 **Requirements**: ANA-01, ANA-02, ANA-03, ANA-04
 **Success Criteria** (what must be TRUE):
+
   1. A new click records the referrer and the device it came from
   2. Owner can switch the analytics view between a 7-day and a 30-day window
   3. Owner sees links ranked by click count over the selected window
   4. Reports render over events recorded before this phase, showing an unknown/other bucket rather than breaking
   5. A profile with no events yet shows an empty state, not a broken chart
+
 **Plans**: TBD
 **UI hint**: yes
 
 Notes:
+
 - ANA-01 must land before or with ANA-02/03 — the Event model has no referrer or device field, so there is nothing to report on until capture ships. Historical events will permanently lack these fields; every report has to tolerate their absence (criterion 4).
 
 ### Phase 6: Portfolio Presentation
+
 **Goal**: Someone who opens the repo understands the app and can run it without asking a question
 **Depends on**: Phases 3, 4, 5 (screenshots need the finished UI)
 **Requirements**: DOC-01, DOC-02, DOC-03
 **Success Criteria** (what must be TRUE):
+
   1. README states what the app is, links the live deployment, lists the stack, and gives local setup steps that work
   2. README shows screenshots of the public page and the dashboard in their finished state
   3. `.env.example` lists every environment variable the app reads, with placeholders and no real secrets
   4. A fresh clone can be run locally following only the README
+
 **Plans**: TBD
 
 Notes:
+
 - The repo builds from `projects/linktree` inside the `princeji100/projects` monorepo; setup instructions must not assume the repo root.
 
 ## Progress
@@ -151,7 +201,7 @@ Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Lock Down Write Paths | 0/TBD | Not started | - |
+| 1. Lock Down Write Paths | 0/8 | Not started | - |
 | 1.5. Admin & Upload Management | 0/TBD | Not started | - |
 | 2. Fix the Broken Paths | 0/TBD | Not started | - |
 | 3. Link Lifecycle Control | 0/TBD | Not started | - |
