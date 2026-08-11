@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: context exhaustion at 76% (2026-08-09)
-last_updated: "2026-08-10T18:18:45.456Z"
+stopped_at: context exhaustion at 75% (2026-08-10)
+last_updated: "2026-08-10T18:35:10.958Z"
 last_activity: 2026-08-10 -- Phase 01 planning complete
 progress:
   total_phases: 7
@@ -67,10 +67,16 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+User-run chores, carried over unresolved since 2026-08-09 (harness cannot push to a default branch):
+
+- `cd ~/Documents/Codes && git push projects main` — several commits behind, incl. phase-1 plans (bd10bc7)
+- `cd ~/Documents/Codes && git remote remove projectssh` — same repo over SSH, stale master ref
+- Create `projects/linktree/.env` (MONGODB_URI + S3 creds) — unblocks Wave 1
+- Add `s3:ListBucket` (bucket ARN) + `s3:DeleteObject` (bucket/*) to the S3_ACCESS_KEY IAM policy — resolves RESEARCH.md unresolved item 2
 
 ### Blockers/Concerns
 
+- [Phase 1]: Wave 1 (01-01) DEFERRED by user decision 2026-08-11 — started at Wave 2 instead. Blocked on: no `.env` in projects/linktree (needs MONGODB_URI + S3 creds), and IAM policy for S3_ACCESS_KEY likely needs `s3:ListBucket` + `s3:DeleteObject` (RESEARCH.md predicts AccessDenied on first wipe run). 01-01 Task 3 is a human-verify checkpoint — the wipe is irreversible and the run belongs to the user, never an agent.
 - [Phase 1]: Vercel free tier is serverless with no workers and no Redis — rate limiting (SEC-05) must be backed by MongoDB or another already-installed dependency
 - [Phases 3/4]: Live Page documents exist; new `links` fields and the theme field must be optional and backward compatible with documents that lack them
 - [Phase 5]: Events recorded before ANA-01 will never have referrer or device — reports must tolerate their absence
@@ -85,6 +91,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-09T15:42:15.179Z
-Stopped at: context exhaustion at 76% (2026-08-09)
+Last session: 2026-08-11
+Stopped at: Session resumed — Wave 1 deferred, executing Phase 1 Wave 2
 Resume file: None
