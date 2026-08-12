@@ -177,18 +177,23 @@ async function db() {
 const countOf = async (database, name) =>
   database.collection(name).countDocuments();
 
-// ponytail: lib/s3.js is created by plan 01-01 (deferred — irreversible wipe).
 // Imported dynamically so a missing module is a SKIP, not a module-load crash.
-// Do NOT create lib/s3.js here: pre-empting the wipe plan is how buckets get emptied by accident.
+// ListObjectsV2Command comes from the SDK — lib/s3.js exports only s3Client and
+// BUCKET_NAME. Destructuring it from lib/s3.js gave undefined, `new undefined()`
+// threw, and the catch turned that into a silent null → every bucket-delta
+// assertion SKIPped while looking healthy. The reason is logged now for that
+// exact reason: a null here must never be indistinguishable from "no bucket".
 async function bucketKeyCount() {
   if (!process.env.BUCKET_NAME) return null;
   try {
-    const { s3Client, ListObjectsV2Command } = await import('../lib/s3.js');
+    const { s3Client } = await import('../lib/s3.js');
+    const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
     const out = await s3Client.send(
       new ListObjectsV2Command({ Bucket: process.env.BUCKET_NAME })
     );
     return out.KeyCount ?? 0;
-  } catch {
+  } catch (error) {
+    console.error(`  (bucketKeyCount unavailable: ${error.message.split('\n')[0]})`);
     return null;
   }
 }
