@@ -12,13 +12,15 @@ export const s3Client = new S3Client({
         // Note: S3_SECRET_KEY, not S3_SECRET_ACCESS_KEY. This is the name in .env.
         secretAccessKey: process.env.S3_SECRET_KEY,
     },
-    // The SDK's default connection timeout is short enough that a first call from a
-    // home connection to eu-north-1 fails with TimeoutError before TLS completes —
-    // observed while verifying ListBucket for the wipe. A TimeoutError there is easy to
-    // misread as the AccessDenied this phase predicts, so give the handshake room.
-    // Object literal rather than `new NodeHttpHandler(...)` to avoid importing a
-    // transitive @smithy package that is not a declared dependency.
-    requestHandler: { connectionTimeout: 15_000, requestTimeout: 30_000 },
+    // Reaching eu-north-1 from this connection is genuinely slow to hand shake: 15s
+    // still produced TimeoutError on two consecutive post-wipe list calls, while curl
+    // to the same endpoint answered in ~1s and a 60s connection timeout succeeded
+    // first try. A TimeoutError here reads almost exactly like the AccessDenied this
+    // phase predicts, so the handshake gets room and the call gets retries.
+    // ponytail: tuned to an observed-slow home connection, not measured latency.
+    // Vercel sits far closer to eu-north-1 and would be fine with the defaults.
+    requestHandler: { connectionTimeout: 60_000, requestTimeout: 120_000 },
+    maxAttempts: 5,
 });
 
 export const BUCKET_NAME = process.env.BUCKET_NAME;

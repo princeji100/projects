@@ -50,7 +50,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — SEC-12 destructive wipe (Mongo collections + S3 bucket), `lib/s3.js` extraction
+- [x] 01-01-PLAN.md — SEC-12 destructive wipe (Mongo collections + S3 bucket), `lib/s3.js` extraction
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
