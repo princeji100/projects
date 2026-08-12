@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: plan 01-02 complete (2026-08-12)
+stopped_at: plan 01-03 complete (2026-08-12)
 last_updated: "2026-08-12T00:00:00.000Z"
-last_activity: 2026-08-12 -- Plan 01-02 complete, harness covers all nine SEC flags
+last_activity: 2026-08-12 -- Plan 01-03 complete, Wave 2 done, --sec05 green
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 8
-  completed_plans: 1
-  percent: 13
+  completed_plans: 2
+  percent: 25
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-08-08)
 ## Current Position
 
 Phase: 1 of 7 (Lock Down Write Paths)
-Plan: 1 of 8 complete (01-02) — next is 01-03
+Plan: 2 of 8 complete (01-02, 01-03) — Wave 2 done, next is Wave 3
 Status: Executing
-Last activity: 2026-08-12 -- Plan 01-02 complete (3/3 tasks), all nine SEC flags exist
+Last activity: 2026-08-12 -- Plan 01-03 complete (2/2 tasks), `--sec05` green
 
-Progress: [█░░░░░░░░░] 13%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -75,13 +75,13 @@ Resolved 2026-08-12:
 
 Still outstanding (user-run):
 
-- Add S3 credentials to `.env` — `.env` currently holds only `MONGODB_URI`. Needs the bucket, region, and key/secret. **Name check:** `app/api/upload/route.js` reads `S3_ACCESS_KEY` + `S3_SECRET_KEY` + `BUCKET_NAME`; the Wave 1 notes say `S3_SECRET_ACCESS_KEY`. Pick one and make both agree.
+- ~~Add S3 credentials to `.env`~~ — done. `.env` now holds `MONGODB_URI`, `BUCKET_NAME`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`. **Name resolved:** `S3_SECRET_KEY` is the canonical name — it is what `app/api/upload/route.js` actually reads. The Wave 1 notes saying `S3_SECRET_ACCESS_KEY` are the ones that are wrong; fix them, not the code. No S3 call has been exercised yet, so the credentials are present but unverified.
 - Add `s3:ListBucket` (bucket ARN) + `s3:DeleteObject` (bucket/*) to the S3_ACCESS_KEY IAM policy — resolves RESEARCH.md unresolved item 2
-- `cd ~/Documents/Codes && git push projects main` — two new commits (c4d4bd2 + the 01-02 summary)
+- `cd ~/Documents/Codes && git push projects main` — `projects/main` is at 5ada447, five commits behind (c4d4bd2, 3386848, 449331f, d1146a6, and the 01-03 docs commit)
 
 ### Blockers/Concerns
 
-- [Phase 1]: Wave 1 (01-01) still DEFERRED. `MONGODB_URI` now exists, but S3 credentials do not, and the IAM policy likely still needs `s3:ListBucket` + `s3:DeleteObject` (RESEARCH.md predicts AccessDenied on first wipe run). 01-01 Task 3 is a human-verify checkpoint — the wipe is irreversible, destroys the owner's own page, and the run belongs to the user, never an agent.
+- [Phase 1]: Wave 1 (01-01) still DEFERRED. `MONGODB_URI` and all three S3 vars now exist, but no S3 call has been made yet and the IAM policy likely still needs `s3:ListBucket` + `s3:DeleteObject` (RESEARCH.md predicts AccessDenied on first wipe run). 01-01 Task 3 is a human-verify checkpoint — the wipe is irreversible, destroys the owner's own page, and the run belongs to the user, never an agent.
 - [Phase 1]: `node_modules` was found half-installed on 2026-08-12 — 242M on disk but ~half the packages were empty dirs, incl. `bson`, breaking every mongoose import. Repaired with `npm install` (manifests untouched). Suspect this first on an inexplicable `Cannot find module`.
 - [Phase 1]: `app/api/click/route.js` calls `atob(searchParams.get('url'))` unguarded and `Event.create` before any validation — a missing `url` throws and garbage rows get written. `--sec08` catches it; plan 01-07 owns the fix.
 - [Phase 1]: Vercel free tier is serverless with no workers and no Redis — rate limiting (SEC-05) must be backed by MongoDB or another already-installed dependency
@@ -99,12 +99,18 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-08-12
-Stopped at: Plan 01-02 COMPLETE (60abaad, 4d6f833, c4d4bd2). All nine SEC flags exist. `--units` exit 0; bare-environment SKIP path exit 0; `npm run build` exit 0; no dependency added.
-Resume file: None — next unit of work is plan 01-03
+Stopped at: Plan 01-03 COMPLETE (449331f, d1146a6). Wave 2 is done. `--sec05` exit 0;
+limiter self-check `[true,true,true,false,true]`; `npm run build` exit 0; no dependency added.
+Resume file: None — next unit of work is Wave 3 (01-04 … 01-07, parallelisable)
 
-Three flags fail against live Atlas by design — they are contracts awaiting their plan:
-`--sec05` (no `ratelimits` → 01-03), `--sec11-db` (no `allowedusers` → 01-05),
-`--sec12` (`pages` has 6 rows → 01-01 wipe deferred).
+01-03 was found written-but-uncommitted on resume: the previous session ended between
+writing the five files and recording them. Every acceptance criterion was re-verified
+against the working tree before committing — nothing was trusted from the prior session.
+**If a session ends mid-plan, check `git status` before assuming the work is unstarted.**
 
-**01-03 is now unblocked.** Its Task 2 self-check calls `checkRateLimit` against a live
-DB — the reason it was deferred on 2026-08-11 — and Atlas is now reachable.
+Two flags still fail against live Atlas by design — contracts awaiting their plan:
+`--sec11-db` (no `allowedusers` → 01-05), `--sec12` (`pages` has 6 rows → 01-01 deferred).
+
+**Wave 3 is unblocked.** All four plans call `requireSession` and `checkRateLimit` from
+`lib/`; signatures are recorded in `01-03-SUMMARY.md`. Note 01-04 gates `/api/upload`,
+which needs working S3 credentials — see the outstanding human actions.

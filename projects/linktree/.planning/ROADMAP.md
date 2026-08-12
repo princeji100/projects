@@ -54,8 +54,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02-PLAN.md — magic-byte sniffing, username validator, and the `verify-phase1.js` harness
-- [ ] 01-03-PLAN.md — Upload/RateLimit/AllowedUser models plus the shared session and rate-limit helpers
+- [x] 01-02-PLAN.md — magic-byte sniffing, username validator, and the `verify-phase1.js` harness
+- [x] 01-03-PLAN.md — Upload/RateLimit/AllowedUser models plus the shared session and rate-limit helpers
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
