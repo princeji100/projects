@@ -2,12 +2,12 @@
 import { Chart } from "react-google-charts";
 import { useState } from "react";
 
-const Graf = ({ data }) => {
+const Graf = ({ data, title = "Daily Clicks" }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const options = {
-    title: "Clicks Over the Last 30 Days",
+    title,
     titleTextStyle: {
       color: '#1e293b',
       fontSize: 16,

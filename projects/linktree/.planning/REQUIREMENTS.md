@@ -72,10 +72,10 @@ Phase 1 ships the collections; these are the screens that manage them.
 
 ### Analytics
 
-- [ ] **ANA-01**: Click events capture referrer and device so the data exists to report on
-- [ ] **ANA-02**: The analytics page offers a 7-day and 30-day view of the trend
-- [ ] **ANA-03**: Links are ranked by click count over the selected window
-- [ ] **ANA-04**: A profile with no events yet shows an empty state, not a broken chart
+- [x] **ANA-01**: Click events capture referrer and device so the data exists to report on
+- [x] **ANA-02**: The analytics page offers a 7-day and 30-day view of the trend
+- [x] **ANA-03**: Links are ranked by click count over the selected window
+- [x] **ANA-04**: A profile with no events yet shows an empty state, not a broken chart
 
 ### Presentation
 

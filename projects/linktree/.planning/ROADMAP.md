@@ -178,7 +178,8 @@ Notes:
   4. Reports render over events recorded before this phase, showing an unknown/other bucket rather than breaking
   5. A profile with no events yet shows an empty state, not a broken chart
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [x] 05-1-PLAN.md: Server-Side Ingestion, 7d/30d Aggregations, Deterministic Rankings, and Empty States
 **UI hint**: yes
 
 Notes:
@@ -213,9 +214,9 @@ Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 | 1. Lock Down Write Paths | 8/8 | Complete | 2026-08-14 |
 | 1.5. Admin & Upload Management | 2/2 | Complete   | 2026-08-13 |
 | 2. Fix the Broken Paths | 1/1 | Complete | 2026-08-14 |
-| 3. Link Lifecycle Control | 0/TBD | Not started | - |
-| 4. Themes & QR Sharing | 0/TBD | Not started | - |
-| 5. Analytics Worth Reading | 0/TBD | Not started | - |
+| 3. Link Lifecycle Control | 1/1 | Complete | 2026-08-14 |
+| 4. Themes & QR Sharing | 1/1 | Complete | 2026-08-14 |
+| 5. Analytics Worth Reading | 1/1 | Complete | 2026-08-14 |
 | 6. Portfolio Presentation | 0/TBD | Not started | - |
 
 ## Coverage

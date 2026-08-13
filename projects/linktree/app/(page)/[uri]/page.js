@@ -3,6 +3,7 @@ import Event from '@/models/Event';
 import Page from '@/models/Page';
 import User from '@/models/User';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import {
   faDiscord,
   faFacebook,
@@ -30,6 +31,8 @@ import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
 import { isLinkLive } from '@/lib/linkLifecycle';
 import { getTheme } from '@/lib/themes';
+import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
+import { getBaseUrl } from '@/lib/siteUrl';
 
 const iconMapping = {
   email: faEnvelope,
@@ -62,8 +65,14 @@ const UserPage = async ({ params }) => {
     notFound();
   }
 
-  // FIX-04: Event creation is gated strictly behind page existence
-  await Event.create({ url: uri, page: uri, type: 'view' });
+  // FIX-04 & ANA-01: Event creation is gated strictly behind page existence with normalized metadata
+  const headerList = await headers();
+  const userAgent = headerList.get('user-agent');
+  const referer = headerList.get('referer');
+  const device = parseDevice(userAgent);
+  const referrer = normalizeReferrer(referer, getBaseUrl());
+
+  await Event.create({ url: uri, page: uri, type: 'view', device, referrer });
 
   const user = await User.findOne({ email: page.owner });
 

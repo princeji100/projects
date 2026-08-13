@@ -2,6 +2,8 @@ import connectToDatabase from "@/lib/connectToDB";
 import Event from "@/models/Event";
 import Page from "@/models/Page";
 import { checkRateLimit, rateLimitKey } from "@/lib/rateLimit";
+import { parseDevice, normalizeReferrer } from "@/lib/analyticsParser";
+import { getBaseUrl } from "@/lib/siteUrl";
 
 export const POST = async (req) => {
   // D-18/D-19: the only unauthenticated write in the app, so there is no session to
@@ -47,6 +49,12 @@ export const POST = async (req) => {
     return Response.json({ error: 'Unknown page' }, { status: 400 });
   }
 
-  await Event.create({ type: 'click', url, page });
+  // Phase 5: Server-side device & referrer normalization (ANA-01)
+  const userAgent = req.headers.get('user-agent');
+  const referer = req.headers.get('referer');
+  const device = parseDevice(userAgent);
+  const referrer = normalizeReferrer(referer, getBaseUrl());
+
+  await Event.create({ type: 'click', url, page, device, referrer });
   return Response.json(true);
 };
