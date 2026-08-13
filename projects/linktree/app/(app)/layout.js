@@ -34,9 +34,11 @@ export default async function AppLayout({ children }) {
     return redirect('/login')
   }
   
-await connectToDatabase();
-  const page = await Page.findOne({ owner: session?.user?.email })
-  
+  await connectToDatabase();
+  const page = await Page.findOne({ owner: session?.user?.email });
+  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase()?.trim();
+  const isAdmin = Boolean(session?.user?.email && adminEmail && session.user.email.toLowerCase().trim() === adminEmail);
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50`}>
@@ -69,7 +71,7 @@ await connectToDatabase();
                     <span className="underline font-medium">{page.uri}</span>
                   </Link>
                 )}
-                <AppSidebar />
+                <AppSidebar isAdmin={isAdmin} />
               </div>
             </aside>
             <div className="grow p-6 md:p-8">
