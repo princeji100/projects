@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: 01-06 complete and committed (dd72b38). Wave 3 has 01-05 (checkpoint) and 01-07 left.
-last_updated: "2026-08-13T15:41:41.541Z"
-last_activity: 2026-08-13
+stopped_at: Phase 1.5 UI-SPEC approved
+last_updated: "2026-08-13T19:55:21.854Z"
+last_activity: 2026-08-13 -- Phase 1.5 planning complete
 progress:
   total_phases: 7
-  completed_phases: 0
-  total_plans: 8
-  completed_plans: 6
-  percent: 0
+  completed_phases: 1
+  total_plans: 10
+  completed_plans: 8
+  percent: 14
 ---
 
 # Project State
@@ -28,7 +28,8 @@ See: .planning/PROJECT.md (updated 2026-08-08)
 - Phase: 1.5 of 7 (Admin & Upload Management)
 - Status: Ready to plan
 - Progress: Phase 1 (8/8) complete, Phase 1.5 context gathered
-Last activity: 2026-08-13
+
+Last activity: 2026-08-13 -- Phase 1.5 planning complete
 
 Progress: [██████████] 100%
 
@@ -140,9 +141,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T01:14:00+05:30
-Stopped at: Phase 1.5 context gathered. Decisions locked for Admin Allowlist UI and Uploads Management. Ready for planning.
-Resume file: .planning/phases/01.5-admin-upload-management-inserted/01.5-CONTEXT.md
+Last session: 2026-08-13T19:49:38.590Z
+Stopped at: Phase 1.5 UI-SPEC approved
+Resume file: .planning/phases/01.5-admin-upload-management-inserted/01.5-UI-SPEC.md
 
 **Phase 01 closed out 2026-08-14.** 01-05 SUMMARY was held pending the user's manual OAuth
 verification — confirmed when the user hit the "invite-only" refusal in their browser, then
