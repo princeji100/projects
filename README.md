@@ -12,7 +12,7 @@ layout, responsive behaviour, and state management.
 
 | Project | Stack | Live | Source |
 |---|---|---|---|
-| **Linktree clone** | React · Tailwind | [Demo](https://linktree-princeji.vercel.app/) | [`projects/linktree`](./projects/linktree) |
+| **Linktree clone** | Next.js 15 · React 19 · MongoDB · AWS S3 · Tailwind | [Demo](https://linktree-princeji.vercel.app/) | [`projects/linktree`](./projects/linktree/README.md) |
 | **Portfolio site** | HTML · CSS · JS | — | [`projects/portfolio`](./projects/portfolio) |
 | **Todo app** | React · Vite | [Demo](https://projects-rho-seven.vercel.app) | [`front-end-challange/TodoApp`](./front-end-challange/TodoApp) |
 | **Movie app** | React Native | — | [`ReactNative/MovieApp`](./ReactNative/MovieApp) |

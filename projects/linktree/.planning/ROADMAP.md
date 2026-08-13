@@ -198,7 +198,8 @@ Notes:
   3. `.env.example` lists every environment variable the app reads, with placeholders and no real secrets
   4. A fresh clone can be run locally following only the README
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [x] 06-1-PLAN.md: Portfolio Presentation, UI Screenshots, and Final v1 Release Gate
 
 Notes:
 
@@ -217,7 +218,7 @@ Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 | 3. Link Lifecycle Control | 1/1 | Complete | 2026-08-14 |
 | 4. Themes & QR Sharing | 1/1 | Complete | 2026-08-14 |
 | 5. Analytics Worth Reading | 1/1 | Complete | 2026-08-14 |
-| 6. Portfolio Presentation | 0/TBD | Not started | - |
+| 6. Portfolio Presentation | 1/1 | Complete | 2026-08-14 |
 
 ## Coverage
 

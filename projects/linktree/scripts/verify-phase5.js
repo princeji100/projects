@@ -19,7 +19,7 @@ async function check(name, fn) {
   }
 }
 
-console.log('--- Running Phase 5 Analytics Worth Reading Verification ---\n');
+console.log('--- Running Refined Phase 5 Analytics Worth Reading Verification ---\n');
 
 // 1. Device Parser Unit Tests
 await check('device-parser: accurately classifies mobile, tablet, desktop, and other user agents', async () => {
@@ -71,36 +71,33 @@ await check('device-parser: accurately classifies mobile, tablet, desktop, and o
   assert.equal(parseDevice(undefined), 'other');
 });
 
-// 2. Referrer Normalizer Unit Tests
-await check('referrer-normalizer: extracts clean domain, strips www, resolves redirects, handles direct fallbacks', async () => {
-  const appUrl = 'https://linktree.app';
+// 2. Conservative Referrer Normalization & Safety (subdomain preservation, safe www stripping)
+await check('referrer-normalizer: strips safe www only, preserves arbitrary subdomains, handles direct & internal', async () => {
+  const appUrl = 'https://linktree.example.com';
 
-  // Standard external referrers
-  assert.equal(normalizeReferrer('https://www.google.com/search?q=linktree', appUrl), 'google.com');
-  assert.equal(normalizeReferrer('https://instagram.com/username', appUrl), 'instagram.com');
-  assert.equal(normalizeReferrer('http://www.github.com/project', appUrl), 'github.com');
+  // Strips www only
+  assert.equal(normalizeReferrer('https://www.google.com/search?q=test', appUrl), 'google.com');
+  assert.equal(normalizeReferrer('https://www.instagram.com/profile', appUrl), 'instagram.com');
 
-  // Known redirector & mobile subdomains
-  assert.equal(normalizeReferrer('https://t.co/xyz123', appUrl), 'twitter.com');
-  assert.equal(normalizeReferrer('https://l.instagram.com/?u=https%3A', appUrl), 'instagram.com');
-  assert.equal(normalizeReferrer('https://lm.facebook.com/l.php?u=...', appUrl), 'facebook.com');
-  assert.equal(normalizeReferrer('https://youtu.be/video123', appUrl), 'youtube.com');
-  assert.equal(normalizeReferrer('https://lnkd.in/post123', appUrl), 'linkedin.com');
+  // Preserves valid subdomains & public suffixes without destructive truncation
+  assert.equal(normalizeReferrer('https://blog.news.co.uk/articles/1', appUrl), 'blog.news.co.uk');
+  assert.equal(normalizeReferrer('https://sub.my-site.org.au/path?query=1#hash', appUrl), 'sub.my-site.org.au');
 
-  // Same-origin or internal referrers -> 'direct'
-  assert.equal(normalizeReferrer('https://linktree.app/johndoe', appUrl), 'direct');
-  assert.equal(normalizeReferrer('http://localhost:3000/account', 'http://localhost:3000'), 'direct');
+  // Same-site canonical-host referrers classified as 'internal'
+  assert.equal(normalizeReferrer('https://linktree.example.com/johndoe', appUrl), 'internal');
+  assert.equal(normalizeReferrer('https://www.linktree.example.com/account', appUrl), 'internal');
+  assert.equal(normalizeReferrer('http://localhost:3000/account', 'http://localhost:3000'), 'internal');
 
-  // Direct / empty / malformed referrers
+  // Missing / empty / malformed referrers classified as 'direct'
   assert.equal(normalizeReferrer('', appUrl), 'direct');
   assert.equal(normalizeReferrer(null, appUrl), 'direct');
   assert.equal(normalizeReferrer(undefined, appUrl), 'direct');
-  assert.equal(normalizeReferrer('not a url %%%', appUrl), 'direct');
+  assert.equal(normalizeReferrer('   ', appUrl), 'direct');
+  assert.equal(normalizeReferrer('not-a-valid-url-%%%%', appUrl), 'direct');
 });
 
 // 3. Event Model Schema & Metadata Persistence
-await check('event-schema: Event model persists device and referrer without forcing defaults on historical events', async () => {
-  // A: Modern event with device and referrer
+await check('event-schema: persists optional device and referrer without default values on historical events', async () => {
   const newEvent = new Event({
     type: 'click',
     page: 'testuser',
@@ -111,99 +108,231 @@ await check('event-schema: Event model persists device and referrer without forc
   assert.equal(newEvent.device, 'mobile');
   assert.equal(newEvent.referrer, 'twitter.com');
 
-  // B: Historical event representation (fields omitted)
+  // Historical event without fields
   const legacyEvent = new Event({
     type: 'click',
     page: 'testuser',
     url: 'https://github.com/test',
   });
-  assert.equal(legacyEvent.device, undefined, 'Historical records must not have forced schema default');
-  assert.equal(legacyEvent.referrer, undefined, 'Historical records must not have forced schema default');
+  assert.equal(legacyEvent.device, undefined, 'Historical records must not have forced default');
+  assert.equal(legacyEvent.referrer, undefined, 'Historical records must not have forced default');
 });
 
-// 4. Server-Side Aggregations & Historical Event Grouping (Integration)
-await check('analytics-aggregations: groups historical events with missing metadata into "Unknown" bucket', async () => {
+// 4. Strict Separation of View & Click Events
+await check('event-type-separation: aggregations strictly separate views from clicks across all metrics', async () => {
   await connectToDatabase();
-  const testUri = `test-analytics-${Date.now()}`;
+  const testUri = `test-sep-${Date.now()}`;
 
   try {
     const now = new Date();
 
-    // Insert 1 modern click event (with device & referrer)
+    // 5 views from mobile/direct
+    for (let i = 0; i < 5; i++) {
+      await Event.create({
+        page: testUri,
+        type: 'view',
+        url: testUri,
+        device: 'mobile',
+        referrer: 'direct',
+        createdAt: now,
+      });
+    }
+
+    // 2 clicks from desktop/google.com on Link A
     await Event.create({
       page: testUri,
       type: 'click',
-      url: 'https://example.com/one',
+      url: 'https://link-a.com',
+      device: 'desktop',
+      referrer: 'google.com',
+      createdAt: now,
+    });
+    await Event.create({
+      page: testUri,
+      type: 'click',
+      url: 'https://link-a.com',
       device: 'desktop',
       referrer: 'google.com',
       createdAt: now,
     });
 
-    // Insert 1 historical click event (without device & referrer)
+    const links = [{ url: 'https://link-a.com', title: 'Link A' }];
+    const data = await getAnalyticsData(testUri, links, '7d');
+
+    // Total counts separate
+    assert.equal(data.summary.totalViews, 5, 'Must report exactly 5 views');
+    assert.equal(data.summary.totalClicks, 2, 'Must report exactly 2 clicks');
+
+    // Device breakdown must only count clicks (desktop: 2, mobile: 0)
+    const desktopClicks = data.deviceBreakdown.find((d) => d.key === 'desktop');
+    assert.equal(desktopClicks?.count, 2, 'Clicks device breakdown must only include click events');
+    const mobileClicks = data.deviceBreakdown.find((d) => d.key === 'mobile');
+    assert.equal(mobileClicks, undefined, 'Views device data must not leak into clicks device breakdown');
+
+    // Referrer breakdown must only count clicks (google.com: 2, direct: 0)
+    const googleRef = data.referrerBreakdown.find((r) => r.domain === 'google.com');
+    assert.equal(googleRef?.count, 2, 'Clicks referrer breakdown must only include click events');
+    const directRef = data.referrerBreakdown.find((r) => r.domain === 'direct');
+    assert.equal(directRef, undefined, 'Views referrer data must not leak into clicks referrer breakdown');
+  } finally {
+    await Event.deleteMany({ page: testUri });
+  }
+});
+
+// 5. Historical Unknown vs New Direct/Internal Distinction
+await check('historical-unknown-distinction: groups missing historical fields as "Unknown" without conflating direct', async () => {
+  await connectToDatabase();
+  const testUri = `test-hist-${Date.now()}`;
+
+  try {
+    const now = new Date();
+
+    // 1 historical click (no device, no referrer)
     await Event.create({
       page: testUri,
       type: 'click',
-      url: 'https://example.com/two',
+      url: 'https://old.com',
       createdAt: now,
     });
 
-    // Insert 1 view event
+    // 1 new click with direct referrer & mobile device
     await Event.create({
       page: testUri,
-      type: 'view',
-      url: testUri,
+      type: 'click',
+      url: 'https://new-direct.com',
       device: 'mobile',
       referrer: 'direct',
       createdAt: now,
     });
 
-    const links = [
-      { url: 'https://example.com/one', title: 'Link One' },
-      { url: 'https://example.com/two', title: 'Link Two' },
-      { url: 'https://example.com/three', title: 'Link Three (Unclicked)' },
-    ];
+    // 1 new click with internal referrer & desktop device
+    await Event.create({
+      page: testUri,
+      type: 'click',
+      url: 'https://new-internal.com',
+      device: 'desktop',
+      referrer: 'internal',
+      createdAt: now,
+    });
 
-    const data7d = await getAnalyticsData(testUri, links, '7d');
+    const data = await getAnalyticsData(testUri, [], '7d');
 
-    assert.equal(data7d.selectedRange, '7d');
-    assert.equal(data7d.summary.totalViews, 1);
-    assert.equal(data7d.summary.totalClicks, 2);
-    assert.equal(data7d.hasData, true);
+    // Devices
+    const unknownDevice = data.deviceBreakdown.find((d) => d.key === 'Unknown');
+    assert.equal(unknownDevice?.count, 1, 'Historical record is Unknown device');
+    const mobileDevice = data.deviceBreakdown.find((d) => d.key === 'mobile');
+    assert.equal(mobileDevice?.count, 1, 'New direct record is mobile device');
+    const desktopDevice = data.deviceBreakdown.find((d) => d.key === 'desktop');
+    assert.equal(desktopDevice?.count, 1, 'New internal record is desktop device');
 
-    // Verify historical missing fields appear in "Unknown" breakdown
-    const unknownDevice = data7d.deviceBreakdown.find((d) => d.key === 'Unknown');
-    assert.ok(unknownDevice, 'Unknown device bucket must exist');
-    assert.equal(unknownDevice.count, 1, 'Historical event grouped into Unknown');
+    // Referrers
+    const unknownRef = data.referrerBreakdown.find((r) => r.domain === 'Unknown');
+    assert.equal(unknownRef?.count, 1, 'Historical record is Unknown referrer');
+    assert.equal(unknownRef?.name, 'Unknown (Historical)');
 
-    const unknownReferrer = data7d.referrerBreakdown.find((r) => r.domain === 'Unknown');
-    assert.ok(unknownReferrer, 'Unknown referrer bucket must exist');
-    assert.equal(unknownReferrer.count, 1, 'Historical event grouped into Unknown');
+    const directRef = data.referrerBreakdown.find((r) => r.domain === 'direct');
+    assert.equal(directRef?.count, 1, 'New direct record is direct referrer');
+    assert.equal(directRef?.name, 'Direct / Bookmarks');
+
+    const internalRef = data.referrerBreakdown.find((r) => r.domain === 'internal');
+    assert.equal(internalRef?.count, 1, 'New internal record is internal referrer');
+    assert.equal(internalRef?.name, 'Internal / Same-Site');
   } finally {
     await Event.deleteMany({ page: testUri });
   }
 });
 
-// 5. Continuous Daily Timeline Chart
-await check('continuous-timeline: generates continuous date points for every day in window', async () => {
+// 6. Exact UTC Timezone, Day-Boundary Semantics & Half-Open Window [windowStart, windowEnd)
+await check('utc-day-boundaries: enforces half-open [windowStart, windowEnd), exact 7 and 30 bucket counts, and boundary inclusion/exclusion', async () => {
   await connectToDatabase();
-  const testUri = `test-timeline-${Date.now()}`;
+  // Fixed reference timestamp: 2026-08-14T15:30:00.000Z
+  const refTime = new Date('2026-08-14T15:30:00.000Z');
+  const testUri = `test-utc-boundary-${Date.now()}`;
 
   try {
-    const data7d = await getAnalyticsData(testUri, [], '7d');
-    // Header + 7 calendar days = 8 rows
-    assert.equal(data7d.chartData.length, 8, '7-day window must have exactly 8 chart rows');
-    assert.equal(data7d.chartData[0][0], 'Day');
-    assert.equal(data7d.chartData[0][1], 'Clicks');
+    // Insert boundary test events
+    // Event 1: 1ms before windowStart (2026-08-07T23:59:59.999Z) -> MUST BE EXCLUDED
+    await Event.create({
+      page: testUri,
+      type: 'click',
+      url: 'https://test.com/before-start',
+      createdAt: new Date('2026-08-07T23:59:59.999Z'),
+    });
 
-    const data30d = await getAnalyticsData(testUri, [], '30d');
-    // Header + 30 calendar days = 31 rows
-    assert.equal(data30d.chartData.length, 31, '30-day window must have exactly 31 chart rows');
+    // Event 2: Exact windowStart (2026-08-08T00:00:00.000Z) -> MUST BE INCLUDED ($gte)
+    await Event.create({
+      page: testUri,
+      type: 'click',
+      url: 'https://test.com/at-start',
+      createdAt: new Date('2026-08-08T00:00:00.000Z'),
+    });
+
+    // Event 3: End of today UTC (2026-08-14T23:59:59.999Z) -> MUST BE INCLUDED ($lt)
+    await Event.create({
+      page: testUri,
+      type: 'click',
+      url: 'https://test.com/at-end-today',
+      createdAt: new Date('2026-08-14T23:59:59.999Z'),
+    });
+
+    // Event 4: Exact windowEnd tomorrow midnight (2026-08-15T00:00:00.000Z) -> MUST BE EXCLUDED ($lt)
+    await Event.create({
+      page: testUri,
+      type: 'click',
+      url: 'https://test.com/at-window-end',
+      createdAt: new Date('2026-08-15T00:00:00.000Z'),
+    });
+
+    // 7-day window verification
+    const data7d = await getAnalyticsData(testUri, [], '7d', refTime);
+    assert.equal(data7d.rangeDays, 7);
+    assert.equal(data7d.windowStart, '2026-08-08T00:00:00.000Z');
+    assert.equal(data7d.windowEnd, '2026-08-15T00:00:00.000Z');
+
+    // Exactly 7 daily bucket points in chartData (header + 7 daily points = 8 elements)
+    const dailyPoints7d = data7d.chartData.slice(1);
+    assert.equal(dailyPoints7d.length, 7, '7d range must yield exactly 7 daily points');
+    assert.equal(dailyPoints7d[0][0], '2026-08-08', 'First bucket is start date');
+    assert.equal(dailyPoints7d[6][0], '2026-08-14', 'Last bucket is today (before windowEnd)');
+
+    // Only events 2 and 3 should be counted (Events 1 and 4 excluded)
+    assert.equal(data7d.summary.totalClicks, 2, 'Must count only events within [windowStart, windowEnd)');
+
+    // 30-day window verification
+    const data30d = await getAnalyticsData(testUri, [], '30d', refTime);
+    assert.equal(data30d.rangeDays, 30);
+    assert.equal(data30d.windowStart, '2026-07-16T00:00:00.000Z');
+    assert.equal(data30d.windowEnd, '2026-08-15T00:00:00.000Z');
+
+    // Exactly 30 daily bucket points in chartData (header + 30 daily points = 31 elements)
+    const dailyPoints30d = data30d.chartData.slice(1);
+    assert.equal(dailyPoints30d.length, 30, '30d range must yield exactly 30 daily points');
+    assert.equal(dailyPoints30d[0][0], '2026-07-16', 'First bucket is 29 days before today');
+    assert.equal(dailyPoints30d[29][0], '2026-08-14', 'Last bucket is today');
   } finally {
     await Event.deleteMany({ page: testUri });
   }
 });
 
-// 6. Deterministic Link Rankings & Zero-Click Preservation (ANA-03)
+// 7. Invalid Range Fallback
+await check('invalid-range-fallback: invalid or missing range parameters fallback safely to 7d', async () => {
+  const testUri = `test-fallback-${Date.now()}`;
+
+  const res1 = await getAnalyticsData(testUri, [], '90d');
+  assert.equal(res1.selectedRange, '7d');
+  assert.equal(res1.rangeDays, 7);
+
+  const res2 = await getAnalyticsData(testUri, [], 'invalid-text');
+  assert.equal(res2.selectedRange, '7d');
+
+  const res3 = await getAnalyticsData(testUri, [], null);
+  assert.equal(res3.selectedRange, '7d');
+
+  const res4 = await getAnalyticsData(testUri, [], undefined);
+  assert.equal(res4.selectedRange, '7d');
+});
+
+// 8. Deterministic Link Rankings & Zero-Click Retention (ANA-03)
 await check('deterministic-ranking: sorts by clicks descending, breaks ties by link order, retains 0-click links', async () => {
   await connectToDatabase();
   const testUri = `test-rank-${Date.now()}`;
@@ -263,7 +392,7 @@ await check('deterministic-ranking: sorts by clicks descending, breaks ties by l
   }
 });
 
-// 7. Empty State Detection (ANA-04)
+// 9. Zero-Event Empty State Detection (ANA-04)
 await check('empty-state-detection: hasData is false when 0 events exist in the selected window', async () => {
   await connectToDatabase();
   const testUri = `test-empty-${Date.now()}`;

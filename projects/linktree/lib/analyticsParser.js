@@ -35,8 +35,11 @@ export function parseDevice(userAgent) {
 }
 
 /**
- * Normalizes a Referer header string into a clean, canonical domain name or 'direct'.
- * Strips protocol, path, port, query params, fragments, credentials, and 'www.' prefixes.
+ * Normalizes a Referer header string into a clean, canonical domain name, 'internal', or 'direct'.
+ * - Lowercases hostname and removes safe 'www.' prefix.
+ * - Preserves arbitrary valid subdomains and public suffixes (e.g. blog.example.co.uk).
+ * - Classifies same-site canonical-host referrals as 'internal'.
+ * - Classifies missing, empty, or malformed referrers as 'direct'.
  *
  * @param {string | null | undefined} refererHeader
  * @param {string | null | undefined} appUrl
@@ -60,32 +63,29 @@ export function normalizeReferrer(refererHeader, appUrl) {
     return 'direct';
   }
 
-  // Strip leading 'www.'
+  // Strip only the safe 'www.' prefix
   hostname = hostname.replace(/^www\./, '');
 
-  if (!hostname || hostname === 'localhost' || hostname === '127.0.0.1') {
+  if (!hostname) {
     return 'direct';
   }
 
-  // Same-origin check
+  // Check for same-site canonical host referrals -> 'internal'
   if (appUrl) {
     try {
-      const appOrigin = new URL(appUrl.includes('://') ? appUrl : `https://${appUrl}`).hostname.replace(/^www\./, '').toLowerCase();
-      if (hostname === appOrigin) {
-        return 'direct';
+      const appHost = new URL(appUrl.includes('://') ? appUrl : `https://${appUrl}`).hostname.replace(/^www\./, '').toLowerCase();
+      if (appHost && (hostname === appHost || ((appHost === 'localhost' || appHost === '127.0.0.1') && (hostname === 'localhost' || hostname === '127.0.0.1')))) {
+        return 'internal';
       }
     } catch {
       // Ignore invalid appUrl
     }
   }
 
-  // Map common redirect/mobile subdomains to canonical brand hostnames
-  if (hostname === 't.co') return 'twitter.com';
-  if (/^(l|lm)\.instagram\.com$/.test(hostname)) return 'instagram.com';
-  if (/^(l|lm|m)\.facebook\.com$/.test(hostname)) return 'facebook.com';
-  if (hostname === 'youtu.be' || hostname === 'm.youtube.com') return 'youtube.com';
-  if (hostname === 'lnkd.in') return 'linkedin.com';
-  if (hostname === 'm.reddit.com' || hostname === 'out.reddit.com') return 'reddit.com';
+  // If no appUrl configured but referrer is localhost/127.0.0.1, classify as internal
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'internal';
+  }
 
   return hostname;
 }

@@ -16,6 +16,7 @@ import {
 import { toast } from 'react-toastify';
 import { deleteUpload } from '@/action/UploadAction';
 import SectionBox from '@/components/layout/SectionBox';
+import SafeImage from '@/components/media/SafeImage';
 
 const MAX_QUOTA_BYTES = 25 * 1024 * 1024; // 25 MB
 
@@ -149,12 +150,19 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                 >
                   {/* Thumbnail Preview */}
                   <div className="relative aspect-square bg-slate-100 overflow-hidden">
-                    <Image
+                    <SafeImage
                       src={upload.url}
                       alt={filename}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                       className="object-cover group-hover:scale-105 transition duration-200"
+                      fallback={
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-400 p-3 text-center">
+                          <FontAwesomeIcon icon={faImages} className="text-3xl mb-1.5 text-slate-300" />
+                          <span className="text-[10px] text-slate-500 font-mono truncate max-w-full px-1">
+                            {filename}
+                          </span>
+                        </div>
+                      }
                     />
 
                     {/* In-Use Badge */}
@@ -237,19 +245,46 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
               >
                 <FontAwesomeIcon icon={faTriangleExclamation} className="text-lg" />
               </span>
-              <div>
+              <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-bold text-slate-900">
                   {pendingDelete.inUse ? 'Active Image in Use' : 'Confirm Deletion'}
                 </h3>
-                <p className="text-sm text-slate-600 mt-1">
+                
+                {/* Visual Preview Box */}
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 my-3">
+                  <div className="relative w-12 h-12 rounded-lg bg-slate-200 overflow-hidden shrink-0">
+                    <SafeImage
+                      src={pendingDelete.upload.url}
+                      alt={pendingDelete.upload.key ? pendingDelete.upload.key.split('/').pop() : 'Upload preview'}
+                      fill
+                      className="object-cover"
+                      fallback={
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <FontAwesomeIcon icon={faImages} className="text-sm" />
+                        </div>
+                      }
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="text-xs font-semibold text-slate-800 truncate">
+                      {pendingDelete.upload.key ? pendingDelete.upload.key.split('/').pop() : 'Image'}
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      {formatBytes(pendingDelete.upload.size)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-sm text-slate-600">
                   {pendingDelete.inUse ? (
                     <>
-                      Are you sure? This image is currently in use as:{' '}
-                      <span className="font-semibold text-slate-800">
-                        {pendingDelete.references.join(', ')}
-                      </span>
-                      .
-                      <br />
+                      <p className="mb-1">
+                        Are you sure? This image is currently in use as:{' '}
+                        <span className="font-semibold text-slate-800">
+                          {pendingDelete.references.join(', ')}
+                        </span>
+                        .
+                      </p>
                       <span className="text-xs text-amber-700 mt-2 block font-medium bg-amber-50 p-2.5 rounded-lg border border-amber-100">
                         Deleting this file will remove it from AWS S3, release{' '}
                         {formatBytes(pendingDelete.upload.size)}, and automatically clear the
@@ -258,14 +293,15 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                     </>
                   ) : (
                     <>
-                      Are you sure you want to permanently delete this upload?
-                      <br />
+                      <p>
+                        Are you sure you want to permanently delete this upload?
+                      </p>
                       <span className="text-xs text-slate-500 mt-1 block">
                         File will be deleted from cloud storage and {formatBytes(pendingDelete.upload.size)} will be freed.
                       </span>
                     </>
                   )}
-                </p>
+                </div>
               </div>
             </div>
 

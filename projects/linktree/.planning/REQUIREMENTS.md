@@ -12,16 +12,16 @@ Requirements for this milestone. Each maps to roadmap phases.
 Signup is gated by an email allowlist (decided 2026-08-09, reversing the earlier open-signup
 decision). Public profile pages stay public; only account creation is invite-only.
 
-- [ ] **SEC-11**: An email that is not on the allowlist cannot sign in, and sees a clear
+- [x] **SEC-11**: An email that is not on the allowlist cannot sign in, and sees a clear
   invite-only message rather than a generic error
-- [ ] **SEC-12**: All pre-existing data (Pages, Users, Events, NextAuth adapter collections, and
+- [x] **SEC-12**: All pre-existing data (Pages, Users, Events, NextAuth adapter collections, and
   every S3 object) is wiped once before the gates go live — a clean slate with no migration or
   backfill path
-- [ ] **SEC-01**: `/api/upload` rejects requests without a valid session
-- [ ] **SEC-02**: Uploads are rejected above a size cap (server-enforced, not just client-side)
-- [ ] **SEC-03**: Uploads are rejected unless the content type is an allowlisted image format
-- [ ] **SEC-04**: A single account cannot exceed a per-user upload quota
-- [ ] **SEC-05**: Write endpoints (upload, page save, username claim) are rate limited per user
+- [x] **SEC-01**: `/api/upload` rejects requests without a valid session
+- [x] **SEC-02**: Uploads are rejected above a size cap (server-enforced, not just client-side)
+- [x] **SEC-03**: Uploads are rejected unless the content type is an allowlisted image format
+- [x] **SEC-04**: A single account cannot exceed a per-user upload quota
+- [x] **SEC-05**: Write endpoints (upload, page save, username claim) are rate limited per user
 - [x] **SEC-06**: Reserved usernames (`api`, `account`, `login`, `about`, admin-ish words) cannot be claimed
 - [x] **SEC-07**: Usernames are validated for charset and length before becoming a public URL
 - [x] **SEC-08**: `/api/click` handles malformed input without throwing a 500
@@ -81,9 +81,9 @@ Phase 1 ships the collections; these are the screens that manage them.
 
 This is a portfolio piece; the repo is read by the same people who open the live link.
 
-- [ ] **DOC-01**: README covers what the app is, the live link, the stack, and local setup
-- [ ] **DOC-02**: README includes screenshots of the public page and the dashboard
-- [ ] **DOC-03**: `.env.example` documents every environment variable the app reads
+- [x] **DOC-01**: README covers what the app is, the live link, the stack, and local setup
+- [x] **DOC-02**: README includes screenshots of the public page and the dashboard
+- [x] **DOC-03**: `.env.example` documents every environment variable the app reads
 
 ## v2 Requirements
 

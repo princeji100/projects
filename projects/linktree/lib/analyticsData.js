@@ -1,33 +1,56 @@
 import Event from '../models/Event.js';
-import { format, addDays, isBefore, isEqual } from 'date-fns';
 
 /**
- * Server-authoritative analytics data aggregation engine.
- * Computes metrics, continuous daily charts, breakdowns, and deterministic link rankings
- * over a strictly derived 7-day or 30-day window.
+ * Server-authoritative analytics data aggregation engine with explicit UTC day boundaries
+ * and strict separation between view and click event types.
  *
  * @param {string} pageUri
  * @param {Array} links
- * @param {string | undefined} rangeParam - '7d' | '30d'
+ * @param {string | undefined} rangeParam - '7d' | '30d' (defaults safely to '7d')
+ * @param {Date | string | undefined} referenceDate - Optional reference date (defaults to current time)
  * @returns {Promise<Object>}
  */
-export async function getAnalyticsData(pageUri, links = [], rangeParam = '7d') {
+export async function getAnalyticsData(pageUri, links = [], rangeParam = '7d', referenceDate = null) {
+  // 1. Strict range validation with safe fallback (ANA-02)
   const selectedRange = rangeParam === '30d' ? '30d' : '7d';
   const rangeDays = selectedRange === '30d' ? 30 : 7;
 
-  // Derive exact window bounds
-  const now = new Date();
-  const windowEnd = new Date(now);
-  const windowStart = new Date(now);
-  windowStart.setDate(windowStart.getDate() - (rangeDays - 1));
-  windowStart.setHours(0, 0, 0, 0);
+  // 2. Exact UTC day-boundary semantics: half-open window [windowStart, windowEnd)
+  const now = referenceDate ? new Date(referenceDate) : new Date();
+  
+  // UTC midnight (rangeDays - 1) days before today
+  const windowStart = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() - (rangeDays - 1),
+      0,
+      0,
+      0,
+      0
+    )
+  );
 
-  // Fetch events for this page within window
+  // Tomorrow's UTC midnight: windowEnd is exclusive
+  const windowEnd = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 1,
+      0,
+      0,
+      0,
+      0
+    )
+  );
+
+  // 3. Fetch all events for this page within the half-open window [windowStart, windowEnd)
   const events = await Event.find({
     page: pageUri,
-    createdAt: { $gte: windowStart, $lte: windowEnd },
+    createdAt: { $gte: windowStart, $lt: windowEnd },
   }).lean();
 
+  // 4. Strict separation between view and click events
   const viewEvents = events.filter((e) => e.type === 'view');
   const clickEvents = events.filter((e) => e.type === 'click');
 
@@ -35,26 +58,33 @@ export async function getAnalyticsData(pageUri, links = [], rangeParam = '7d') {
   const totalClicks = clickEvents.length;
   const hasData = totalViews > 0 || totalClicks > 0;
 
-  // 1. Continuous Daily Click Trend Chart Data
+  // 5. Continuous Daily Click Timeline in UTC (never mixing views into clicks)
   const dailyClicksMap = {};
   for (const c of clickEvents) {
     if (c.createdAt) {
-      const dateKey = format(new Date(c.createdAt), 'yyyy-MM-dd');
-      dailyClicksMap[dateKey] = (dailyClicksMap[dateKey] || 0) + 1;
+      const utcDateKey = new Date(c.createdAt).toISOString().slice(0, 10);
+      dailyClicksMap[utcDateKey] = (dailyClicksMap[utcDateKey] || 0) + 1;
     }
   }
 
   const chartData = [['Day', 'Clicks']];
-  for (
-    let d = new Date(windowStart);
-    isBefore(d, windowEnd) || isEqual(d, windowEnd);
-    d = addDays(d, 1)
-  ) {
-    const formattedDate = format(d, 'yyyy-MM-dd');
-    chartData.push([formattedDate, dailyClicksMap[formattedDate] || 0]);
+  for (let i = rangeDays - 1; i >= 0; i--) {
+    const dayDate = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - i,
+        0,
+        0,
+        0,
+        0
+      )
+    );
+    const dateKey = dayDate.toISOString().slice(0, 10);
+    chartData.push([dateKey, dailyClicksMap[dateKey] || 0]);
   }
 
-  // 2. Device Breakdown (grouping historical records with missing device into 'Unknown')
+  // 6. Device Breakdown for Clicks (historical missing = 'Unknown')
   const deviceCounts = {
     mobile: 0,
     desktop: 0,
@@ -63,44 +93,49 @@ export async function getAnalyticsData(pageUri, links = [], rangeParam = '7d') {
     Unknown: 0,
   };
 
-  for (const e of events) {
-    if (!e.device) {
+  for (const c of clickEvents) {
+    if (!c.device) {
       deviceCounts.Unknown++;
-    } else if (deviceCounts[e.device] !== undefined) {
-      deviceCounts[e.device]++;
+    } else if (deviceCounts[c.device] !== undefined) {
+      deviceCounts[c.device]++;
     } else {
       deviceCounts.other++;
     }
   }
 
-  const totalEvents = events.length;
   const deviceBreakdown = Object.entries(deviceCounts)
-    .filter(([, count]) => count > 0 || totalEvents === 0)
+    .filter(([, count]) => count > 0 || totalClicks === 0)
     .map(([device, count]) => ({
       name: device.charAt(0).toUpperCase() + device.slice(1),
       key: device,
       count,
-      percentage: totalEvents > 0 ? Number(((count / totalEvents) * 100).toFixed(1)) : 0,
+      percentage: totalClicks > 0 ? Number(((count / totalClicks) * 100).toFixed(1)) : 0,
     }))
     .sort((a, b) => b.count - a.count);
 
-  // 3. Referrer Breakdown (grouping historical records with missing referrer into 'Unknown')
+  // 7. Referrer Breakdown for Clicks (historical missing = 'Unknown', same-site = 'internal', missing = 'direct')
   const referrerCounts = {};
-  for (const e of events) {
-    const ref = !e.referrer ? 'Unknown' : e.referrer;
+  for (const c of clickEvents) {
+    const ref = !c.referrer ? 'Unknown' : c.referrer;
     referrerCounts[ref] = (referrerCounts[ref] || 0) + 1;
   }
+
+  const referrerLabelMap = {
+    direct: 'Direct / Bookmarks',
+    internal: 'Internal / Same-Site',
+    Unknown: 'Unknown (Historical)',
+  };
 
   const referrerBreakdown = Object.entries(referrerCounts)
     .map(([domain, count]) => ({
       domain,
-      name: domain === 'direct' ? 'Direct / Bookmarks' : domain,
+      name: referrerLabelMap[domain] || domain,
       count,
-      percentage: totalEvents > 0 ? Number(((count / totalEvents) * 100).toFixed(1)) : 0,
+      percentage: totalClicks > 0 ? Number(((count / totalClicks) * 100).toFixed(1)) : 0,
     }))
     .sort((a, b) => b.count - a.count);
 
-  // 4. Deterministic Link Ranking (ANA-03)
+  // 8. Deterministic Link Rankings for Clicks (ANA-03)
   const clickCountByUrl = {};
   for (const c of clickEvents) {
     if (c.url) {
@@ -125,7 +160,7 @@ export async function getAnalyticsData(pageUri, links = [], rangeParam = '7d') {
 
   const totalRankedClicks = mappedLinks.reduce((sum, l) => sum + l.clicks, 0);
 
-  // Deterministic sorting: clicks descending, then originalIndex ascending
+  // Deterministic sorting: clicks descending, tie-breaker: original link index ascending
   mappedLinks.sort((a, b) => {
     if (b.clicks !== a.clicks) {
       return b.clicks - a.clicks;
@@ -139,7 +174,7 @@ export async function getAnalyticsData(pageUri, links = [], rangeParam = '7d') {
     percentage: totalRankedClicks > 0 ? Number(((l.clicks / totalRankedClicks) * 100).toFixed(1)) : 0,
   }));
 
-  // Top summary metrics
+  // 9. Summary KPI Metrics
   const topLink = rankedLinks.find((l) => l.clicks > 0)?.title || (rankedLinks[0]?.title ?? 'None');
   const topReferrer = referrerBreakdown[0]?.name || 'None';
 
