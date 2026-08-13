@@ -21,7 +21,7 @@ async function check(name, fn) {
 console.log('--- Running Refined Phase 4 Themes & QR Sharing Verification ---\n');
 
 // 1. Theme Preset Registry & Visual Design Tokens
-await check('theme-registry: defines 8 curated accessible presets with all required visual tokens', async () => {
+await check('theme-registry: defines 8 curated presets with all required visual tokens', async () => {
   assert.equal(themes.length, 8, 'Must have exactly 8 presets');
 
   const requiredTokens = [
@@ -207,19 +207,36 @@ await check('preset-mode-isolation: preset styling only applies in preset mode; 
   assert.match(presetRes.pageBgClass, /from-black/);
 });
 
-// 7. Site URL Canonicalization
-await check('site-url-canonicalization: getPublicProfileUrl constructs exact canonical public URL server-side', async () => {
-  // Test baseUrl resolution
-  const baseUrl = getBaseUrl();
-  assert.ok(baseUrl, 'Base URL must be non-empty string');
-  assert.ok(!baseUrl.endsWith('/'), 'Base URL must not end with trailing slash');
+// 7. Site URL Canonicalization & Missing Env Guard
+await check('site-url-canonicalization: constructs canonical URL when configured, fails clearly when env is missing', async () => {
+  const origPublic = process.env.NEXT_PUBLIC_URL;
+  const origAuth = process.env.NEXTAUTH_URL;
 
-  // Test profile URL construction
-  assert.equal(getPublicProfileUrl('alice'), `${baseUrl}/alice`);
-  assert.equal(getPublicProfileUrl('/bob/'), `${baseUrl}/bob`);
-  assert.equal(getPublicProfileUrl(''), '');
-  assert.equal(getPublicProfileUrl(null), '');
-  assert.equal(getPublicProfileUrl(undefined), '');
+  try {
+    // A: When configured with valid base URL
+    process.env.NEXT_PUBLIC_URL = 'https://linktree.example.com/';
+    delete process.env.NEXTAUTH_URL;
+
+    const baseUrl = getBaseUrl();
+    assert.equal(baseUrl, 'https://linktree.example.com');
+    assert.equal(getPublicProfileUrl('alice'), 'https://linktree.example.com/alice');
+    assert.equal(getPublicProfileUrl('/bob/'), 'https://linktree.example.com/bob');
+    assert.equal(getPublicProfileUrl(''), '');
+    assert.equal(getPublicProfileUrl(null), '');
+
+    // B: When both env vars are absent/empty (fails clearly instead of silently generating localhost)
+    delete process.env.NEXT_PUBLIC_URL;
+    delete process.env.NEXTAUTH_URL;
+
+    assert.equal(getBaseUrl(), '', 'Base URL returns empty string when env is absent');
+    assert.equal(getPublicProfileUrl('alice'), '', 'Profile URL returns empty string when base URL is unconfigured');
+  } finally {
+    // Restore environment
+    if (origPublic !== undefined) process.env.NEXT_PUBLIC_URL = origPublic;
+    else delete process.env.NEXT_PUBLIC_URL;
+    if (origAuth !== undefined) process.env.NEXTAUTH_URL = origAuth;
+    else delete process.env.NEXTAUTH_URL;
+  }
 });
 
 // 8. Unsaved Profile QR Guard

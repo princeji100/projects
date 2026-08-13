@@ -73,6 +73,10 @@ const QRCodeCard = ({ uri, publicUrl }) => {
   };
 
   if (!isSavedProfile) {
+    const message = !uri
+      ? 'Claim and save your unique username above to generate your verified public QR code.'
+      : 'Canonical site URL is not configured (missing NEXT_PUBLIC_URL). Configure your site URL to generate scannable profile QR codes.';
+
     return (
       <SectionBox>
         <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
@@ -81,9 +85,7 @@ const QRCodeCard = ({ uri, publicUrl }) => {
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-800">Share Profile with QR Code</h2>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Claim and save your unique username above to generate your verified public QR code.
-            </p>
+            <p className="text-sm text-slate-500 mt-0.5">{message}</p>
           </div>
         </div>
       </SectionBox>
