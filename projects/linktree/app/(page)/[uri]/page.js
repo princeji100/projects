@@ -28,6 +28,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
+import { isLinkLive } from '@/lib/linkLifecycle';
 
 const iconMapping = {
   email: faEnvelope,
@@ -146,11 +147,13 @@ const UserPage = async ({ params }) => {
             </div>
           )}
 
-          {/* Links Grid */}
+          {/* Links Grid - Server-authoritative lifecycle filtering (LINK-01..LINK-04) */}
           <div className="grid md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto">
-            {page.links?.map((link, index) => {
-              const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
-              return (
+            {page.links
+              ?.filter((link) => isLinkLive(link))
+              .map((link, index) => {
+                const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
+                return (
                 <Link
                   key={linkKey}
                   href={link.url || '#'}

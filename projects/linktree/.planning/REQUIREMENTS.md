@@ -65,10 +65,10 @@ Phase 1 ships the collections; these are the screens that manage them.
 
 ### Link Management
 
-- [ ] **LINK-01**: Each link can be toggled active or inactive without deleting it
-- [ ] **LINK-02**: Inactive links are hidden from the public page but preserved in the dashboard
-- [ ] **LINK-03**: A link can carry an optional publish window (start and/or end date)
-- [ ] **LINK-04**: The public page respects the publish window when deciding what to render
+- [x] **LINK-01**: Each link can be toggled active or inactive without deleting it
+- [x] **LINK-02**: Inactive links are hidden from the public page but preserved in the dashboard
+- [x] **LINK-03**: A link can carry an optional publish window (start and/or end date)
+- [x] **LINK-04**: The public page respects the publish window when deciding what to render
 
 ### Analytics
 

@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Lock Down Write Paths** - Close the unauthenticated upload endpoint and every other write a stranger can reach
 - [x] **Phase 1.5: Admin & Upload Management** (INSERTED) - Screens to manage the allowlist and the uploads Phase 1 starts tracking (completed 2026-08-13)
 - [x] **Phase 2: Fix the Broken Paths** - Clear the nine confirmed defects in the public page, claim flow, and dashboard (completed 2026-08-14)
-- [ ] **Phase 3: Link Lifecycle Control** - Owners toggle links on/off and schedule them without deleting anything
+- [x] **Phase 3: Link Lifecycle Control** - Owners toggle links on/off and schedule them without deleting anything (completed 2026-08-14)
 - [ ] **Phase 4: Themes & QR Sharing** - One-click theme presets plus a downloadable QR code for the profile
 - [ ] **Phase 5: Analytics Worth Reading** - Referrer, device, 7/30-day trends, and top links
 - [ ] **Phase 6: Portfolio Presentation** - README, screenshots, and `.env.example` for the repo audience
@@ -136,7 +136,8 @@ Notes:
   3. The public page renders only links whose publish window includes the current time
   4. Pages saved before this change render exactly as they did — a link with no active flag and no window is treated as live
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [x] 03-1-PLAN.md — Implement link lifecycle evaluator, active toggle, datetime scheduling, and server-side filtering (completed 2026-08-14)
 **UI hint**: yes
 
 Notes:

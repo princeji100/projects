@@ -4,6 +4,7 @@ import User from "@/models/User"
 import connectToDatabase from "@/lib/connectToDB"
 import { requireSession } from "@/lib/requireSession"
 import * as rateLimit from "@/lib/rateLimit"
+import { validateAndSanitizeLink } from "@/lib/linkLifecycle"
 
 // All three saves share ONE bucket. D-19's 30/min is per user for saving a page, not
 // per form — three separate buckets would let a caller cycle the forms for 90/min.
@@ -86,9 +87,22 @@ const SavePageLinks = async (links) => {
     const gate = await checkSaveGate();
     if (!gate.allowed) return gate.result;
 
+    if (!Array.isArray(links)) {
+        return { success: false, error: 'Links must be an array' };
+    }
+
+    const sanitizedLinks = [];
+    for (const link of links) {
+        const validation = validateAndSanitizeLink(link);
+        if (!validation.ok) {
+            return { success: false, error: validation.error };
+        }
+        sanitizedLinks.push(validation.link);
+    }
+
     try {
         await connectToDatabase();
-        await Page.updateOne({ owner: gate.session.user.email }, { links });
+        await Page.updateOne({ owner: gate.session.user.email }, { links: sanitizedLinks });
         return { success: true };
     } catch (error) {
         console.error('Error saving links:', error);
