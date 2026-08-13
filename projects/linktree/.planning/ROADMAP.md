@@ -90,7 +90,11 @@ Notes:
   4. Deleting an upload removes the S3 object and the `Upload` record, and the freed quota is immediately usable
   5. Deleting an image still referenced by the page warns before it happens
 
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [x] 01.5-1-PLAN.md — Admin allowlist UI, server actions, and session revocation
+- [x] 01.5-2-PLAN.md — Uploads manager, quota progress meter, and safe deletion cascade
 **UI hint**: yes
 
 Notes:
