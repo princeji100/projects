@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 2 complete, ready for Phase 3
-stopped_at: Phase 2 complete
-last_updated: "2026-08-14T01:49:30.000Z"
+status: Ready to discuss / plan
+stopped_at: Phase 3 context gathered
+last_updated: "2026-08-13T20:22:39.740Z"
 last_activity: 2026-08-14 -- Phase 2 completed and verified with 7 behavioral tests
 progress:
   total_phases: 7
@@ -141,9 +141,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T20:09:27.377Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-fix-the-broken-paths/02-CONTEXT.md
+Last session: 2026-08-13T20:22:39.723Z
+Stopped at: Phase 3 context gathered
+Resume file: .planning/phases/03-link-lifecycle-control/03-CONTEXT.md
 
 **Phase 01 closed out 2026-08-14.** 01-05 SUMMARY was held pending the user's manual OAuth
 verification — confirmed when the user hit the "invite-only" refusal in their browser, then
