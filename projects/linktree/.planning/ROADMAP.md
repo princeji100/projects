@@ -20,9 +20,9 @@ the live link.
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Lock Down Write Paths** - Close the unauthenticated upload endpoint and every other write a stranger can reach
+- [x] **Phase 1: Lock Down Write Paths** - Close the unauthenticated upload endpoint and every other write a stranger can reach
 - [x] **Phase 1.5: Admin & Upload Management** (INSERTED) - Screens to manage the allowlist and the uploads Phase 1 starts tracking (completed 2026-08-13)
-- [ ] **Phase 2: Fix the Broken Paths** - Clear the nine confirmed defects in the public page, claim flow, and dashboard
+- [x] **Phase 2: Fix the Broken Paths** - Clear the nine confirmed defects in the public page, claim flow, and dashboard (completed 2026-08-14)
 - [ ] **Phase 3: Link Lifecycle Control** - Owners toggle links on/off and schedule them without deleting anything
 - [ ] **Phase 4: Themes & QR Sharing** - One-click theme presets plus a downloadable QR code for the profile
 - [ ] **Phase 5: Analytics Worth Reading** - Referrer, device, 7/30-day trends, and top links
@@ -115,7 +115,10 @@ Notes:
   4. Social button icons render their intended colors in a production build, not the purged-class default
   5. A full walkthrough of public page, dashboard, and analytics produces no server or console errors — no async-`params` warning, no unstable-key remounts, one MongoDB connection path
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [x] 02-1-PLAN.md — Fix the nine confirmed defects across public page, claim flow, forms, analytics, and actions
 
 Notes:
 
@@ -207,7 +210,7 @@ Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Lock Down Write Paths | 8/8 | Complete | 2026-08-14 |
 | 1.5. Admin & Upload Management | 2/2 | Complete   | 2026-08-13 |
-| 2. Fix the Broken Paths | 0/TBD | Not started | - |
+| 2. Fix the Broken Paths | 1/1 | Complete | 2026-08-14 |
 | 3. Link Lifecycle Control | 0/TBD | Not started | - |
 | 4. Themes & QR Sharing | 0/TBD | Not started | - |
 | 5. Analytics Worth Reading | 0/TBD | Not started | - |

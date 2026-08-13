@@ -16,16 +16,12 @@ const PageLinkForm = ({ page }) => {
     const save = async (e) => {
         e.preventDefault();
         const result = await SavePageLinks(links);
-        // Keyed off `error`, NOT `success`, and that is deliberate. SavePageLinks still
-        // returns { success: false } on its own success path — Phase 2's FIX-01 — so
-        // branching on `success` here would toast an error after every good save.
-        // Genuine refusals always carry an `error`; the FIX-01 path never does.
-        if (result?.error) {
-            toast.error(result.retryAfter
-                ? `${result.error} (${result.retryAfter}s)`
-                : result.error);
-        } else {
+        if (result?.success) {
             toast.success('Links saved successfully');
+        } else {
+            toast.error(result?.retryAfter
+                ? `${result.error} (${result.retryAfter}s)`
+                : result?.error || 'Failed to save links');
         }
     }
 

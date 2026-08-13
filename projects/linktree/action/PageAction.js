@@ -89,11 +89,7 @@ const SavePageLinks = async (links) => {
     try {
         await connectToDatabase();
         await Page.updateOne({ owner: gate.session.user.email }, { links });
-        // FIX-01 (Phase 2): this is the SUCCESS path and it reports failure. This plan
-        // changed only the shape — the falsy truthiness is preserved deliberately so the
-        // semantics are identical to before. No `error` field, which is how the caller
-        // tells this apart from a real refusal; fix the value here, not the caller.
-        return { success: false };
+        return { success: true };
     } catch (error) {
         console.error('Error saving links:', error);
         return { success: false, error: 'Failed to save links' };

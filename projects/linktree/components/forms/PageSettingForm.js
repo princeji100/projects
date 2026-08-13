@@ -1,7 +1,7 @@
 'use client'
 import RadioTogglers from "../formItem/RadioTogglers"
 import { faCloudArrowUp, faImage, faPalette, faSave } from "@fortawesome/free-solid-svg-icons"
-import Image from "next/image";
+import ProfileAvatar from "@/components/media/ProfileAvatar";
 import SubmitButton from "../buttons/SubmitButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SavePageSetting } from "@/action/PageAction";
@@ -11,10 +11,10 @@ import upload from "@/lib/upload";
 import SectionBox from "../layout/SectionBox";
 
 const PageSettingForm = ({ page, user }) => {
-  const [bgType, setBgType] = useState(page.bgType);
-  const [bgColor, setBgColor] = useState(page.bgColor);
-  const [bgImage, setBgImage] = useState(page.bgImage);
-  const [avatar, setAvatar] = useState(user?.image);
+  const [bgType, setBgType] = useState(page?.bgType || 'color');
+  const [bgColor, setBgColor] = useState(page?.bgColor || '#000000');
+  const [bgImage, setBgImage] = useState(page?.bgImage || '');
+  const [avatar, setAvatar] = useState(user?.image || '');
 
   const saveBaseSettings = async (e) => {
     e.preventDefault();
@@ -29,34 +29,33 @@ const PageSettingForm = ({ page, user }) => {
       // D-20: a refusal must never look like a success. `result` is always an object
       // and always truthy, so success is `result.success`, not the object itself.
       if (result?.success) {
-        toast.success('Settings saved successfully', {
-          position: "top-right",
-          autoClose: 3000,
-          theme: "light",
-        });
+        toast.success('Saved successfully');
       } else {
         toast.error(result?.retryAfter
           ? `${result.error} (${result.retryAfter}s)`
           : result?.error || 'Failed to save settings');
       }
-    } catch (error) {
-      toast.error('Failed to save settings');
+    } catch (err) {
+      console.error(err);
+      toast.error('An unexpected error occurred');
     }
   }
 
   const handleImageUpload = async (e, setter) => {
-    // upload() toasts its own specific reason (D-28) and no longer rethrows, so a
-    // catch here would only add a second, vaguer toast on top of the exact one.
     await upload(e, link => setter(link));
   }
+
+  const headerStyle = bgType === 'color' 
+    ? { backgroundColor: bgColor } 
+    : (bgImage ? { backgroundImage: `url(${bgImage})` } : { backgroundColor: '#1e293b' });
 
   return (
     <div className="max-w-4xl mx-auto">
       <SectionBox>
         <form onSubmit={saveBaseSettings} className="space-y-6">
           <div 
-            className="py-4 -m-4 min-h-[300px] flex items-center bg-cover bg-center justify-center rounded-lg transition-all duration-300" 
-            style={bgType === 'color' ? { backgroundColor: bgColor } : { backgroundImage: `url(${bgImage})` }}
+            className="py-4 -m-4 min-h-[300px] flex items-center bg-cover bg-center justify-center rounded-lg transition-all duration-300 bg-slate-800" 
+            style={headerStyle}
           >
             <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg">
               <RadioTogglers
@@ -103,12 +102,10 @@ const PageSettingForm = ({ page, user }) => {
 
           <div className="flex justify-center -mb-16">
             <div className="relative">
-              <div className="bg-white shadow-lg w-32 h-32 rounded-full overflow-hidden">
-                <Image 
-                  className="rounded-full object-cover" 
+              <div className="bg-white shadow-lg w-32 h-32 rounded-full overflow-hidden ring-4 ring-white">
+                <ProfileAvatar 
                   src={avatar} 
-                  width={128} 
-                  height={128} 
+                  size={128} 
                   alt="Profile picture" 
                 />
               </div>

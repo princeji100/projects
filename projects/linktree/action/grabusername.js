@@ -1,10 +1,9 @@
 'use server';
-import mongoose from 'mongoose';
 import Page from '@/models/Page';
+import connectToDatabase from '@/lib/connectToDB';
 import { requireSession } from '@/lib/requireSession';
 import { validateUsername } from '@/lib/username';
 import { checkRateLimit, rateLimitKey } from '@/lib/rateLimit';
-let isConnected = false; // Track the MongoDB connection status
 
 // Every exit returns { success: boolean, error?: string, retryAfter?: number, data?: object }.
 // No path returns undefined — the caller reads result.success (D-24).
@@ -44,11 +43,7 @@ const handleFormSubmit = async (formdata) => {
     }
 
     try {
-        // Phase 2 FIX-09 owns collapsing this into lib/connectToDB.js. Left as-is on purpose.
-        if (!isConnected) {
-            await mongoose.connect(process.env.MONGODB_URI);
-            isConnected = true;
-        }
+        await connectToDatabase();
 
         if (!Page) {
             console.error('Page model is undefined');

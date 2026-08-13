@@ -7,7 +7,6 @@ import Page from '@/models/Page';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { format, addDays, isBefore, isEqual, parseISO } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLink } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
@@ -104,42 +103,47 @@ const AnalyticsPage = async () => {
       <SectionBox>
         <h2 className="text-xl font-semibold text-slate-800 mb-6 text-center">Link Analytics</h2>
         <div className="space-y-4">
-          {page.links.map(link => (
-            <div key={uuidv4()} 
-                 className="flex flex-col md:flex-row items-center gap-4 p-4 border-t border-slate-100 first:border-t-0">
-              <div className="text-blue-500">
-                <FontAwesomeIcon icon={faLink} className="text-lg" />
-              </div>
-              
-              <div className="grow text-center md:text-left">
-                <h3 className="font-medium text-slate-800">{link.title || 'No Title'}</h3>
-                <p className="text-slate-600 text-sm">{link.subtitle || 'No Subtitle'}</p>
-                <Link 
-                  className="text-xs text-blue-500 hover:text-blue-600 transition-colors" 
-                  target="_blank" 
-                  href={link.url}
-                >
-                  {link.url}
-                </Link>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="bg-white px-6 py-3 rounded-lg border border-slate-100 shadow-sm">
-                  <div className="text-3xl font-semibold text-slate-800 mb-1">
-                    {getTodayClicks(link.url)}
-                  </div>
-                  <div className="text-xs font-medium text-slate-500 uppercase">Today</div>
+          {page?.links?.map((link, index) => {
+            const linkKey = link._id?.toString() || link.id || `${link.url}-${index}`;
+            return (
+              <div 
+                key={linkKey} 
+                className="flex flex-col md:flex-row items-center gap-4 p-4 border-t border-slate-100 first:border-t-0"
+              >
+                <div className="text-blue-500">
+                  <FontAwesomeIcon icon={faLink} className="text-lg" />
+                </div>
+                
+                <div className="grow text-center md:text-left">
+                  <h3 className="font-medium text-slate-800">{link.title || 'No Title'}</h3>
+                  <p className="text-slate-600 text-sm">{link.subtitle || 'No Subtitle'}</p>
+                  <Link 
+                    className="text-xs text-blue-500 hover:text-blue-600 transition-colors" 
+                    target="_blank" 
+                    href={link.url || '#'}
+                  >
+                    {link.url}
+                  </Link>
                 </div>
 
-                <div className="bg-white px-6 py-3 rounded-lg border border-slate-100 shadow-sm">
-                  <div className="text-3xl font-semibold text-slate-800 mb-1">
-                    {getAllTimeClicks(link.url)}
+                <div className="flex gap-4">
+                  <div className="bg-white px-6 py-3 rounded-lg border border-slate-100 shadow-sm">
+                    <div className="text-3xl font-semibold text-slate-800 mb-1">
+                      {getTodayClicks(link.url)}
+                    </div>
+                    <div className="text-xs font-medium text-slate-500 uppercase">Today</div>
                   </div>
-                  <div className="text-xs font-medium text-slate-500 uppercase">Total</div>
+
+                  <div className="bg-white px-6 py-3 rounded-lg border border-slate-100 shadow-sm">
+                    <div className="text-3xl font-semibold text-slate-800 mb-1">
+                      {getAllTimeClicks(link.url)}
+                    </div>
+                    <div className="text-xs font-medium text-slate-500 uppercase">Total</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </SectionBox>
     </div>

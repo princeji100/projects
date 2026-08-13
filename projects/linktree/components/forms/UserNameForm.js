@@ -8,24 +8,27 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 const UserNameForm = () => {
-  const [username, setUsername] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [name, setName] = useState(searchParams.get('Choiceusername') || '');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    const formdata = new FormData(event.target);
-    
-    event.target.reset();
+    setErrorMessage('');
+    const formdata = new FormData();
+    formdata.set('username', name);
 
     try {
       const result = await handleFormSubmit(formdata);
-      setUsername(!result.success);
-      if (result) {
-        router.push('/account?created=' + formdata.get('username'));
+      if (result?.success) {
+        router.push('/account?created=' + encodeURIComponent(name.trim().toLowerCase()));
+      } else {
+        setErrorMessage(result?.error || 'Username is not available');
       }
     } catch (err) {
       console.error(err);
+      setErrorMessage('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -45,16 +48,20 @@ const UserNameForm = () => {
                      text-center text-slate-700 font-medium
                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
                      transition-all duration-200 placeholder:text-slate-400"
-            defaultValue={searchParams.get('Choiceusername')}
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (errorMessage) setErrorMessage('');
+            }}
             type="text"
             name="username"
             placeholder="Enter username"
             spellCheck={false}
             autoComplete="off"
           />
-          {username && (
+          {errorMessage && (
             <div className="mt-2">
-              <UserNameFormResult />
+              <UserNameFormResult message={errorMessage} />
             </div>
           )}
         </div>

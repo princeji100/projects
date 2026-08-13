@@ -30,15 +30,15 @@ decision). Public profile pages stay public; only account creation is invite-onl
 
 Confirmed defects, each located in the codebase.
 
-- [ ] **FIX-01**: `SavePageLinks` returns true on success — today it returns false either way, so the caller cannot tell (`action/PageAction.js:63`)
-- [ ] **FIX-02**: A taken username does not redirect to the success page — checks `result.success`, not `result` (`components/forms/UserNameForm.js:24`)
-- [ ] **FIX-03**: An unknown `/username` renders a 404 page instead of crashing with a 500 (`app/(page)/[uri]/page.js`)
-- [ ] **FIX-04**: No view Event is written for a profile that does not exist (`app/(page)/[uri]/page.js:35`)
-- [ ] **FIX-05**: A missing avatar or background image renders a fallback instead of throwing in `next/image` (`app/(page)/[uri]/page.js:66`, `components/forms/PageSettingForm.js:106`)
-- [ ] **FIX-06**: `params` is awaited per the Next 15 async API (`app/(page)/[uri]/page.js:31`)
-- [ ] **FIX-07**: Analytics link rows use stable keys, not a fresh `uuidv4()` per render (`app/(app)/account/analytics/page.js:108`)
-- [ ] **FIX-08**: Social button icons render their intended colors — the dynamic `text-${key}-500` classes are purged at build (`components/forms/PageButtonForm.js:83,128`)
-- [ ] **FIX-09**: One MongoDB connection path — `action/grabusername.js` drops its private `mongoose.connect` in favour of `lib/connectToDB.js`
+- [x] **FIX-01**: `SavePageLinks` returns true on success — today it returns false either way, so the caller cannot tell (`action/PageAction.js:63`)
+- [x] **FIX-02**: A taken username does not redirect to the success page — checks `result.success`, not `result` (`components/forms/UserNameForm.js:24`)
+- [x] **FIX-03**: An unknown `/username` renders a 404 page instead of crashing with a 500 (`app/(page)/[uri]/page.js`)
+- [x] **FIX-04**: No view Event is written for a profile that does not exist (`app/(page)/[uri]/page.js:35`)
+- [x] **FIX-05**: A missing avatar or background image renders a fallback instead of throwing in `next/image` (`app/(page)/[uri]/page.js:66`, `components/forms/PageSettingForm.js:106`)
+- [x] **FIX-06**: `params` is awaited per the Next 15 async API (`app/(page)/[uri]/page.js:31`)
+- [x] **FIX-07**: Analytics link rows use stable keys, not a fresh `uuidv4()` per render (`app/(app)/account/analytics/page.js:108`)
+- [x] **FIX-08**: Social button icons render their intended colors — the dynamic `text-${key}-500` classes are purged at build (`components/forms/PageButtonForm.js:83,128`)
+- [x] **FIX-09**: One MongoDB connection path — `action/grabusername.js` drops its private `mongoose.connect` in favour of `lib/connectToDB.js`
 
 ### Admin & Upload Management
 
@@ -129,19 +129,19 @@ Which phases cover which requirements.
 | SEC-06 | Phase 1 — Lock Down Write Paths | Complete (01-06) |
 | SEC-07 | Phase 1 — Lock Down Write Paths | Complete (01-06) |
 | SEC-08 | Phase 1 — Lock Down Write Paths | Complete |
-| FIX-01 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-02 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-03 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-04 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-05 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-06 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-07 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-08 | Phase 2 — Fix the Broken Paths | Pending |
-| FIX-09 | Phase 2 — Fix the Broken Paths | Pending |
-| ADMIN-01 | Phase 1.5 — Admin & Upload Management | Pending |
-| ADMIN-02 | Phase 1.5 — Admin & Upload Management | Pending |
-| UPLOAD-01 | Phase 1.5 — Admin & Upload Management | Pending |
-| UPLOAD-02 | Phase 1.5 — Admin & Upload Management | Pending |
+| FIX-01 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-02 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-03 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-04 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-05 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-06 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-07 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-08 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| FIX-09 | Phase 2 — Fix the Broken Paths | Complete (02-01) |
+| ADMIN-01 | Phase 1.5 — Admin & Upload Management | Complete (01.5-01) |
+| ADMIN-02 | Phase 1.5 — Admin & Upload Management | Complete (01.5-01) |
+| UPLOAD-01 | Phase 1.5 — Admin & Upload Management | Complete (01.5-02) |
+| UPLOAD-02 | Phase 1.5 — Admin & Upload Management | Complete (01.5-02) |
 | LINK-01 | Phase 3 — Link Lifecycle Control | Pending |
 | LINK-02 | Phase 3 — Link Lifecycle Control | Pending |
 | LINK-03 | Phase 3 — Link Lifecycle Control | Pending |
