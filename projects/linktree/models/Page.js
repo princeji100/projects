@@ -1,4 +1,5 @@
-import { model, models, Schema } from 'mongoose';
+import mongoose from 'mongoose';
+const { model, models, Schema } = mongoose;
 
 // Define the schema for the Page model
 const PageSchema = new Schema({

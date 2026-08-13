@@ -1,4 +1,5 @@
-import { model, models, Schema } from 'mongoose';
+import mongoose from 'mongoose';
+const { model, models, Schema } = mongoose;
 
 // Define the schema for the Upload model.
 // D-12: makes every S3 object trackable and is the source of truth for the 25 MB quota.

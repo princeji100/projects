@@ -113,34 +113,36 @@ export async function deleteUpload(uploadId) {
     await Upload.deleteOne({ _id: uploadId });
 
     // 3. Clear active references in User (avatar)
-    await User.updateOne(
+    await User.updateMany(
       { email: session.user.email, image: uploadUrl },
       { $set: { image: '' } }
     );
 
     // 4. Clear active references in Page (bgImage)
-    await Page.updateOne(
+    await Page.updateMany(
       { owner: session.user.email, bgImage: uploadUrl },
       { $set: { bgImage: '' } }
     );
 
     // 5. Clear active references in Page (links[].icon)
-    const page = await Page.findOne({ owner: session.user.email });
-    if (page && Array.isArray(page.links)) {
-      let hasIconMatches = false;
-      const updatedLinks = page.links.map((link) => {
-        if (link.icon === uploadUrl) {
-          hasIconMatches = true;
-          return { ...link, icon: '' };
-        }
-        return link;
-      });
+    const pages = await Page.find({ owner: session.user.email });
+    for (const p of pages) {
+      if (Array.isArray(p.links)) {
+        let hasIconMatches = false;
+        const updatedLinks = p.links.map((link) => {
+          if (link && link.icon === uploadUrl) {
+            hasIconMatches = true;
+            return { ...link, icon: '' };
+          }
+          return link;
+        });
 
-      if (hasIconMatches) {
-        await Page.updateOne(
-          { owner: session.user.email },
-          { links: updatedLinks }
-        );
+        if (hasIconMatches) {
+          await Page.updateOne(
+            { _id: p._id },
+            { $set: { links: updatedLinks } }
+          );
+        }
       }
     }
 
