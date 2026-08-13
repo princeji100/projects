@@ -117,7 +117,7 @@ bumped 15.2.0 → 15.2.8 for the React Server Components CVE.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| ~~Keep signup open to everyone~~ → **invite-only allowlist** | Reversed 2026-08-09 during Phase 1 discussion. Everything runs on free tiers (Vercel, personal S3, Atlas); per-user quotas bound cost per user but leave the user count unbounded. The architecture stays multi-tenant — only the door is gated, and public pages stay public. | — Pending |
+| ~~Keep signup open to everyone~~ → **invite-only allowlist** | Reversed 2026-08-09 during Phase 1 discussion. Everything runs on free tiers (Vercel, personal S3, Atlas); per-user quotas bound cost per user but leave the user count unbounded. The architecture stays multi-tenant — only the door is gated, and public pages stay public. | Implemented in phase 01 plan 05 — the `signIn` callback refuses any email absent from `AllowedUser`; awaiting the live two-account sign-in verification |
 | Wipe all existing data once at the start of Phase 1 | Live Pages/Users/Events predate every gate and were claimed under no validation rules. A clean slate removes the need for migration and backfill code entirely. Confirmed irreversible by the owner. | — Pending |
 | Security work comes before features | Open signup + unauthenticated upload endpoint is an active liability | — Pending |
 | Keep the single-repo structure (`projects/linktree` inside the monorepo) | Splitting would break the Vercel deployment for zero user benefit | — Pending |
