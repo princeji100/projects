@@ -201,7 +201,7 @@ Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Lock Down Write Paths | 6/8 | In Progress|  |
+| 1. Lock Down Write Paths | 8/8 | Complete | 2026-08-14 |
 | 1.5. Admin & Upload Management | 0/TBD | Not started | - |
 | 2. Fix the Broken Paths | 0/TBD | Not started | - |
 | 3. Link Lifecycle Control | 0/TBD | Not started | - |

@@ -140,9 +140,19 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T15:40:07.944Z
-Stopped at: 01-07 complete and committed (56f6d68). Wave 3 has only 01-05 (checkpoint) left; 01-08 is unstarted.
+Last session: 2026-08-14T00:58:00+05:30
+Stopped at: Phase 01 complete. All 8 plans have SUMMARYs, all commits pushed to GitHub. Next up: Phase 1.5 (Admin & Upload Management) or Phase 2 (Fix the Broken Paths).
 Resume file: None
+
+**Phase 01 closed out 2026-08-14.** 01-05 SUMMARY was held pending the user's manual OAuth
+verification — confirmed when the user hit the "invite-only" refusal in their browser, then
+seeded their email and signed in successfully. 01-08 was completed by resuming from the
+Claude Code token-limit interruption; Tasks 1 and 2 code was already written, Task 2 files
+were uncommitted. All acceptance criteria passed, build clean, `verify-phase1.js` reports
+0 failures.
+
+The DB was wiped (`scripts/wipe.js --yes-destroy-everything`) to satisfy SEC-12 and clear
+the 24.5 MB of test junk from the quota. The owner's email was re-seeded afterwards.
 
 **Two plans in a row were lost to a mid-plan session end, and `git status` was not enough
 to recover the second one.** 01-03 was found written-but-uncommitted. 01-04 was worse: Task
