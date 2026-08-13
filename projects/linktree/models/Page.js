@@ -1,6 +1,16 @@
 import mongoose from 'mongoose';
 const { model, models, Schema } = mongoose;
 
+const LinkSchema = new Schema({
+    title: { type: String, default: '' },
+    subtitle: { type: String, default: '' },
+    icon: { type: String, default: '' },
+    url: { type: String, default: '' },
+    active: { type: Boolean, default: true },
+    startsAt: { type: Date, default: null },
+    endsAt: { type: Date, default: null },
+}, { _id: true });
+
 // Define the schema for the Page model
 const PageSchema = new Schema({
     uri: { type: String, required: true, min: 1, unique: true },
@@ -15,7 +25,7 @@ const PageSchema = new Schema({
     bgColor:{type: String, default:'#000'},
     bgImage:{type: String, default:''},
     buttons:{type:Object,default:{}},
-    links:{type:Object,default:[]},
+    links:{type: [LinkSchema], default:[]},
 }, {
     timestamps: true,
 });

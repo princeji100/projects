@@ -88,36 +88,32 @@ const UserPage = async ({ params }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-950 to-indigo-900 text-white pb-12">
-      {/* Header Section */}
+    <div className="bg-blue-950 text-white min-h-screen">
       <div
-        className="h-56 bg-cover bg-center transition-all duration-300 relative before:absolute before:inset-0 before:bg-black/20 bg-slate-900"
+        className="h-80 bg-slate-900 bg-cover bg-center transition-all duration-300 relative shadow-inner"
         style={headerStyle}
-      />
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-blue-950/90" />
+      </div>
 
-      {/* Profile Section */}
-      <div className="max-w-4xl mx-auto px-4 -mt-28 relative z-10">
-        <div className="flex flex-col items-center">
-          {/* Profile Image with Fallback (FIX-05) */}
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-1 rounded-full shadow-2xl shadow-black/30">
-            <div className="w-44 h-44 rounded-full overflow-hidden ring-4 ring-white/10 bg-slate-800">
-              <ProfileAvatar
-                src={user?.image}
-                alt={page.displayName || 'Profile picture'}
-                size={176}
-                priority
-              />
-            </div>
+      <div className="max-w-4xl mx-auto px-6 -mt-32 relative z-10 pb-16">
+        <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center -mt-20 sm:-mt-24 mb-6">
+            <ProfileAvatar
+              src={user?.image}
+              name={page.displayName || user?.name || uri}
+              size={128}
+            />
           </div>
 
-          {/* Profile Info */}
-          <h2 className="text-4xl font-bold text-center mt-6 mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-            {page.displayName || page.uri}
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-1 text-white tracking-tight">
+            {page.displayName || uri}
           </h2>
 
           {page.location && (
-            <h3 className="text-lg flex gap-2 justify-center items-center text-blue-200/80 mb-4">
-              <FontAwesomeIcon className="h-4" icon={faMapMarkerAlt} />
+            <h3 className="text-sm sm:text-base text-blue-200/80 flex items-center justify-center gap-2 mb-4 font-medium">
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="text-blue-400" />
               <span>{page.location}</span>
             </h3>
           )}
@@ -149,11 +145,9 @@ const UserPage = async ({ params }) => {
 
           {/* Links Grid - Server-authoritative lifecycle filtering (LINK-01..LINK-04) */}
           <div className="grid md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto">
-            {page.links
-              ?.filter((link) => isLinkLive(link))
-              .map((link, index) => {
-                const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
-                return (
+            {liveLinks.map((link, index) => {
+              const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
+              return (
                 <Link
                   key={linkKey}
                   href={link.url || '#'}

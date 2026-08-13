@@ -102,3 +102,35 @@ export function validateAndSanitizeLink(link) {
 
   return { ok: true, link: sanitized };
 }
+
+/**
+ * Formats a Date object or ISO timestamp string into a local 'YYYY-MM-DDTHH:mm' input value.
+ *
+ * @param {Date | string | null | undefined} dateVal
+ * @returns {string}
+ */
+export function toLocalDatetimeInput(dateVal) {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const mins = pad(d.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${mins}`;
+}
+
+/**
+ * Converts a local 'YYYY-MM-DDTHH:mm' input string to a UTC Date object.
+ * Empty or whitespace strings return null (indicating no schedule constraint).
+ *
+ * @param {string | null | undefined} val
+ * @returns {Date | null}
+ */
+export function fromLocalDatetimeInput(val) {
+  if (!val || typeof val !== 'string' || !val.trim()) return null;
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? null : d;
+}

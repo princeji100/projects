@@ -15,36 +15,30 @@ import {
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons';
 import SubmitButton from '../buttons/SubmitButton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import upload from '@/lib/upload';
 import Image from 'next/image';
 import { SavePageLinks } from '@/action/PageAction';
 import { toast } from 'react-toastify';
-import { getLinkLifecycleStatus } from '@/lib/linkLifecycle';
-
-function toLocalDatetimeInput(dateVal) {
-  if (!dateVal) return '';
-  const d = new Date(dateVal);
-  if (isNaN(d.getTime())) return '';
-  const pad = (n) => String(n).padStart(2, '0');
-  const year = d.getFullYear();
-  const month = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  const hours = pad(d.getHours());
-  const mins = pad(d.getMinutes());
-  return `${year}-${month}-${day}T${hours}:${mins}`;
-}
-
-function fromLocalDatetimeInput(val) {
-  if (!val) return null;
-  const d = new Date(val);
-  return isNaN(d.getTime()) ? null : d.toISOString();
-}
+import {
+  getLinkLifecycleStatus,
+  toLocalDatetimeInput,
+  fromLocalDatetimeInput,
+} from '@/lib/linkLifecycle';
 
 const PageLinkForm = ({ page }) => {
   const [links, setLinks] = useState(page?.links || []);
   const [openScheduleIndex, setOpenScheduleIndex] = useState(null);
+  const [clientNow, setClientNow] = useState(() => new Date());
+
+  // Lightweight client timer to keep live status badges visually fresh without page refresh
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setClientNow(new Date());
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
 
   const save = async (e) => {
     e.preventDefault();
@@ -110,7 +104,7 @@ const PageLinkForm = ({ page }) => {
   };
 
   const renderBadge = (link) => {
-    const status = getLinkLifecycleStatus(link);
+    const status = getLinkLifecycleStatus(link, clientNow);
 
     switch (status) {
       case 'live':
