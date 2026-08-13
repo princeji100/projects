@@ -1,17 +1,27 @@
-'use client'
-import RadioTogglers from "../formItem/RadioTogglers"
-import { faCloudArrowUp, faImage, faPalette, faSave } from "@fortawesome/free-solid-svg-icons"
-import ProfileAvatar from "@/components/media/ProfileAvatar";
-import SubmitButton from "../buttons/SubmitButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SavePageSetting } from "@/action/PageAction";
-import { toast } from "react-toastify";
-import { useState } from "react";
-import upload from "@/lib/upload";
-import SectionBox from "../layout/SectionBox";
+'use client';
+
+import RadioTogglers from '../formItem/RadioTogglers';
+import {
+  faCloudArrowUp,
+  faImage,
+  faPalette,
+  faSave,
+  faPaintBrush,
+  faCheck,
+} from '@fortawesome/free-solid-svg-icons';
+import ProfileAvatar from '@/components/media/ProfileAvatar';
+import SubmitButton from '../buttons/SubmitButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { SavePageSetting } from '@/action/PageAction';
+import { toast } from 'react-toastify';
+import { useState } from 'react';
+import upload from '@/lib/upload';
+import SectionBox from '../layout/SectionBox';
+import { themes, getTheme } from '@/lib/themes';
 
 const PageSettingForm = ({ page, user }) => {
   const [bgType, setBgType] = useState(page?.bgType || 'color');
+  const [theme, setTheme] = useState(page?.theme || 'default');
   const [bgColor, setBgColor] = useState(page?.bgColor || '#000000');
   const [bgImage, setBgImage] = useState(page?.bgImage || '');
   const [avatar, setAvatar] = useState(user?.image || '');
@@ -20,99 +30,162 @@ const PageSettingForm = ({ page, user }) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     formData.append('bgType', bgType);
+    formData.append('theme', theme);
     formData.append('bgColor', bgColor);
     formData.append('bgImage', bgImage);
     formData.append('avatar', avatar);
-    
+
     try {
       const result = await SavePageSetting(formData);
-      // D-20: a refusal must never look like a success. `result` is always an object
-      // and always truthy, so success is `result.success`, not the object itself.
       if (result?.success) {
         toast.success('Saved successfully');
       } else {
-        toast.error(result?.retryAfter
-          ? `${result.error} (${result.retryAfter}s)`
-          : result?.error || 'Failed to save settings');
+        toast.error(
+          result?.retryAfter
+            ? `${result.error} (${result.retryAfter}s)`
+            : result?.error || 'Failed to save settings'
+        );
       }
     } catch (err) {
       console.error(err);
       toast.error('An unexpected error occurred');
     }
-  }
+  };
 
   const handleImageUpload = async (e, setter) => {
-    await upload(e, link => setter(link));
-  }
+    await upload(e, (link) => setter(link));
+  };
 
-  const headerStyle = bgType === 'color' 
-    ? { backgroundColor: bgColor } 
-    : (bgImage ? { backgroundImage: `url(${bgImage})` } : { backgroundColor: '#1e293b' });
+  const currentPreset = getTheme(theme);
+
+  // Live preview header styling
+  let headerStyle = {};
+  if (bgType === 'preset') {
+    headerStyle = { backgroundColor: currentPreset.headerBg };
+  } else if (bgType === 'color') {
+    headerStyle = { backgroundColor: bgColor };
+  } else if (bgType === 'image' && bgImage) {
+    headerStyle = { backgroundImage: `url(${bgImage})` };
+  } else {
+    headerStyle = { backgroundColor: '#1e293b' };
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
       <SectionBox>
         <form onSubmit={saveBaseSettings} className="space-y-6">
-          <div 
-            className="py-4 -m-4 min-h-[300px] flex items-center bg-cover bg-center justify-center rounded-lg transition-all duration-300 bg-slate-800" 
+          {/* Header Preview Box */}
+          <div
+            className="py-4 -m-4 min-h-[300px] flex items-center bg-cover bg-center justify-center rounded-lg transition-all duration-300 relative overflow-hidden"
             style={headerStyle}
           >
-            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg">
+            {bgType === 'preset' && (
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none" />
+            )}
+
+            <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-xl z-10 max-w-lg w-full mx-4 border border-white/40">
               <RadioTogglers
                 defaultValue={bgType}
                 options={[
+                  { value: 'preset', icon: faPaintBrush, label: 'Preset' },
                   { value: 'color', icon: faPalette, label: 'Color' },
-                  { value: 'image', icon: faImage, label: 'Image' }
+                  { value: 'image', icon: faImage, label: 'Image' },
                 ]}
                 onChange={setBgType}
               />
-              
-              {bgType === 'color' && (
-                <div className="mt-4 bg-white rounded-lg shadow-sm p-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-slate-700 font-medium">Background:</span>
-                    <input
-                      type="color"
-                      className="w-12 h-8 rounded cursor-pointer"
-                      onChange={e => setBgColor(e.target.value)}
-                      value={bgColor}
-                      name="bgColor"
-                    />
+
+              {/* Preset Theme Selection Grid */}
+              {bgType === 'preset' && (
+                <div className="mt-4">
+                  <span className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                    Choose Theme Preset:
+                  </span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {themes.map((t) => {
+                      const isSelected = theme === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setTheme(t.id)}
+                          className={`group relative p-2.5 rounded-lg border text-left transition-all duration-200 flex flex-col items-center gap-1.5 ${
+                            isSelected
+                              ? 'border-blue-600 ring-2 ring-blue-500/30 bg-blue-50/50 shadow-sm'
+                              : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50'
+                          }`}
+                        >
+                          <div
+                            className={`w-full h-8 rounded-md bg-gradient-to-r ${t.previewGradient} flex items-center justify-center border border-black/10 shadow-inner`}
+                          >
+                            {isSelected && (
+                              <FontAwesomeIcon
+                                icon={faCheck}
+                                className="text-white drop-shadow text-xs"
+                              />
+                            )}
+                          </div>
+                          <span
+                            className={`text-xs font-medium text-center truncate w-full ${
+                              isSelected ? 'text-blue-700 font-semibold' : 'text-slate-700'
+                            }`}
+                          >
+                            {t.name}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
+              {/* Custom Color Selector */}
+              {bgType === 'color' && (
+                <div className="mt-4 bg-slate-50 rounded-lg border border-slate-200 p-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-700 text-sm font-medium">Custom Color:</span>
+                    <input
+                      type="color"
+                      className="w-12 h-8 rounded cursor-pointer border border-slate-300"
+                      onChange={(e) => setBgColor(e.target.value)}
+                      value={bgColor}
+                      name="bgColor"
+                    />
+                    <span className="text-xs text-slate-500 font-mono">{bgColor}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Custom Image Upload */}
               {bgType === 'image' && (
                 <div className="mt-4">
-                  <label className="bg-white hover:bg-slate-50 transition-colors cursor-pointer flex gap-2 items-center shadow-sm px-4 py-2 rounded-lg" >
+                  <label className="bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-sm px-4 py-2.5 rounded-lg">
                     <input type="hidden" name="bgImage" defaultValue={bgImage} />
-                    <input 
-                      type="file" 
-                      onChange={e => handleImageUpload(e, setBgImage)}
+                    <input
+                      type="file"
+                      onChange={(e) => handleImageUpload(e, setBgImage)}
                       className="hidden"
                       accept="image/jpeg,image/png,image/webp"
                     />
                     <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
-                    <span className="text-slate-700">Change Image</span>
+                    <span className="text-slate-700 text-sm font-medium">
+                      {bgImage ? 'Change Image' : 'Upload Image'}
+                    </span>
                   </label>
                 </div>
               )}
             </div>
           </div>
 
+          {/* Profile Avatar */}
           <div className="flex justify-center -mb-16">
             <div className="relative">
               <div className="bg-white shadow-lg w-32 h-32 rounded-full overflow-hidden ring-4 ring-white">
-                <ProfileAvatar 
-                  src={avatar} 
-                  size={128} 
-                  alt="Profile picture" 
-                />
+                <ProfileAvatar src={avatar} size={128} alt="Profile picture" />
               </div>
               <label className="absolute bottom-0 right-0 bg-white hover:bg-slate-50 transition-colors p-2 rounded-full shadow-md cursor-pointer">
                 <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
-                <input 
-                  onChange={e => handleImageUpload(e, setAvatar)}
+                <input
+                  onChange={(e) => handleImageUpload(e, setAvatar)}
                   type="file"
                   className="hidden"
                   accept="image/jpeg,image/png,image/webp"
@@ -122,45 +195,58 @@ const PageSettingForm = ({ page, user }) => {
             </div>
           </div>
 
+          {/* User Info Inputs */}
           <div className="space-y-4 pt-8">
             <div>
-              <label htmlFor="nameIn" className="block text-sm font-medium text-slate-700 mb-1">Display Name</label>
-              <input 
-                type="text" 
-                id="nameIn" 
-                name="displayName" 
+              <label
+                htmlFor="nameIn"
+                className="block text-sm font-medium text-slate-700 mb-1"
+              >
+                Display Name
+              </label>
+              <input
+                type="text"
+                id="nameIn"
+                name="displayName"
                 spellCheck={false}
-                data-ms-editor="true"
-                defaultValue={page.displayName} 
+                defaultValue={page.displayName}
                 className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="John Doe" 
+                placeholder="John Doe"
               />
             </div>
 
             <div>
-              <label htmlFor="locationIn" className="block text-sm font-medium text-slate-700 mb-1">Location</label>
-              <input 
-                type="text" 
-                id="locationIn" 
-                name="location" 
-                defaultValue={page.location} 
+              <label
+                htmlFor="locationIn"
+                className="block text-sm font-medium text-slate-700 mb-1"
+              >
+                Location
+              </label>
+              <input
+                type="text"
+                id="locationIn"
+                name="location"
+                defaultValue={page.location}
                 spellCheck={false}
-                data-ms-editor="true"
                 className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="New York, USA" 
+                placeholder="New York, USA"
               />
             </div>
 
             <div>
-              <label htmlFor="bioIn" className="block text-sm font-medium text-slate-700 mb-1">Bio</label>
-              <textarea 
-                id="bioIn" 
+              <label
+                htmlFor="bioIn"
+                className="block text-sm font-medium text-slate-700 mb-1"
+              >
+                Bio
+              </label>
+              <textarea
+                id="bioIn"
                 name="bio"
                 spellCheck={false}
-                data-ms-editor="true" 
-                defaultValue={page.bio} 
+                defaultValue={page.bio}
                 className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[100px]"
-                placeholder="Tell us about yourself..." 
+                placeholder="Tell us about yourself..."
               />
             </div>
 
@@ -174,7 +260,7 @@ const PageSettingForm = ({ page, user }) => {
         </form>
       </SectionBox>
     </div>
-  )
-}
+  );
+};
 
-export default PageSettingForm
+export default PageSettingForm;

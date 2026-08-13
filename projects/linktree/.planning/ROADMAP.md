@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1.5: Admin & Upload Management** (INSERTED) - Screens to manage the allowlist and the uploads Phase 1 starts tracking (completed 2026-08-13)
 - [x] **Phase 2: Fix the Broken Paths** - Clear the nine confirmed defects in the public page, claim flow, and dashboard (completed 2026-08-14)
 - [x] **Phase 3: Link Lifecycle Control** - Owners toggle links on/off and schedule them without deleting anything (completed 2026-08-14)
-- [ ] **Phase 4: Themes & QR Sharing** - One-click theme presets plus a downloadable QR code for the profile
+- [x] **Phase 4: Themes & QR Sharing** - One-click theme presets plus a downloadable QR code for the profile (completed 2026-08-14)
 - [ ] **Phase 5: Analytics Worth Reading** - Referrer, device, 7/30-day trends, and top links
 - [ ] **Phase 6: Portfolio Presentation** - README, screenshots, and `.env.example` for the repo audience
 
@@ -157,7 +157,8 @@ Notes:
   4. Owner sees a QR code in the dashboard that scans to their own public page URL
   5. Owner can download that QR code as an image file
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [x] 04-1-PLAN.md — Implement theme presets, live preview, custom background preservation, and QR code card (completed 2026-08-14)
 **UI hint**: yes
 
 Notes:

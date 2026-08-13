@@ -24,6 +24,7 @@ const PageSchema = new Schema({
     bgType: {type: String, default:'color'},
     bgColor:{type: String, default:'#000'},
     bgImage:{type: String, default:''},
+    theme: {type: String, default: 'default'},
     buttons:{type:Object,default:{}},
     links:{type: [LinkSchema], default:[]},
 }, {

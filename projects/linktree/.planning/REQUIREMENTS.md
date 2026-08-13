@@ -44,24 +44,24 @@ Confirmed defects, each located in the codebase.
 
 Phase 1 ships the collections; these are the screens that manage them.
 
-- [ ] **ADMIN-01**: An admin-only page (gated on `ADMIN_EMAIL`) lists allowlisted emails and can
+- [x] **ADMIN-01**: An admin-only page (gated on `ADMIN_EMAIL`) lists allowlisted emails and can
   add or remove them
-- [ ] **ADMIN-02**: A non-admin who reaches the admin page is refused, not shown the controls
-- [ ] **UPLOAD-01**: The dashboard lists the owner's uploads with a thumbnail, size, and total
+- [x] **ADMIN-02**: A non-admin who reaches the admin page is refused, not shown the controls
+- [x] **UPLOAD-01**: The dashboard lists the owner's uploads with a thumbnail, size, and total
   against the 25 MB quota
-- [ ] **UPLOAD-02**: Deleting an upload removes both the S3 object and the `Upload` record, freeing
+- [x] **UPLOAD-02**: Deleting an upload removes both the S3 object and the `Upload` record, freeing
   quota, and warns when the image is still in use on the page
 
 ### QR Code
 
-- [ ] **QR-01**: The dashboard displays a QR code that resolves to the owner's public page
-- [ ] **QR-02**: The QR code can be downloaded as an image file
+- [x] **QR-01**: The dashboard displays a QR code that resolves to the owner's public page
+- [x] **QR-02**: The QR code can be downloaded as an image file
 
 ### Themes
 
-- [ ] **THEME-01**: A set of preset themes is offered in the page settings form
-- [ ] **THEME-02**: Selecting a preset applies it in one action, with a live preview before saving
-- [ ] **THEME-03**: Custom color and custom background image keep working alongside presets
+- [x] **THEME-01**: A set of preset themes is offered in the page settings form
+- [x] **THEME-02**: Selecting a preset applies it in one action, with a live preview before saving
+- [x] **THEME-03**: Custom color and custom background image keep working alongside presets
 
 ### Link Management
 

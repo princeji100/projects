@@ -326,7 +326,10 @@ async function runIntegration() {
       const pagesToClean = await Page.find({ owner: inUseEmail });
       for (const p of pagesToClean) {
         if (Array.isArray(p.links)) {
-          const updatedLinks = p.links.map((l) => (l && l.icon === inUseUploadUrl ? { ...l, icon: '' } : l));
+          const updatedLinks = p.links.map((l) => {
+            const lObj = typeof l.toObject === 'function' ? l.toObject() : l;
+            return (lObj && lObj.icon === inUseUploadUrl ? { ...lObj, icon: '' } : lObj);
+          });
           await Page.updateOne({ _id: p._id }, { $set: { links: updatedLinks } });
         }
       }

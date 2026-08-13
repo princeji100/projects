@@ -43,12 +43,18 @@ const SavePageSetting = async (formData) => {
 
     try {
         await connectToDatabase();
-        const dataKey = ['displayName', 'location', 'bio', 'bgType', 'bgColor', 'bgImage'];
+        const dataKey = ['displayName', 'location', 'bio', 'bgType', 'bgColor', 'bgImage', 'theme'];
         const dataToUpdate = {};
         for (const key of dataKey) {
             if (formData.has(key)) {
                 dataToUpdate[key] = formData.get(key);
             }
+        }
+        if (dataToUpdate.bgType && !['color', 'image', 'preset'].includes(dataToUpdate.bgType)) {
+            dataToUpdate.bgType = 'color';
+        }
+        if (!dataToUpdate.theme) {
+            dataToUpdate.theme = 'default';
         }
         await Page.updateOne({ owner: gate.session.user.email }, dataToUpdate);
         if (formData.has('avatar')) {

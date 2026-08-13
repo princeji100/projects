@@ -130,11 +130,12 @@ export async function deleteUpload(uploadId) {
       if (Array.isArray(p.links)) {
         let hasIconMatches = false;
         const updatedLinks = p.links.map((link) => {
-          if (link && link.icon === uploadUrl) {
+          const linkObj = typeof link.toObject === 'function' ? link.toObject() : link;
+          if (linkObj && linkObj.icon === uploadUrl) {
             hasIconMatches = true;
-            return { ...link, icon: '' };
+            return { ...linkObj, icon: '' };
           }
-          return link;
+          return linkObj;
         });
 
         if (hasIconMatches) {

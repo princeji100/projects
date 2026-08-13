@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import UserNameForm from '@/components/forms/UserNameForm'
 import { useRouter } from "next/navigation";
 import PageSettingForm from "@/components/forms/PageSettingForm";
+import QRCodeCard from "@/components/sections/QRCodeCard";
 import PageButtonForm from "@/components/forms/PageButtonForm";
 import PageLinkForm from "@/components/forms/PageLinkForm";
 import { useSession } from 'next-auth/react'
@@ -64,6 +65,7 @@ const AccountPage = () => {
 
             <div className="space-y-6">
                 <PageSettingForm page={pageData} user={session.user} />
+                <QRCodeCard page={pageData} />
                 <PageButtonForm page={pageData} />
                 <PageLinkForm page={pageData} user={session.user} />
             </div>

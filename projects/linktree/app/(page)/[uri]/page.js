@@ -29,14 +29,13 @@ import Link from 'next/link';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
 import { isLinkLive } from '@/lib/linkLifecycle';
+import { getTheme } from '@/lib/themes';
 
 const iconMapping = {
   email: faEnvelope,
   mobile: faPhone,
   instagram: faInstagram,
-  twitter: faTwitter,
   facebook: faFacebook,
-  linkedin: faLinkedin,
   discord: faDiscord,
   youtube: faYoutube,
   whatsapp: faWhatsapp,
@@ -47,6 +46,8 @@ const iconMapping = {
   reddit: faReddit,
   website: faGlobe,
   github: faGithub,
+  twitter: faTwitter,
+  linkedin: faLinkedin,
 };
 
 const UserPage = async ({ params }) => {
@@ -79,25 +80,44 @@ const UserPage = async ({ params }) => {
     }
   };
 
-  // FIX-05: Background styling with graceful fallback
+  // Phase 4: Theme resolution
+  const currentTheme = getTheme(page.theme);
+  const isPreset = page.bgType === 'preset';
+
   let headerStyle = {};
-  if (page.bgType === 'color') {
+  let pageBgClass = currentTheme.pageBg;
+  let headerOverlayClass = currentTheme.headerOverlay;
+
+  if (isPreset) {
+    headerStyle = { backgroundColor: currentTheme.headerBg };
+  } else if (page.bgType === 'color') {
+    pageBgClass = 'bg-slate-950';
     headerStyle = { backgroundColor: page.bgColor || '#000' };
+    headerOverlayClass = 'bg-gradient-to-b from-black/20 via-transparent to-slate-950/90';
   } else if (page.bgType === 'image' && page.bgImage) {
+    pageBgClass = 'bg-slate-950';
     headerStyle = { backgroundImage: `url(${page.bgImage})` };
+    headerOverlayClass = 'bg-gradient-to-b from-black/20 via-transparent to-slate-950/90';
+  } else {
+    headerStyle = { backgroundColor: currentTheme.headerBg };
   }
 
+  // Phase 3: Single now capture per render pass
+  const renderNow = new Date();
+  const liveLinks = (page.links || []).filter((link) => isLinkLive(link, renderNow));
+
   return (
-    <div className="bg-blue-950 text-white min-h-screen">
+    <div className={`min-h-screen ${pageBgClass} ${currentTheme.textColor} transition-colors duration-300`}>
+      {/* Header Banner */}
       <div
         className="h-80 bg-slate-900 bg-cover bg-center transition-all duration-300 relative shadow-inner"
         style={headerStyle}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-blue-950/90" />
+        <div className={`absolute inset-0 ${headerOverlayClass}`} />
       </div>
 
       <div className="max-w-4xl mx-auto px-6 -mt-32 relative z-10 pb-16">
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
           {/* Avatar Section */}
           <div className="flex flex-col items-center -mt-20 sm:-mt-24 mb-6">
             <ProfileAvatar
@@ -107,20 +127,22 @@ const UserPage = async ({ params }) => {
             />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-1 text-white tracking-tight">
+          <h2 className={`text-2xl sm:text-3xl font-bold text-center mb-1 ${currentTheme.headingColor} tracking-tight`}>
             {page.displayName || uri}
           </h2>
 
           {page.location && (
-            <h3 className="text-sm sm:text-base text-blue-200/80 flex items-center justify-center gap-2 mb-4 font-medium">
-              <FontAwesomeIcon icon={faMapMarkerAlt} className="text-blue-400" />
+            <h3 className={`text-sm sm:text-base ${currentTheme.mutedTextColor} flex items-center justify-center gap-2 mb-4 font-medium`}>
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="opacity-80" />
               <span>{page.location}</span>
             </h3>
           )}
 
           {page.bio && (
             <div className="max-w-md mx-auto text-center mb-10">
-              <p className="text-blue-100/90 leading-relaxed">{page.bio}</p>
+              <p className={`${currentTheme.mutedTextColor} leading-relaxed text-sm sm:text-base`}>
+                {page.bio}
+              </p>
             </div>
           )}
 
@@ -131,8 +153,8 @@ const UserPage = async ({ params }) => {
                 <Link
                   key={buttonKey}
                   href={buttonLink(buttonKey, page.buttons[buttonKey])}
-                  className="rounded-full p-4 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm 
-                           shadow-lg hover:shadow-xl transition-all duration-300 w-14 h-14 hover:-translate-y-1"
+                  className={`rounded-full p-4 flex items-center justify-center ${currentTheme.buttonStyle} backdrop-blur-sm 
+                           shadow-lg hover:shadow-xl transition-all duration-300 w-14 h-14 hover:-translate-y-1`}
                 >
                   <FontAwesomeIcon
                     className="h-6 w-6"
@@ -153,11 +175,11 @@ const UserPage = async ({ params }) => {
                   href={link.url || '#'}
                   target="_blank"
                   ping={`${process.env.NEXT_PUBLIC_URL || ''}api/click?url=${btoa(link.url || '')}&page=${page.uri}`}
-                  className="group relative bg-white/10 hover:bg-white/20 rounded-xl flex items-center p-5 gap-5 
-                           transition-all duration-300 backdrop-blur-sm hover:-translate-y-1 hover:shadow-xl"
+                  className={`group relative ${currentTheme.cardBg} ${currentTheme.cardBorder} rounded-xl flex items-center p-5 gap-5 
+                           transition-all duration-300 backdrop-blur-sm hover:-translate-y-1 hover:shadow-xl`}
                 >
-                  <div className="bg-gradient-to-br from-blue-500/50 to-indigo-600/50 w-16 h-16 rounded-full 
-                                flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/10">
+                  <div className={`${currentTheme.iconBg} w-16 h-16 rounded-full 
+                                flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/10`}>
                     <LinkIcon
                       src={link.icon}
                       title={link.title || 'Untitled Link'}
@@ -165,11 +187,11 @@ const UserPage = async ({ params }) => {
                     />
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <h3 className="font-semibold text-lg truncate text-white">
+                    <h3 className={`font-semibold text-lg truncate ${currentTheme.headingColor}`}>
                       {link.title || 'Untitled Link'}
                     </h3>
                     {link.subtitle && (
-                      <p className="text-blue-200/70 text-sm truncate">
+                      <p className={`${currentTheme.subtitleColor} text-sm truncate`}>
                         {link.subtitle}
                       </p>
                     )}
