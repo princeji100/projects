@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: 01-04 complete; Wave 3 has 01-05, 01-06, 01-07 left
-last_updated: "2026-08-13"
-last_activity: 2026-08-13 -- 01-04 completed and committed (ce00a1c)
+stopped_at: 01-06 complete and committed (dd72b38). Wave 3 has 01-05 (checkpoint) and 01-07 left.
+last_updated: "2026-08-13T15:30:31.193Z"
+last_activity: 2026-08-13
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 8
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-08-08)
 ## Current Position
 
 Phase: 01 (lock-down-write-paths) — EXECUTING
-Plan: 4 of 8 complete
-Status: Wave 3 in progress — 01-05, 01-06, 01-07 remain, then 01-08 (Wave 4)
-Last activity: 2026-08-13 -- 01-04 completed and committed (ce00a1c)
+Plan: 5 of 8 complete (01-01 deferred, 01-05 at a checkpoint, 01-07 not started)
+Status: Executing Phase 01
+Last activity: 2026-08-13
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [█████░░░░░] 50%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P06 | 18m | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,8 @@ Recent decisions affecting current work:
 - [Init]: Signup stays open to everyone; this is a real multi-tenant product, not a personal page
 - [Init]: Stay on JavaScript and the existing Next/mongoose/NextAuth stack — no migrations
 - [Roadmap]: Documentation phase sits last because screenshots need the finished UI
+- [01-06]: claim rate limit runs AFTER validation — a malformed name gets its real reason rather than burning one of five hourly slots; enumeration requires well-formed names
+- [01-06]: handleFormSubmit returns { success, error?, retryAfter?, data? } on every path — retryAfter only on rate-limit refusal. Phase 2 FIX-02 reads this contract
 
 ### Pending Todos
 
@@ -80,6 +83,7 @@ Resolved 2026-08-13:
   canonical — it is what the code reads. Wave 1 notes saying `S3_SECRET_ACCESS_KEY` are wrong;
   fix the notes, not the code. `ListObjectsV2` returned 55 keys on 08-13, so the credentials
   are no longer merely present.
+
 - ~~Add `s3:ListBucket` + `s3:DeleteObject` to the IAM policy~~ — **already present.** Both
   probed successfully on 08-13. RESEARCH.md unresolved item 2 predicted AccessDenied on the
   wipe; that prediction was wrong. No policy edit needed.
@@ -91,6 +95,7 @@ Still outstanding (user-run):
   browser); an agent cannot get one. `npm run dev`, sign in, copy the token, then
   `VERIFY_SESSION_COOKIE=<token> node scripts/verify-phase1.js --sec01 --sec02 --sec03 --sec04 --sec05`.
   The 08-12 traffic in `uploads` is strong evidence they pass, but they have not been run green.
+
 - `cd ~/Documents/Codes && git push projects main` — now six commits behind (c4d4bd2, 3386848,
   449331f, d1146a6, the 01-03 docs commit, 75fec2e, ce00a1c)
 
@@ -100,13 +105,16 @@ Still outstanding (user-run):
   `s3:ListBucket` and `s3:DeleteObject` were probed and permitted on 08-13, so the wipe will
   not fail on IAM. What remains is that 01-01 Task 3 is a human-verify checkpoint: the wipe is
   irreversible, destroys the owner's own page, and the run belongs to the user, never an agent.
+
 - [Phase 1]: **The owner is at 24.5 MB of the 25 MB quota, all test junk** (37 `uploads` rows
   from the 08-12 verifier runs). The next genuine upload by `princesrivastav216@gmail.com` will
   be refused with the D-16 message. The deferred 01-01 wipe clears it.
+
 - [Phase 1]: 55 S3 objects vs 37 `uploads` rows — 18 orphans, 19 MB. **Already explained, not a
   leak:** every orphan predates the first `Upload` record, so they are Task-1-era puts from
   before `Upload.create` existed. The wipe removes them. Noted because count-mismatch is exactly
   the shape a real quota leak would take.
+
 - [Phase 1]: `node_modules` was found half-installed on 2026-08-12 — 242M on disk but ~half the packages were empty dirs, incl. `bson`, breaking every mongoose import. Repaired with `npm install` (manifests untouched). Suspect this first on an inexplicable `Cannot find module`.
 - [Phase 1]: `app/api/click/route.js` calls `atob(searchParams.get('url'))` unguarded and `Event.create` before any validation — a missing `url` throws and garbage rows get written. `--sec08` catches it; plan 01-07 owns the fix.
 - [Phase 1]: Vercel free tier is serverless with no workers and no Redis — rate limiting (SEC-05) must be backed by MongoDB or another already-installed dependency
@@ -123,8 +131,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13
-Stopped at: 01-04 complete and committed (ce00a1c). Wave 3 has 01-05, 01-06, 01-07 left.
+Last session: 2026-08-13T15:30:13.671Z
+Stopped at: 01-06 complete and committed (dd72b38). Wave 3 has 01-05 (checkpoint) and 01-07 left.
 Resume file: None
 
 **Two plans in a row were lost to a mid-plan session end, and `git status` was not enough
@@ -145,3 +153,13 @@ Two flags still fail against live Atlas by design — contracts awaiting their p
 Remaining Wave 3 plans (01-05, 01-06, 01-07) are independent of each other and were never
 blocked on 01-04. All call `requireSession` / `checkRateLimit`; signatures in
 `01-03-SUMMARY.md`. 01-07 additionally consumes the status-code table in `01-04-SUMMARY.md`.
+
+**2026-08-13, after 01-06:** the claim path is gated (dd72b38). 01-05 is still mid-flight
+at its human-verify checkpoint — its code commits are landed, its SUMMARY is deliberately
+unwritten. **01-07 is the only Wave 3 plan left to start.**
+
+01-06 left one thing visibly broken to a user, on purpose: `components/forms/UserNameForm.js:24`
+does `if (result) router.push(...)`, and an object is always truthy, so a refused claim still
+redirects to the success page with no message. That is Phase 2's FIX-02 and out of 01-06's
+`files_modified`. The server-side gate is real — no invalid document is created — but do not
+read a successful-looking redirect in the browser as the gate having failed.
