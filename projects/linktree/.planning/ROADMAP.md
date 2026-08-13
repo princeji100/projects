@@ -21,7 +21,7 @@ the live link.
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Lock Down Write Paths** - Close the unauthenticated upload endpoint and every other write a stranger can reach
-- [ ] **Phase 1.5: Admin & Upload Management** (INSERTED) - Screens to manage the allowlist and the uploads Phase 1 starts tracking
+- [x] **Phase 1.5: Admin & Upload Management** (INSERTED) - Screens to manage the allowlist and the uploads Phase 1 starts tracking (completed 2026-08-13)
 - [ ] **Phase 2: Fix the Broken Paths** - Clear the nine confirmed defects in the public page, claim flow, and dashboard
 - [ ] **Phase 3: Link Lifecycle Control** - Owners toggle links on/off and schedule them without deleting anything
 - [ ] **Phase 4: Themes & QR Sharing** - One-click theme presets plus a downloadable QR code for the profile
@@ -202,7 +202,7 @@ Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Lock Down Write Paths | 8/8 | Complete | 2026-08-14 |
-| 1.5. Admin & Upload Management | 0/TBD | Not started | - |
+| 1.5. Admin & Upload Management | 2/2 | Complete   | 2026-08-13 |
 | 2. Fix the Broken Paths | 0/TBD | Not started | - |
 | 3. Link Lifecycle Control | 0/TBD | Not started | - |
 | 4. Themes & QR Sharing | 0/TBD | Not started | - |
