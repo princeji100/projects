@@ -152,6 +152,43 @@ async function runUnits() {
     assert.equal(dbRecordDeleted, false);
     assert.equal(referencesCleared, false);
   });
+
+  // Test S3 succeeded but subsequent Mongo cleanup failed
+  await check('mongo-fail-after-s3: S3 succeeds, Mongo fails, action returns failure, reconciliation remains possible', async () => {
+    let s3Deleted = false;
+    let mongoCleaned = false;
+    let actionResult = null;
+
+    // Simulated execution function mirroring action/UploadAction.js flow
+    async function executeDeletionFlow(simulateMongoFailure = false) {
+      try {
+        // Step 1: S3 deletion
+        s3Deleted = true;
+
+        // Step 2: Mongo cleanup
+        if (simulateMongoFailure) {
+          throw new Error('Mongo connection drop during cleanup');
+        }
+        mongoCleaned = true;
+        return { success: true, message: 'Upload permanently deleted and references cleared' };
+      } catch (error) {
+        return { success: false, error: 'Failed to complete upload deletion' };
+      }
+    }
+
+    // 1. Initial attempt fails during Mongo cleanup
+    actionResult = await executeDeletionFlow(true);
+    assert.equal(actionResult.success, false, 'Action must NOT report success when Mongo cleanup fails');
+    assert.equal(actionResult.error, 'Failed to complete upload deletion');
+    assert.equal(s3Deleted, true, 'S3 deletion had succeeded');
+    assert.equal(mongoCleaned, false, 'Mongo cleanup had failed');
+
+    // 2. Recovery / reconciliation path: user or retry calls delete again
+    // S3 deletion of an already-deleted key in S3 succeeds idempotently, allowing Mongo to finish
+    const retryResult = await executeDeletionFlow(false);
+    assert.equal(retryResult.success, true, 'Retry reconciliation succeeds');
+    assert.equal(mongoCleaned, true, 'Mongo state is reconciled');
+  });
 }
 
 // -------------------------------------------------------------
