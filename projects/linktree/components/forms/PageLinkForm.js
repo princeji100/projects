@@ -15,8 +15,18 @@ const PageLinkForm = ({ page }) => {
     
     const save = async (e) => {
         e.preventDefault();
-        await SavePageLinks(links);
-        toast.success('Links saved successfully');
+        const result = await SavePageLinks(links);
+        // Keyed off `error`, NOT `success`, and that is deliberate. SavePageLinks still
+        // returns { success: false } on its own success path — Phase 2's FIX-01 — so
+        // branching on `success` here would toast an error after every good save.
+        // Genuine refusals always carry an `error`; the FIX-01 path never does.
+        if (result?.error) {
+            toast.error(result.retryAfter
+                ? `${result.error} (${result.retryAfter}s)`
+                : result.error);
+        } else {
+            toast.success('Links saved successfully');
+        }
     }
 
     const addNewLink = () => {
@@ -91,9 +101,9 @@ const PageLinkForm = ({ page }) => {
                                     <label className="w-full">
                                         <input 
                                             onChange={e => handelUpload(e, index)} 
-                                            id={`icon-${index}`} 
+                                            id={`icon-${index}`}
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/jpeg,image/png,image/webp"
                                             className="hidden" 
                                         />
                                         <span className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors">

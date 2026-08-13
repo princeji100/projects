@@ -47,8 +47,16 @@ const PageButtonForm = ({ page }) => {
     const saveButton = async (e) => {
         e.preventDefault()
         const formData = new FormData(e.target)
-        await SavePageButton(formData)
-        toast.success('Button saved successfully')
+        // The result used to be discarded, so a throttled or unauthenticated save still
+        // showed "saved successfully" — exactly the silent failure D-20 forbids.
+        const result = await SavePageButton(formData)
+        if (result?.success) {
+            toast.success('Button saved successfully')
+        } else {
+            toast.error(result?.retryAfter
+                ? `${result.error} (${result.retryAfter}s)`
+                : result?.error || 'Failed to save buttons')
+        }
     }
 
     const removeButton = (button) => {

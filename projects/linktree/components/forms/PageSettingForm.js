@@ -26,25 +26,28 @@ const PageSettingForm = ({ page, user }) => {
     
     try {
       const result = await SavePageSetting(formData);
-      if (result) {
+      // D-20: a refusal must never look like a success. `result` is always an object
+      // and always truthy, so success is `result.success`, not the object itself.
+      if (result?.success) {
         toast.success('Settings saved successfully', {
           position: "top-right",
           autoClose: 3000,
           theme: "light",
         });
+      } else {
+        toast.error(result?.retryAfter
+          ? `${result.error} (${result.retryAfter}s)`
+          : result?.error || 'Failed to save settings');
       }
     } catch (error) {
       toast.error('Failed to save settings');
     }
   }
 
-  const handleImageUpload = async (e, setter, errorMessage) => {
-    try {
-      await upload(e, link => setter(link));
-    } catch (error) {
-      console.error(errorMessage, error);
-      toast.error(errorMessage);
-    }
+  const handleImageUpload = async (e, setter) => {
+    // upload() toasts its own specific reason (D-28) and no longer rethrows, so a
+    // catch here would only add a second, vaguer toast on top of the exact one.
+    await upload(e, link => setter(link));
   }
 
   return (
@@ -86,9 +89,9 @@ const PageSettingForm = ({ page, user }) => {
                     <input type="hidden" name="bgImage" defaultValue={bgImage} />
                     <input 
                       type="file" 
-                      onChange={e => handleImageUpload(e, setBgImage, 'Failed to upload cover image')} 
-                      className="hidden" 
-                      accept="image/*"
+                      onChange={e => handleImageUpload(e, setBgImage)}
+                      className="hidden"
+                      accept="image/jpeg,image/png,image/webp"
                     />
                     <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
                     <span className="text-slate-700">Change Image</span>
@@ -112,10 +115,10 @@ const PageSettingForm = ({ page, user }) => {
               <label className="absolute bottom-0 right-0 bg-white hover:bg-slate-50 transition-colors p-2 rounded-full shadow-md cursor-pointer">
                 <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
                 <input 
-                  onChange={e => handleImageUpload(e, setAvatar, 'Failed to upload avatar')} 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*"
+                  onChange={e => handleImageUpload(e, setAvatar)}
+                  type="file"
+                  className="hidden"
+                  accept="image/jpeg,image/png,image/webp"
                 />
                 <input type="hidden" name="avatar" defaultValue={avatar} />
               </label>
