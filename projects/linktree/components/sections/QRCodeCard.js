@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -13,25 +13,16 @@ import {
 import { toast } from 'react-toastify';
 import SectionBox from '../layout/SectionBox';
 
-const QRCodeCard = ({ page }) => {
+const QRCodeCard = ({ uri, publicUrl }) => {
   const [copied, setCopied] = useState(false);
-  const [origin, setOrigin] = useState('');
   const qrRef = useRef(null);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const publicUrl = process.env.NEXT_PUBLIC_URL || window.location.origin;
-      setOrigin(publicUrl.replace(/\/$/, ''));
-    }
-  }, []);
-
-  const uri = page?.uri || '';
-  const profileUrl = uri && origin ? `${origin}/${uri}` : '';
+  const isSavedProfile = Boolean(uri && publicUrl);
 
   const handleCopy = async () => {
-    if (!profileUrl) return;
+    if (!isSavedProfile) return;
     try {
-      await navigator.clipboard.writeText(profileUrl);
+      await navigator.clipboard.writeText(publicUrl);
       setCopied(true);
       toast.success('Profile URL copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
@@ -41,35 +32,57 @@ const QRCodeCard = ({ page }) => {
   };
 
   const handleDownload = () => {
-    if (!profileUrl) return;
+    if (!isSavedProfile) {
+      toast.error('Save your profile username before downloading the QR code');
+      return;
+    }
+
     const canvas = qrRef.current?.querySelector('canvas');
     if (!canvas) {
       toast.error('Unable to generate QR image');
       return;
     }
 
-    // High resolution canvas export
-    const imageUri = canvas.toDataURL('image/png');
-    const downloadLink = document.createElement('a');
-    downloadLink.href = imageUri;
-    downloadLink.download = `linktree-${uri || 'profile'}-qr.png`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-    toast.success('QR Code downloaded as PNG');
+    try {
+      // Create a high-resolution 1024x1024 canvas for crisp physical scanning with quiet zone
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = 1024;
+      exportCanvas.height = 1024;
+      const ctx = exportCanvas.getContext('2d');
+
+      // Fill solid white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      // Draw the crisp QR code scaled up smoothly
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(canvas, 64, 64, 896, 896);
+
+      const imageUri = exportCanvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      downloadLink.href = imageUri;
+      downloadLink.download = `linktree-${uri}-qr.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      toast.success('QR Code downloaded as high-res PNG');
+    } catch (err) {
+      console.error('QR download error:', err);
+      toast.error('Failed to download QR image');
+    }
   };
 
-  if (!uri) {
+  if (!isSavedProfile) {
     return (
       <SectionBox>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="text-blue-600 bg-blue-50 p-2.5 rounded-lg">
-            <FontAwesomeIcon icon={faQrcode} className="text-xl" />
+        <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+          <div className="text-slate-400 bg-slate-100 p-3.5 rounded-xl">
+            <FontAwesomeIcon icon={faQrcode} className="text-2xl" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-800">Share with QR Code</h2>
-            <p className="text-xs text-slate-500">
-              Claim your username first to generate your custom profile QR code
+            <h2 className="text-xl font-bold text-slate-800">Share Profile with QR Code</h2>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Claim and save your unique username above to generate your verified public QR code.
             </p>
           </div>
         </div>
@@ -80,7 +93,7 @@ const QRCodeCard = ({ page }) => {
   return (
     <SectionBox>
       <div className="flex flex-col md:flex-row items-center gap-8 justify-between">
-        {/* Info & URL */}
+        {/* Info & Canonical URL */}
         <div className="space-y-4 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3">
             <div className="text-blue-600 bg-blue-50 p-2.5 rounded-xl">
@@ -95,7 +108,7 @@ const QRCodeCard = ({ page }) => {
           </div>
 
           <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-3 max-w-md">
-            <span className="text-xs font-mono text-slate-700 truncate">{profileUrl}</span>
+            <span className="text-xs font-mono text-slate-700 truncate">{publicUrl}</span>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 type="button"
@@ -106,7 +119,7 @@ const QRCodeCard = ({ page }) => {
                 <FontAwesomeIcon icon={copied ? faCheck : faCopy} className={copied ? 'text-green-600' : ''} />
               </button>
               <a
-                href={profileUrl}
+                href={publicUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs font-medium text-slate-600 hover:text-blue-600 p-1.5 rounded hover:bg-slate-200 transition-colors"
@@ -121,7 +134,7 @@ const QRCodeCard = ({ page }) => {
             <button
               type="button"
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
             >
               <FontAwesomeIcon icon={faDownload} />
               <span>Download PNG</span>
@@ -130,7 +143,7 @@ const QRCodeCard = ({ page }) => {
             <button
               type="button"
               onClick={handleCopy}
-              className="flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-all"
+              className="flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-all cursor-pointer"
             >
               <FontAwesomeIcon icon={copied ? faCheck : faCopy} className={copied ? 'text-green-600' : ''} />
               <span>{copied ? 'Copied' : 'Copy Link'}</span>
@@ -138,16 +151,19 @@ const QRCodeCard = ({ page }) => {
           </div>
         </div>
 
-        {/* QR Code Canvas */}
+        {/* QR Code Canvas with High Contrast & Quiet Zone */}
         <div
           ref={qrRef}
           className="bg-white p-4 rounded-2xl shadow-lg border border-slate-100 flex flex-col items-center gap-2 flex-shrink-0"
         >
           <QRCodeCanvas
-            value={profileUrl || 'https://example.com'}
+            value={publicUrl}
             size={180}
             level="H"
             includeMargin={true}
+            bgColor="#ffffff"
+            fgColor="#000000"
+            marginSize={4}
             className="rounded-lg"
           />
           <span className="text-[11px] font-medium text-slate-400">/{uri}</span>

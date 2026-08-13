@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import connectToDatabase from "@/lib/connectToDB";
 import Page from "@/models/Page";
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getPublicProfileUrl } from "@/lib/siteUrl";
 
 export async function GET() {
     try {
@@ -18,7 +19,11 @@ export async function GET() {
             return Response.json(null);
         }
 
-        return Response.json(page);
+        const pageObj = page.toObject ? page.toObject() : page;
+        return Response.json({
+            ...pageObj,
+            publicUrl: getPublicProfileUrl(page.uri),
+        });
     } catch (error) {
         return Response.json({ error: "Internal Server Error" }, { status: 500 });
     }

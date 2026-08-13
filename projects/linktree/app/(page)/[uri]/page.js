@@ -80,26 +80,25 @@ const UserPage = async ({ params }) => {
     }
   };
 
-  // Phase 4: Theme resolution
-  const currentTheme = getTheme(page.theme);
+  // Phase 4: Theme resolution - preset styling ONLY applies when bgType === 'preset'
   const isPreset = page.bgType === 'preset';
+  const defaultTheme = getTheme('default');
+  const currentTheme = isPreset ? getTheme(page.theme) : defaultTheme;
 
   let headerStyle = {};
-  let pageBgClass = currentTheme.pageBg;
-  let headerOverlayClass = currentTheme.headerOverlay;
+  let pageBgClass = isPreset ? currentTheme.pageBg : 'bg-blue-950';
+  let headerOverlayClass = isPreset
+    ? currentTheme.headerOverlay
+    : 'bg-gradient-to-b from-black/20 via-transparent to-blue-950/90';
 
   if (isPreset) {
     headerStyle = { backgroundColor: currentTheme.headerBg };
   } else if (page.bgType === 'color') {
-    pageBgClass = 'bg-slate-950';
     headerStyle = { backgroundColor: page.bgColor || '#000' };
-    headerOverlayClass = 'bg-gradient-to-b from-black/20 via-transparent to-slate-950/90';
   } else if (page.bgType === 'image' && page.bgImage) {
-    pageBgClass = 'bg-slate-950';
     headerStyle = { backgroundImage: `url(${page.bgImage})` };
-    headerOverlayClass = 'bg-gradient-to-b from-black/20 via-transparent to-slate-950/90';
   } else {
-    headerStyle = { backgroundColor: currentTheme.headerBg };
+    headerStyle = { backgroundColor: '#1e293b' };
   }
 
   // Phase 3: Single now capture per render pass

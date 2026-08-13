@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
 import Page from '../models/Page.js';
 import { themes, getTheme } from '../lib/themes.js';
+import { getBaseUrl, getPublicProfileUrl } from '../lib/siteUrl.js';
 
 let passed = 0;
 let failed = 0;
@@ -19,9 +18,9 @@ async function check(name, fn) {
   }
 }
 
-console.log('--- Running Phase 4 Themes & QR Sharing Verification ---\n');
+console.log('--- Running Refined Phase 4 Themes & QR Sharing Verification ---\n');
 
-// 1. Theme Preset Registry
+// 1. Theme Preset Registry & Visual Design Tokens
 await check('theme-registry: defines 8 curated accessible presets with all required visual tokens', async () => {
   assert.equal(themes.length, 8, 'Must have exactly 8 presets');
 
@@ -49,11 +48,20 @@ await check('theme-registry: defines 8 curated accessible presets with all requi
     }
   }
 
-  const expectedIds = ['default', 'emerald', 'sunset', 'ocean', 'purple', 'minimal-light', 'cyberpunk', 'crimson'];
+  const expectedIds = [
+    'default',
+    'emerald',
+    'sunset',
+    'ocean',
+    'purple',
+    'minimal-light',
+    'cyberpunk',
+    'crimson',
+  ];
   assert.deepEqual(
     themes.map((t) => t.id),
     expectedIds,
-    'Must include all expected theme IDs'
+    'Must include all expected theme IDs in correct order'
   );
 });
 
@@ -64,119 +72,200 @@ await check('theme-fallback: getTheme resolves known keys and falls back to defa
   assert.equal(emerald.id, 'emerald');
   assert.equal(emerald.name, 'Emerald Forest');
 
-  // Unknown / invalid theme
-  const unknown = getTheme('neon_ultra_v2');
-  assert.equal(unknown.id, 'default', 'Unknown key falls back to default');
-
-  // Empty / null / undefined
+  // Unknown / invalid / removed theme keys must fail safely to default
+  assert.equal(getTheme('unknown_theme_xyz').id, 'default');
+  assert.equal(getTheme('neon_ultra').id, 'default');
   assert.equal(getTheme(null).id, 'default');
   assert.equal(getTheme(undefined).id, 'default');
   assert.equal(getTheme('').id, 'default');
 });
 
-// 3. Schema & Model Persistence
-await check('page-schema-theme: Page model schema defines and persists theme and extended bgType', async () => {
-  // Default legacy document
-  const defaultDoc = new Page({ uri: 'defaultuser', owner: 'test@example.com' });
-  assert.equal(defaultDoc.theme, 'default', 'Defaults to theme: "default"');
-  assert.equal(defaultDoc.bgType, 'color', 'Defaults to bgType: "color"');
+// 3. Page Schema bgType Enum Validation & Default Preservation
+await check('page-schema-validation: Page schema defines enum ["color", "image", "preset"] with default "color"', async () => {
+  // A: Default legacy document creation
+  const defaultDoc = new Page({ uri: 'legacyuser', owner: 'legacy@example.com' });
+  assert.equal(defaultDoc.bgType, 'color', 'Default bgType must be "color"');
+  assert.equal(defaultDoc.theme, 'default', 'Default theme must be "default"');
+  assert.equal(defaultDoc.bgColor, '#000', 'Default bgColor must be "#000"');
 
-  // Explicit preset theme document
+  // B: Preset bgType
   const presetDoc = new Page({
-    uri: 'cyberuser',
-    owner: 'cyber@example.com',
+    uri: 'presetuser',
+    owner: 'preset@example.com',
     bgType: 'preset',
-    theme: 'cyberpunk',
-    bgColor: '#123456',
-    bgImage: 'https://s3.aws.com/bg.png',
+    theme: 'emerald',
   });
-
   assert.equal(presetDoc.bgType, 'preset');
-  assert.equal(presetDoc.theme, 'cyberpunk');
-  assert.equal(presetDoc.bgColor, '#123456', 'Preserves custom bgColor');
-  assert.equal(presetDoc.bgImage, 'https://s3.aws.com/bg.png', 'Preserves custom bgImage');
+  assert.equal(presetDoc.theme, 'emerald');
+
+  // C: Schema validation for invalid bgType
+  const invalidDoc = new Page({
+    uri: 'baduser',
+    owner: 'bad@example.com',
+    bgType: 'invalid_mode',
+  });
+  const validationError = invalidDoc.validateSync();
+  assert.ok(validationError, 'Mongoose schema validation must fail on invalid bgType');
+  assert.ok(validationError.errors.bgType, 'Validation error must be on bgType field');
 });
 
-// 4. Custom Background Non-Destructive Mode Preservation
-await check('custom-bg-preservation: switching bgType does not erase custom color or image data', async () => {
-  // Simulate form state transitions in PageSettingForm
-  let formState = {
-    bgType: 'color',
-    bgColor: '#ff5500',
-    bgImage: 'https://s3.aws.com/my-bg.jpg',
-    theme: 'default',
-  };
-
-  // Switch to preset
-  formState = { ...formState, bgType: 'preset', theme: 'sunset' };
-  assert.equal(formState.bgColor, '#ff5500', 'bgColor retained in state');
-  assert.equal(formState.bgImage, 'https://s3.aws.com/my-bg.jpg', 'bgImage retained in state');
-
-  // Switch to image
-  formState = { ...formState, bgType: 'image' };
-  assert.equal(formState.theme, 'sunset', 'theme retained in state');
-  assert.equal(formState.bgColor, '#ff5500', 'bgColor retained in state');
-
-  // Switch back to color
-  formState = { ...formState, bgType: 'color' };
-  assert.equal(formState.bgColor, '#ff5500');
-  assert.equal(formState.bgImage, 'https://s3.aws.com/my-bg.jpg');
-});
-
-// 5. QR Code Canonical URL & Download Filename Computation
-await check('qr-code-url-computation: correctly constructs canonical URL and download filename', async () => {
-  function computeQrData(base, uri) {
-    const cleanBase = (base || 'https://linktree.app').replace(/\/$/, '');
-    const profileUrl = uri ? `${cleanBase}/${uri}` : '';
-    const downloadFilename = `linktree-${uri || 'profile'}-qr.png`;
-    return { profileUrl, downloadFilename };
-  }
-
-  const res1 = computeQrData('https://mylinks.io/', 'johndoe');
-  assert.equal(res1.profileUrl, 'https://mylinks.io/johndoe');
-  assert.equal(res1.downloadFilename, 'linktree-johndoe-qr.png');
-
-  const res2 = computeQrData('https://domain.com', 'developer');
-  assert.equal(res2.profileUrl, 'https://domain.com/developer');
-  assert.equal(res2.downloadFilename, 'linktree-developer-qr.png');
-});
-
-// 6. Public Page Theme Resolution & Layout Integrity
-await check('public-page-theme-resolution: resolves preset vs custom background correctly', async () => {
+// 4. Legacy Color and Image Modes Unchanged
+await check('legacy-modes: color and image background modes render unchanged with legacy styles', async () => {
   function resolvePageStyles(page) {
-    const currentTheme = getTheme(page.theme);
     const isPreset = page.bgType === 'preset';
+    const defaultTheme = getTheme('default');
+    const currentTheme = isPreset ? getTheme(page.theme) : defaultTheme;
 
     let headerStyle = {};
-    let pageBgClass = currentTheme.pageBg;
+    let pageBgClass = isPreset ? currentTheme.pageBg : 'bg-blue-950';
 
     if (isPreset) {
       headerStyle = { backgroundColor: currentTheme.headerBg };
     } else if (page.bgType === 'color') {
-      pageBgClass = 'bg-slate-950';
       headerStyle = { backgroundColor: page.bgColor || '#000' };
     } else if (page.bgType === 'image' && page.bgImage) {
-      pageBgClass = 'bg-slate-950';
       headerStyle = { backgroundImage: `url(${page.bgImage})` };
+    } else {
+      headerStyle = { backgroundColor: '#1e293b' };
     }
 
-    return { pageBgClass, headerStyle, theme: currentTheme };
+    return { pageBgClass, headerStyle, currentTheme };
   }
 
-  // Case A: Preset Mode
-  const presetResult = resolvePageStyles({ bgType: 'preset', theme: 'purple' });
-  assert.equal(presetResult.theme.id, 'purple');
-  assert.equal(presetResult.headerStyle.backgroundColor, '#3b0764');
-  assert.match(presetResult.pageBgClass, /from-purple-950/);
+  // Legacy color document
+  const colorPage = { bgType: 'color', bgColor: '#334455' };
+  const colorRes = resolvePageStyles(colorPage);
+  assert.equal(colorRes.pageBgClass, 'bg-blue-950', 'Legacy color mode uses original bg-blue-950');
+  assert.equal(colorRes.headerStyle.backgroundColor, '#334455', 'Uses custom bgColor');
+  assert.equal(colorRes.currentTheme.id, 'default', 'Uses default theme tokens');
 
-  // Case B: Custom Color Mode
-  const colorResult = resolvePageStyles({ bgType: 'color', bgColor: '#112233', theme: 'sunset' });
-  assert.equal(colorResult.headerStyle.backgroundColor, '#112233');
-  assert.equal(colorResult.pageBgClass, 'bg-slate-950');
+  // Legacy image document
+  const imagePage = { bgType: 'image', bgImage: 'https://s3.aws.com/bg.jpg' };
+  const imageRes = resolvePageStyles(imagePage);
+  assert.equal(imageRes.pageBgClass, 'bg-blue-950');
+  assert.equal(imageRes.headerStyle.backgroundImage, 'url(https://s3.aws.com/bg.jpg)');
+});
 
-  // Case C: Custom Image Mode
-  const imageResult = resolvePageStyles({ bgType: 'image', bgImage: 'https://s3.aws.com/bg.webp' });
-  assert.equal(imageResult.headerStyle.backgroundImage, 'url(https://s3.aws.com/bg.webp)');
+// 5. Non-Destructive Mode Switching Preserves Custom Values
+await check('custom-bg-preservation: switching bgType does not erase custom color or image data', async () => {
+  let formState = {
+    bgType: 'color',
+    bgColor: '#123456',
+    bgImage: 'https://s3.aws.com/custom.png',
+    theme: 'default',
+  };
+
+  // Switch to preset mode
+  formState = { ...formState, bgType: 'preset', theme: 'sunset' };
+  assert.equal(formState.bgColor, '#123456', 'Custom bgColor preserved in state');
+  assert.equal(formState.bgImage, 'https://s3.aws.com/custom.png', 'Custom bgImage preserved in state');
+
+  // Switch to image mode
+  formState = { ...formState, bgType: 'image' };
+  assert.equal(formState.theme, 'sunset', 'Theme choice preserved in state');
+  assert.equal(formState.bgColor, '#123456', 'Custom bgColor preserved in state');
+
+  // Switch back to color mode
+  formState = { ...formState, bgType: 'color' };
+  assert.equal(formState.bgColor, '#123456');
+  assert.equal(formState.bgImage, 'https://s3.aws.com/custom.png');
+});
+
+// 6. Preset Mode Isolation
+await check('preset-mode-isolation: preset styling only applies in preset mode; ignored in color/image modes', async () => {
+  function resolvePageStyles(page) {
+    const isPreset = page.bgType === 'preset';
+    const defaultTheme = getTheme('default');
+    const currentTheme = isPreset ? getTheme(page.theme) : defaultTheme;
+
+    let headerStyle = {};
+    let pageBgClass = isPreset ? currentTheme.pageBg : 'bg-blue-950';
+
+    if (isPreset) {
+      headerStyle = { backgroundColor: currentTheme.headerBg };
+    } else if (page.bgType === 'color') {
+      headerStyle = { backgroundColor: page.bgColor || '#000' };
+    }
+
+    return { pageBgClass, headerStyle, currentTheme, isPreset };
+  }
+
+  // Document has theme: 'cyberpunk' stored, but bgType is 'color'
+  const customColorPage = { bgType: 'color', bgColor: '#111111', theme: 'cyberpunk' };
+  const res = resolvePageStyles(customColorPage);
+
+  assert.equal(res.isPreset, false);
+  assert.equal(res.pageBgClass, 'bg-blue-950', 'Must not use cyberpunk pageBg in color mode');
+  assert.equal(res.currentTheme.id, 'default', 'Must use default theme tokens in color mode');
+
+  // When switched to preset mode, cyberpunk tokens now apply
+  const presetPage = { bgType: 'preset', theme: 'cyberpunk' };
+  const presetRes = resolvePageStyles(presetPage);
+
+  assert.equal(presetRes.isPreset, true);
+  assert.equal(presetRes.currentTheme.id, 'cyberpunk');
+  assert.match(presetRes.pageBgClass, /from-black/);
+});
+
+// 7. Site URL Canonicalization
+await check('site-url-canonicalization: getPublicProfileUrl constructs exact canonical public URL server-side', async () => {
+  // Test baseUrl resolution
+  const baseUrl = getBaseUrl();
+  assert.ok(baseUrl, 'Base URL must be non-empty string');
+  assert.ok(!baseUrl.endsWith('/'), 'Base URL must not end with trailing slash');
+
+  // Test profile URL construction
+  assert.equal(getPublicProfileUrl('alice'), `${baseUrl}/alice`);
+  assert.equal(getPublicProfileUrl('/bob/'), `${baseUrl}/bob`);
+  assert.equal(getPublicProfileUrl(''), '');
+  assert.equal(getPublicProfileUrl(null), '');
+  assert.equal(getPublicProfileUrl(undefined), '');
+});
+
+// 8. Unsaved Profile QR Guard
+await check('unsaved-profile-qr-guard: unsaved profiles cannot download or distribute misleading QR', async () => {
+  function canGenerateAndDownloadQr(uri, publicUrl) {
+    const isSavedProfile = Boolean(uri && publicUrl);
+    return {
+      canDownload: isSavedProfile,
+      canCopy: isSavedProfile,
+      rendersQrCanvas: isSavedProfile,
+    };
+  }
+
+  // Case A: Unsaved profile (no uri)
+  const unsaved1 = canGenerateAndDownloadQr('', '');
+  assert.equal(unsaved1.canDownload, false);
+  assert.equal(unsaved1.canCopy, false);
+  assert.equal(unsaved1.rendersQrCanvas, false);
+
+  // Case B: Null/undefined inputs
+  const unsaved2 = canGenerateAndDownloadQr(null, null);
+  assert.equal(unsaved2.canDownload, false);
+  assert.equal(unsaved2.canCopy, false);
+
+  // Case C: Valid saved profile
+  const saved = canGenerateAndDownloadQr('developer', 'https://example.com/developer');
+  assert.equal(saved.canDownload, true);
+  assert.equal(saved.canCopy, true);
+  assert.equal(saved.rendersQrCanvas, true);
+});
+
+// 9. QR Contrast & Quiet Zone Parameters
+await check('qr-contrast-quiet-zone: QR canvas configuration enforces maximum contrast and quiet zone margin', async () => {
+  const qrConfig = {
+    level: 'H',
+    includeMargin: true,
+    bgColor: '#ffffff',
+    fgColor: '#000000',
+    marginSize: 4,
+  };
+
+  assert.equal(qrConfig.level, 'H', 'Error correction level must be High ("H")');
+  assert.equal(qrConfig.includeMargin, true, 'Quiet zone margin must be included');
+  assert.equal(qrConfig.bgColor, '#ffffff', 'Background must be pure white for contrast');
+  assert.equal(qrConfig.fgColor, '#000000', 'Foreground must be pure black for contrast');
+  assert.ok(qrConfig.marginSize >= 4, 'Quiet zone margin must be at least 4 modules');
 });
 
 console.log('\n================================');

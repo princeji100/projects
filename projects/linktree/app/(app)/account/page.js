@@ -65,7 +65,7 @@ const AccountPage = () => {
 
             <div className="space-y-6">
                 <PageSettingForm page={pageData} user={session.user} />
-                <QRCodeCard page={pageData} />
+                <QRCodeCard uri={pageData?.uri} publicUrl={pageData?.publicUrl} />
                 <PageButtonForm page={pageData} />
                 <PageLinkForm page={pageData} user={session.user} />
             </div>
