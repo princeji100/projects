@@ -104,7 +104,7 @@ const AnalyticsPage = async () => {
         <h2 className="text-xl font-semibold text-slate-800 mb-6 text-center">Link Analytics</h2>
         <div className="space-y-4">
           {page?.links?.map((link, index) => {
-            const linkKey = link._id?.toString() || link.id || `${link.url}-${index}`;
+            const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
             return (
               <div 
                 key={linkKey} 

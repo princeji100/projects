@@ -149,7 +149,7 @@ const UserPage = async ({ params }) => {
           {/* Links Grid */}
           <div className="grid md:grid-cols-2 gap-4 w-full max-w-3xl mx-auto">
             {page.links?.map((link, index) => {
-              const linkKey = link._id || link.id || `${link.url}-${index}`;
+              const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
               return (
                 <Link
                   key={linkKey}
