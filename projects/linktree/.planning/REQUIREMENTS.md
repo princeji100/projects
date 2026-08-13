@@ -24,7 +24,7 @@ decision). Public profile pages stay public; only account creation is invite-onl
 - [ ] **SEC-05**: Write endpoints (upload, page save, username claim) are rate limited per user
 - [x] **SEC-06**: Reserved usernames (`api`, `account`, `login`, `about`, admin-ish words) cannot be claimed
 - [x] **SEC-07**: Usernames are validated for charset and length before becoming a public URL
-- [ ] **SEC-08**: `/api/click` handles malformed input without throwing a 500
+- [x] **SEC-08**: `/api/click` handles malformed input without throwing a 500
 
 ### Correctness
 
@@ -128,7 +128,7 @@ Which phases cover which requirements.
 | SEC-05 | Phase 1 — Lock Down Write Paths | Pending |
 | SEC-06 | Phase 1 — Lock Down Write Paths | Complete (01-06) |
 | SEC-07 | Phase 1 — Lock Down Write Paths | Complete (01-06) |
-| SEC-08 | Phase 1 — Lock Down Write Paths | Pending |
+| SEC-08 | Phase 1 — Lock Down Write Paths | Complete |
 | FIX-01 | Phase 2 — Fix the Broken Paths | Pending |
 | FIX-02 | Phase 2 — Fix the Broken Paths | Pending |
 | FIX-03 | Phase 2 — Fix the Broken Paths | Pending |

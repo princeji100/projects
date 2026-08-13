@@ -144,3 +144,8 @@ node rather than taken from the plan's notes.
 
 Nothing structurally. Phase 5's analytics inherits a cleaner premise: from here on, every row in
 `events` references a page that existed at write time.
+
+## Self-Check: PASSED
+
+`app/api/click/route.js` and `01-07-SUMMARY.md` both exist on disk; commits `56f6d68` and
+`4d7702d` both resolve in `git log`.

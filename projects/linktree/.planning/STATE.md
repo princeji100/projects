@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: 01-06 complete and committed (dd72b38). Wave 3 has 01-05 (checkpoint) and 01-07 left.
-last_updated: "2026-08-13T15:30:31.193Z"
+last_updated: "2026-08-13T15:41:41.541Z"
 last_activity: 2026-08-13
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-08-08)
 ## Current Position
 
 Phase: 01 (lock-down-write-paths) — EXECUTING
-Plan: 5 of 8 complete (01-01 deferred, 01-05 at a checkpoint, 01-07 not started)
-Status: Executing Phase 01
+Plan: 6 of 8 complete (01-01 deferred, 01-05 at a checkpoint, 01-07 not started)
+Status: Ready to execute
 Last activity: 2026-08-13
 
-Progress: [██████░░░░] 63%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [██████░░░░] 63%
 
 *Updated after each plan completion*
 | Phase 01 P06 | 18m | 1 tasks | 1 files |
+| Phase 01 P07 | 25m | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - [Roadmap]: Documentation phase sits last because screenshots need the finished UI
 - [01-06]: claim rate limit runs AFTER validation — a malformed name gets its real reason rather than burning one of five hourly slots; enumeration requires well-formed names
 - [01-06]: handleFormSubmit returns { success, error?, retryAfter?, data? } on every path — retryAfter only on rate-limit refusal. Phase 2 FIX-02 reads this contract
+- [Phase ?]: [01-07]: /api/click limits BEFORE validating — opposite of 01-06's claim path and both are right; click is unauthenticated so a flood is the cheap attack, claim is authenticated so a malformed name should get its real reason
+- [Phase ?]: [01-07]: base64 validation is btoa(atob(x)) === x, not try/catch — atob('abc') returns junk without throwing and atob(null) decodes rather than throwing, so the presence check must precede the decode
 
 ### Pending Todos
 
@@ -96,6 +99,12 @@ Still outstanding (user-run):
   `VERIFY_SESSION_COOKIE=<token> node scripts/verify-phase1.js --sec01 --sec02 --sec03 --sec04 --sec05`.
   The 08-12 traffic in `uploads` is strong evidence they pass, but they have not been run green.
 
+- **Run the `--sec08` success case.** It needs `VERIFY_PAGE_URI` set to a real page `uri`; an
+  agent reading it out of Atlas by hand was refused as an unauthorised live-DB read.
+  `npm run dev`, then `VERIFY_PAGE_URI=<uri> node --env-file=.env scripts/verify-phase1.js --sec08`.
+  The failure half already PASSes, so the untested span is only the four lines from a found
+  Page to `Event.create`.
+
 - `cd ~/Documents/Codes && git push projects main` — now six commits behind (c4d4bd2, 3386848,
   449331f, d1146a6, the 01-03 docs commit, 75fec2e, ce00a1c)
 
@@ -116,7 +125,7 @@ Still outstanding (user-run):
   the shape a real quota leak would take.
 
 - [Phase 1]: `node_modules` was found half-installed on 2026-08-12 — 242M on disk but ~half the packages were empty dirs, incl. `bson`, breaking every mongoose import. Repaired with `npm install` (manifests untouched). Suspect this first on an inexplicable `Cannot find module`.
-- [Phase 1]: `app/api/click/route.js` calls `atob(searchParams.get('url'))` unguarded and `Event.create` before any validation — a missing `url` throws and garbage rows get written. `--sec08` catches it; plan 01-07 owns the fix.
+- ~~[Phase 1]: `app/api/click/route.js` unguarded `atob`~~ — **RESOLVED 2026-08-13 by 01-07 (56f6d68).** Both defects fixed, not just the 500: the missing-param case returned HTTP **200** with a garbage row because `atob(null)` does not throw. `--sec08` PASSes; only its success case SKIPs, needing `VERIFY_PAGE_URI`.
 - [Phase 1]: Vercel free tier is serverless with no workers and no Redis — rate limiting (SEC-05) must be backed by MongoDB or another already-installed dependency
 - [Phases 3/4]: Live Page documents exist; new `links` fields and the theme field must be optional and backward compatible with documents that lack them
 - [Phase 5]: Events recorded before ANA-01 will never have referrer or device — reports must tolerate their absence
@@ -131,8 +140,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T15:30:13.671Z
-Stopped at: 01-06 complete and committed (dd72b38). Wave 3 has 01-05 (checkpoint) and 01-07 left.
+Last session: 2026-08-13T15:40:07.944Z
+Stopped at: 01-07 complete and committed (56f6d68). Wave 3 has only 01-05 (checkpoint) left; 01-08 is unstarted.
 Resume file: None
 
 **Two plans in a row were lost to a mid-plan session end, and `git status` was not enough
