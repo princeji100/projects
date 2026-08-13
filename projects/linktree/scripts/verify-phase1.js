@@ -295,11 +295,16 @@ async function runSec04() {
       return row?.total ?? 0;
     };
 
-    // Fill to the quota. Bounded so a broken size gate cannot loop forever.
-    for (let i = 0; i < 12 && (await sumFor()) < QUOTA; i++) {
+    // Fill until one more CHUNK would cross the quota. The stored total can never
+    // reach QUOTA itself: the gate refuses the upload that would cross it, so a
+    // `sum >= QUOTA` target is unsatisfiable and the loop just burns its 12 tries.
+    // Primed means "the next upload must be refused", which is what we assert below.
+    // Bounded so a broken size gate cannot loop forever.
+    const primed = async () => (await sumFor()) + CHUNK > QUOTA;
+    for (let i = 0; i < 12 && !(await primed()); i++) {
       await upload(padTo(fixtures.png, CHUNK));
     }
-    assert.ok(await sumFor() >= QUOTA, 'could not reach the 25 MB quota to test past it');
+    assert.ok(await primed(), 'could not fill close enough to the 25 MB quota to test crossing it');
 
     const keysBefore = await bucketKeyCount();
     const rowsBefore = await countOf(database, 'uploads');
