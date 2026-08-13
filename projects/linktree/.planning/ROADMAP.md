@@ -59,7 +59,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-04-PLAN.md — all five upload gates on `/api/upload` (session, size, MIME, quota, rate limit)
+- [x] 01-04-PLAN.md — all five upload gates on `/api/upload` (session, size, MIME, quota, rate limit)
 - [ ] 01-05-PLAN.md — invite-only `signIn` allowlist, the `/login` AccessDenied message, allowlist seed script
 - [ ] 01-06-PLAN.md — username claim: charset, length, reserved words, 5/hour limit
 - [ ] 01-07-PLAN.md — `/api/click` hardening (both verified bugs) plus the 60/min per-IP limit
@@ -201,7 +201,7 @@ Phases execute in numeric order: 1 → 1.5 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Lock Down Write Paths | 0/8 | Not started | - |
+| 1. Lock Down Write Paths | 4/8 | In progress | - |
 | 1.5. Admin & Upload Management | 0/TBD | Not started | - |
 | 2. Fix the Broken Paths | 0/TBD | Not started | - |
 | 3. Link Lifecycle Control | 0/TBD | Not started | - |
