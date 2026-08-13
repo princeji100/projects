@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-08)
 
 **Core value:** A stranger opens `/username` and sees a page that loads fast, looks good, and whose links work — every time, without the owner having to check on it.
-**Current focus:** Phase 01 — lock-down-write-paths
+**Current focus:** Phase 1.5 — Admin & Upload Management
 
 ## Current Position
 
-Phase: 01 (lock-down-write-paths) — EXECUTING
-Plan: 6 of 8 complete (01-01 deferred, 01-05 at a checkpoint, 01-07 not started)
-Status: Ready to execute
+- Phase: 1.5 of 7 (Admin & Upload Management)
+- Status: Ready to plan
+- Progress: Phase 1 (8/8) complete, Phase 1.5 context gathered
 Last activity: 2026-08-13
 
-Progress: [████████░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -140,9 +140,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T00:58:00+05:30
-Stopped at: Phase 01 complete. All 8 plans have SUMMARYs, all commits pushed to GitHub. Next up: Phase 1.5 (Admin & Upload Management) or Phase 2 (Fix the Broken Paths).
-Resume file: None
+Last session: 2026-08-14T01:14:00+05:30
+Stopped at: Phase 1.5 context gathered. Decisions locked for Admin Allowlist UI and Uploads Management. Ready for planning.
+Resume file: .planning/phases/01.5-admin-upload-management-inserted/01.5-CONTEXT.md
 
 **Phase 01 closed out 2026-08-14.** 01-05 SUMMARY was held pending the user's manual OAuth
 verification — confirmed when the user hit the "invite-only" refusal in their browser, then
