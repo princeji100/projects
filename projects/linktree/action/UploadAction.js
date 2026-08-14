@@ -72,86 +72,168 @@ export async function getUploadReferences(uploadId) {
 }
 
 /**
- * Deletes an upload from S3 and MongoDB, and safely unsets any references
- * in the User and Page models (D-15, D-17).
+ * Deletes a single upload from S3 and MongoDB, and safely unsets any references.
  */
 export async function deleteUpload(uploadId) {
+  return deleteBulkUploads([uploadId]);
+}
+
+/**
+ * Bulk Deletes multiple uploads from S3 and MongoDB, and cascades reference removals.
+ */
+export async function deleteBulkUploads(uploadIds = []) {
   const session = await requireSession();
   if (!session?.user?.email) {
     return { success: false, error: 'Authentication required' };
   }
 
+  if (!Array.isArray(uploadIds) || uploadIds.length === 0) {
+    return { success: false, error: 'No upload IDs provided' };
+  }
+
   try {
     await connectToDatabase();
-    const upload = await Upload.findById(uploadId);
-    if (!upload) {
-      return { success: false, error: 'Upload not found' };
+    const uploads = await Upload.find({
+      _id: { $in: uploadIds },
+      owner: session.user.email,
+    });
+
+    if (uploads.length === 0) {
+      return { success: false, error: 'No matching uploads found' };
     }
 
-    // D-13: Strict ownership enforcement
-    if (upload.owner !== session.user.email) {
-      return { success: false, error: 'Forbidden: You do not own this upload' };
-    }
+    const deletedUrls = [];
+    const deletePromises = uploads.map(async (upload) => {
+      try {
+        await s3Client.send(
+          new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: upload.key,
+          })
+        );
+        deletedUrls.push(upload.url);
+      } catch (s3Err) {
+        console.error(`S3 deletion failed for key ${upload.key}:`, s3Err);
+      }
+    });
 
-    const uploadUrl = upload.url;
-    const uploadKey = upload.key;
+    await Promise.allSettled(deletePromises);
 
-    // 1. Delete object from AWS S3
-    try {
-      await s3Client.send(
-        new DeleteObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: uploadKey,
-        })
+    // Remove records from MongoDB
+    await Upload.deleteMany({
+      _id: { $in: uploads.map((u) => u._id) },
+      owner: session.user.email,
+    });
+
+    // Clear active references in User (avatar)
+    if (deletedUrls.length > 0) {
+      await User.updateMany(
+        { email: session.user.email, image: { $in: deletedUrls } },
+        { $set: { image: '' } }
       );
-    } catch (s3Err) {
-      console.error('S3 DeleteObjectCommand failed:', s3Err);
-      return { success: false, error: 'Failed to delete file from cloud storage. Deletion aborted.' };
-    }
 
-    // 2. Delete Upload document from MongoDB
-    await Upload.deleteOne({ _id: uploadId });
+      // Clear active references in Page (bgImage)
+      await Page.updateMany(
+        { owner: session.user.email, bgImage: { $in: deletedUrls } },
+        { $set: { bgImage: '' } }
+      );
 
-    // 3. Clear active references in User (avatar)
-    await User.updateMany(
-      { email: session.user.email, image: uploadUrl },
-      { $set: { image: '' } }
-    );
+      // Clear active references in Page (links[].icon)
+      const pages = await Page.find({ owner: session.user.email });
+      for (const p of pages) {
+        if (Array.isArray(p.links)) {
+          let hasIconMatches = false;
+          const updatedLinks = p.links.map((link) => {
+            const linkObj = typeof link.toObject === 'function' ? link.toObject() : link;
+            if (linkObj && deletedUrls.includes(linkObj.icon)) {
+              hasIconMatches = true;
+              return { ...linkObj, icon: '' };
+            }
+            return linkObj;
+          });
 
-    // 4. Clear active references in Page (bgImage)
-    await Page.updateMany(
-      { owner: session.user.email, bgImage: uploadUrl },
-      { $set: { bgImage: '' } }
-    );
-
-    // 5. Clear active references in Page (links[].icon)
-    const pages = await Page.find({ owner: session.user.email });
-    for (const p of pages) {
-      if (Array.isArray(p.links)) {
-        let hasIconMatches = false;
-        const updatedLinks = p.links.map((link) => {
-          const linkObj = typeof link.toObject === 'function' ? link.toObject() : link;
-          if (linkObj && linkObj.icon === uploadUrl) {
-            hasIconMatches = true;
-            return { ...linkObj, icon: '' };
+          if (hasIconMatches) {
+            await Page.updateOne({ _id: p._id }, { $set: { links: updatedLinks } });
           }
-          return linkObj;
-        });
-
-        if (hasIconMatches) {
-          await Page.updateOne(
-            { _id: p._id },
-            { $set: { links: updatedLinks } }
-          );
         }
       }
     }
 
     revalidatePath('/dashboard/uploads');
     revalidatePath('/dashboard');
-    return { success: true, message: 'Upload permanently deleted and references cleared' };
+    return {
+      success: true,
+      message: `Successfully deleted ${uploads.length} media ${uploads.length === 1 ? 'file' : 'files'}`,
+    };
   } catch (error) {
-    console.error('Error during upload deletion cascade:', error);
-    return { success: false, error: 'Failed to complete upload deletion' };
+    console.error('Error during bulk upload deletion:', error);
+    return { success: false, error: 'Failed to complete bulk deletion' };
+  }
+}
+
+/**
+ * Sets an uploaded image as the user's active Profile Avatar in 1 click.
+ */
+export async function setUploadAsAvatar(uploadUrl) {
+  const session = await requireSession();
+  if (!session?.user?.email) {
+    return { success: false, error: 'Authentication required' };
+  }
+
+  if (!uploadUrl) {
+    return { success: false, error: 'Invalid image URL' };
+  }
+
+  try {
+    await connectToDatabase();
+    await User.updateOne(
+      { email: session.user.email },
+      { $set: { image: uploadUrl } }
+    );
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/uploads');
+    return { success: true, message: 'Profile avatar updated successfully!' };
+  } catch (error) {
+    console.error('Error setting avatar:', error);
+    return { success: false, error: 'Failed to update avatar' };
+  }
+}
+
+/**
+ * Sets an uploaded image as the user's active Page Background in 1 click.
+ */
+export async function setUploadAsBackground(uploadUrl) {
+  const session = await requireSession();
+  if (!session?.user?.email) {
+    return { success: false, error: 'Authentication required' };
+  }
+
+  if (!uploadUrl) {
+    return { success: false, error: 'Invalid image URL' };
+  }
+
+  try {
+    await connectToDatabase();
+    const page = await Page.findOne({ owner: session.user.email });
+    if (!page) {
+      return { success: false, error: 'Page profile not found' };
+    }
+
+    await Page.updateOne(
+      { owner: session.user.email },
+      { $set: { bgType: 'image', bgImage: uploadUrl } }
+    );
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/uploads');
+    if (page.uri) {
+      revalidatePath(`/${page.uri}`);
+    }
+
+    return { success: true, message: 'Page background updated successfully!' };
+  } catch (error) {
+    console.error('Error setting background:', error);
+    return { success: false, error: 'Failed to update background' };
   }
 }

@@ -16,13 +16,22 @@ import {
   faCheck,
   faEye,
   faMagnifyingGlass,
-  faFilter,
   faXmark,
   faLayerGroup,
   faCircleCheck,
+  faUserCircle,
+  faImage,
+  faSquareCheck,
+  faSquare,
+  faCheckDouble,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-import { deleteUpload } from '@/action/UploadAction';
+import {
+  deleteUpload,
+  deleteBulkUploads,
+  setUploadAsAvatar,
+  setUploadAsBackground,
+} from '@/action/UploadAction';
 import SectionBox from '@/components/layout/SectionBox';
 import SafeImage from '@/components/media/SafeImage';
 
@@ -38,13 +47,14 @@ function formatBytes(bytes) {
 
 export default function UploadsManagerClient({ initialUploads = [], activeReferences = {} }) {
   const [uploads, setUploads] = useState(initialUploads);
-  const [pendingDelete, setPendingDelete] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [pendingDelete, setPendingDelete] = useState(null); // single or bulk object
   const [previewImage, setPreviewImage] = useState(null);
   const [isPending, startTransition] = useTransition();
   const [isUploading, setIsUploading] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'in-use' | 'avatars' | 'backgrounds' | 'unused'
+  const [activeFilter, setActiveFilter] = useState('all');
   const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef(null);
@@ -52,7 +62,6 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
   const totalUsedBytes = uploads.reduce((acc, curr) => acc + (curr.size || 0), 0);
   const usagePercentage = Math.min(100, Math.round((totalUsedBytes / MAX_QUOTA_BYTES) * 100));
 
-  // Determine progress bar color based on quota usage
   let progressBarColor = 'from-blue-600 via-indigo-600 to-violet-600';
   if (usagePercentage > 90) {
     progressBarColor = 'from-amber-500 to-red-600';
@@ -64,13 +73,11 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
   const handleFileUpload = async (file) => {
     if (!file) return;
 
-    // Validate size (< 4 MB)
     if (file.size > 4 * 1024 * 1024) {
       toast.error('File exceeds 4 MB limit');
       return;
     }
 
-    // Validate quota
     if (totalUsedBytes + file.size > MAX_QUOTA_BYTES) {
       toast.error('Storage quota exceeded (25 MB cap). Delete some files first.');
       return;
@@ -122,28 +129,101 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
     }
   };
 
+  // Quick Action: Set as Avatar
+  const handleSetAvatar = async (upload) => {
+    startTransition(async () => {
+      const res = await setUploadAsAvatar(upload.url);
+      if (res.success) {
+        toast.success('Profile avatar updated!');
+      } else {
+        toast.error(res.error || 'Failed to set avatar');
+      }
+    });
+  };
+
+  // Quick Action: Set as Background
+  const handleSetBackground = async (upload) => {
+    startTransition(async () => {
+      const res = await setUploadAsBackground(upload.url);
+      if (res.success) {
+        toast.success('Page background updated!');
+      } else {
+        toast.error(res.error || 'Failed to set background');
+      }
+    });
+  };
+
+  // Selection toggle
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectAllFiltered = () => {
+    const allFilteredIds = filteredUploads.map((u) => u._id);
+    setSelectedIds(new Set(allFilteredIds));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  // Delete Handlers
   const handleDeleteClick = (upload) => {
     const refs = activeReferences[upload.url] || [];
     setPendingDelete({
+      type: 'single',
       upload,
+      uploads: [upload],
       inUse: refs.length > 0,
       references: refs,
     });
   };
 
+  const handleBulkDeleteClick = () => {
+    const selectedUploadsList = uploads.filter((u) => selectedIds.has(u._id));
+    if (selectedUploadsList.length === 0) return;
+
+    const inUseItems = selectedUploadsList.filter(
+      (u) => (activeReferences[u.url] || []).length > 0
+    );
+
+    setPendingDelete({
+      type: 'bulk',
+      uploads: selectedUploadsList,
+      inUse: inUseItems.length > 0,
+      inUseCount: inUseItems.length,
+    });
+  };
+
   const handleConfirmDelete = async () => {
-    if (!pendingDelete?.upload) return;
-    const uploadId = pendingDelete.upload._id;
+    if (!pendingDelete) return;
+
+    const idsToDelete = pendingDelete.uploads.map((u) => u._id);
 
     startTransition(async () => {
-      const res = await deleteUpload(uploadId);
+      const res = await deleteBulkUploads(idsToDelete);
       if (res.success) {
         toast.success(res.message);
-        setUploads((prev) => prev.filter((u) => u._id !== uploadId));
-        if (previewImage?._id === uploadId) setPreviewImage(null);
+        setUploads((prev) => prev.filter((u) => !idsToDelete.includes(u._id)));
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          idsToDelete.forEach((id) => next.delete(id));
+          return next;
+        });
+        if (previewImage && idsToDelete.includes(previewImage._id)) {
+          setPreviewImage(null);
+        }
         setPendingDelete(null);
       } else {
-        toast.error(res.error || 'Failed to delete upload');
+        toast.error(res.error || 'Failed to delete selected uploads');
       }
     });
   };
@@ -169,8 +249,8 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
 
   // Filter calculations
   const inUseCount = uploads.filter((u) => (activeReferences[u.url] || []).length > 0).length;
-  const avatarCount = uploads.filter((u) => (activeReferences[u.url] || []).some(r => r.includes('Avatar'))).length;
-  const bgCount = uploads.filter((u) => (activeReferences[u.url] || []).some(r => r.includes('Background'))).length;
+  const avatarCount = uploads.filter((u) => (activeReferences[u.url] || []).some((r) => r.includes('Avatar'))).length;
+  const bgCount = uploads.filter((u) => (activeReferences[u.url] || []).some((r) => r.includes('Background'))).length;
   const unusedCount = uploads.length - inUseCount;
 
   const filteredUploads = uploads.filter((u) => {
@@ -179,22 +259,23 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
     const filename = (u.key ? u.key.split('/').pop() : '').toLowerCase();
     const query = searchQuery.toLowerCase().trim();
 
-    // Query search match
-    if (query && !filename.includes(query) && !refs.some(r => r.toLowerCase().includes(query))) {
+    if (query && !filename.includes(query) && !refs.some((r) => r.toLowerCase().includes(query))) {
       return false;
     }
 
-    // Filter tab match
     if (activeFilter === 'in-use') return isInUse;
-    if (activeFilter === 'avatars') return refs.some(r => r.includes('Avatar'));
-    if (activeFilter === 'backgrounds') return refs.some(r => r.includes('Background'));
+    if (activeFilter === 'avatars') return refs.some((r) => r.includes('Avatar'));
+    if (activeFilter === 'backgrounds') return refs.some((r) => r.includes('Background'));
     if (activeFilter === 'unused') return !isInUse;
 
     return true;
   });
 
+  const selectedUploadsList = uploads.filter((u) => selectedIds.has(u._id));
+  const selectedTotalBytes = selectedUploadsList.reduce((acc, u) => acc + (u.size || 0), 0);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       {/* Hidden File Input for Direct Upload */}
       <input
         ref={fileInputRef}
@@ -218,7 +299,7 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
             <div>
               <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Storage & Uploads</h1>
               <p className="text-sm text-slate-500">
-                Manage your media assets, check active page usage, and monitor your cloud storage.
+                Manage your media vault, bulk delete unused files, or set active profile images.
               </p>
             </div>
           </div>
@@ -254,7 +335,6 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
             </div>
           </div>
 
-          {/* Gradient Progress Bar */}
           <div className="w-full h-3.5 bg-slate-200/90 rounded-full overflow-hidden p-0.5 shadow-inner">
             <div
               className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${progressBarColor}`}
@@ -299,40 +379,56 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
         </div>
       </div>
 
-      {/* ═══ Uploads Gallery & Filter System ═══ */}
+      {/* ═══ Uploads Gallery & Multi-Select Manager ═══ */}
       <SectionBox>
-        {/* Top Control Bar: Search & Filter Tabs */}
+        {/* Top Control Bar: Search & Filter Tabs & Select All */}
         <div className="space-y-4 mb-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">Uploaded Media Gallery</h2>
               <p className="text-xs text-slate-500">
-                Click any image to view in high resolution, copy CDN link, or manage file.
+                Select multiple files to bulk delete, or apply directly as Avatar/Background.
               </p>
             </div>
 
-            {/* Live Search Input */}
-            <div className="relative w-full md:w-64">
-              <FontAwesomeIcon
-                icon={faMagnifyingGlass}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"
-              />
-              <input
-                type="text"
-                placeholder="Search assets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
-              {searchQuery && (
+            <div className="flex items-center gap-2">
+              {/* Select All Toggle Button */}
+              {filteredUploads.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs p-1"
+                  onClick={selectedIds.size === filteredUploads.length ? clearSelection : selectAllFiltered}
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <FontAwesomeIcon icon={faXmark} />
+                  <FontAwesomeIcon icon={faCheckDouble} className="text-xs text-slate-500" />
+                  <span>
+                    {selectedIds.size === filteredUploads.length ? 'Deselect All' : 'Select All'}
+                  </span>
                 </button>
               )}
+
+              {/* Live Search Input */}
+              <div className="relative w-full sm:w-60">
+                <FontAwesomeIcon
+                  icon={faMagnifyingGlass}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"
+                />
+                <input
+                  type="text"
+                  placeholder="Search assets..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs p-1"
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -390,19 +486,25 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
             {filteredUploads.map((upload) => {
               const refs = activeReferences[upload.url] || [];
               const isInUse = refs.length > 0;
-              const isAvatar = refs.some(r => r.includes('Avatar'));
-              const isBackground = refs.some(r => r.includes('Background'));
-              const isLinkIcon = refs.some(r => r.includes('Link'));
+              const isAvatar = refs.some((r) => r.includes('Avatar'));
+              const isBackground = refs.some((r) => r.includes('Background'));
+              const isLinkIcon = refs.some((r) => r.includes('Link'));
               const filename = upload.key ? upload.key.split('/').pop() : 'Image';
               const isCopied = copiedId === upload._id;
+              const isSelected = selectedIds.has(upload._id);
 
               return (
                 <div
                   key={upload._id}
-                  className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-200 flex flex-col hover:border-slate-300"
+                  onClick={() => toggleSelect(upload._id)}
+                  className={`group bg-white rounded-2xl border overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer select-none ${
+                    isSelected
+                      ? 'border-blue-600 ring-2 ring-blue-500/30 shadow-md'
+                      : 'border-slate-200/90 hover:border-slate-300'
+                  }`}
                 >
-                  {/* Thumbnail Container with Hover Controls */}
-                  <div className="relative aspect-square bg-slate-100 overflow-hidden cursor-pointer">
+                  {/* Thumbnail Container */}
+                  <div className="relative aspect-square bg-slate-100 overflow-hidden">
                     <SafeImage
                       src={upload.url}
                       alt={filename}
@@ -417,6 +519,23 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                         </div>
                       }
                     />
+
+                    {/* Selection Checkbox (Top Right) */}
+                    <div className="absolute top-2.5 right-2.5 z-20">
+                      <div
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+                          isSelected
+                            ? 'bg-blue-600 text-white shadow-md'
+                            : 'bg-black/40 hover:bg-black/60 text-white/80'
+                        }`}
+                      >
+                        {isSelected ? (
+                          <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                        ) : (
+                          <div className="w-3.5 h-3.5 rounded border border-white/80" />
+                        )}
+                      </div>
+                    </div>
 
                     {/* Status Pill Badge (Top Left) */}
                     <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
@@ -446,14 +565,14 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                     </div>
 
                     {/* Interactive Floating Quick Actions Overlay */}
-                    <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-4">
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-4"
+                    >
                       {/* Fullscreen Lightbox Button */}
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPreviewImage(upload);
-                        }}
+                        onClick={() => setPreviewImage(upload)}
                         title="View Full Resolution"
                         className="w-10 h-10 rounded-xl bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-lg transition-transform active:scale-90 hover:scale-105 cursor-pointer"
                       >
@@ -463,10 +582,7 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                       {/* Copy CDN Link Button */}
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopyLink(upload);
-                        }}
+                        onClick={() => handleCopyLink(upload)}
                         title="Copy CDN Link"
                         className="w-10 h-10 rounded-xl bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-lg transition-transform active:scale-90 hover:scale-105 cursor-pointer"
                       >
@@ -481,7 +597,6 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                         href={upload.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
                         title="Open in new tab"
                         className="w-10 h-10 rounded-xl bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-lg transition-transform active:scale-90 hover:scale-105"
                       >
@@ -491,7 +606,10 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                   </div>
 
                   {/* Metadata & Actions Footer */}
-                  <div className="p-3.5 flex-grow flex flex-col justify-between space-y-3 bg-white">
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-3.5 flex-grow flex flex-col justify-between space-y-3 bg-white"
+                  >
                     <div>
                       <p
                         className="text-xs font-bold text-slate-800 truncate"
@@ -513,13 +631,36 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                       </div>
                     </div>
 
+                    {/* Quick Apply Buttons: Set as Avatar / Background */}
+                    <div className="grid grid-cols-2 gap-1.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleSetAvatar(upload)}
+                        title="Set this image as profile avatar"
+                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg transition active:scale-95 cursor-pointer"
+                      >
+                        <FontAwesomeIcon icon={faUserCircle} />
+                        <span>Set Avatar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSetBackground(upload)}
+                        title="Set this image as page background"
+                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-[10px] font-bold rounded-lg transition active:scale-95 cursor-pointer"
+                      >
+                        <FontAwesomeIcon icon={faImage} />
+                        <span>Set BG</span>
+                      </button>
+                    </div>
+
                     {/* Action Row: Delete & Copy */}
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
                       <button
                         type="button"
                         onClick={() => handleDeleteClick(upload)}
                         aria-label={`Delete upload ${filename}`}
-                        className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-2 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer active:scale-95"
+                        className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-1.5 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer active:scale-95"
                       >
                         <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
                         <span>Delete</span>
@@ -529,7 +670,7 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                         type="button"
                         onClick={() => handleCopyLink(upload)}
                         title="Copy CDN Link"
-                        className="px-3 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer active:scale-95"
+                        className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer active:scale-95"
                       >
                         <FontAwesomeIcon
                           icon={isCopied ? faCheck : faCopy}
@@ -545,6 +686,41 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
         )}
       </SectionBox>
 
+      {/* ═══ Floating Bulk Selection Action Bar ═══ */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-950/95 text-white px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-800 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-200 max-w-xl w-[90%] sm:w-auto justify-between">
+          <div className="flex items-center gap-3">
+            <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+              {selectedIds.size}
+            </span>
+            <div className="text-xs">
+              <p className="font-bold">{selectedIds.size} files selected</p>
+              <p className="text-slate-400 font-mono">{formatBytes(selectedTotalBytes)} total</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleBulkDeleteClick}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-md flex items-center gap-1.5 cursor-pointer"
+            >
+              <FontAwesomeIcon icon={faTrash} className="text-xs" />
+              <span>Delete ({selectedIds.size})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="p-2 text-slate-400 hover:text-white rounded-lg transition cursor-pointer"
+              title="Clear selection"
+            >
+              <FontAwesomeIcon icon={faXmark} className="text-sm" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ═══ High-Resolution Lightbox Modal ═══ */}
       {previewImage && (
         <div
@@ -555,7 +731,6 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
             className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="flex items-center justify-between p-4 px-6 border-b border-slate-100">
               <div className="min-w-0 flex-1 pr-4">
                 <h3 className="font-bold text-slate-900 text-sm truncate">
@@ -574,7 +749,6 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
               </button>
             </div>
 
-            {/* Modal Image View */}
             <div className="relative w-full max-h-[60vh] h-96 bg-slate-950 flex items-center justify-center overflow-hidden">
               <SafeImage
                 src={previewImage.url}
@@ -584,7 +758,6 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
               />
             </div>
 
-            {/* Modal Footer Controls */}
             <div className="p-4 px-6 bg-slate-50 flex items-center justify-between gap-3">
               <div className="text-xs text-slate-500 truncate font-mono max-w-xs">
                 {previewImage.url}
@@ -614,7 +787,7 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
         </div>
       )}
 
-      {/* ═══ Safety Deletion Modal (D-15, D-16) ═══ */}
+      {/* ═══ Safety Deletion Modal (Single & Bulk) ═══ */}
       {pendingDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
@@ -628,58 +801,61 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
               </span>
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
-                  {pendingDelete.inUse ? 'Active Media in Use' : 'Delete Uploaded Media?'}
+                  {pendingDelete.type === 'bulk'
+                    ? `Delete ${pendingDelete.uploads.length} Media Files?`
+                    : pendingDelete.inUse
+                    ? 'Active Media in Use'
+                    : 'Delete Uploaded Media?'}
                 </h3>
-                
-                {/* Visual Thumbnail Preview */}
-                <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 rounded-2xl p-3 my-3.5">
-                  <div className="relative w-14 h-14 rounded-xl bg-slate-200 overflow-hidden shrink-0">
-                    <SafeImage
-                      src={pendingDelete.upload.url}
-                      alt="Thumbnail"
-                      fill
-                      className="object-cover"
-                      fallback={
-                        <div className="w-full h-full flex items-center justify-center text-slate-400">
-                          <FontAwesomeIcon icon={faImages} className="text-sm" />
-                        </div>
-                      }
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1 text-left">
-                    <p className="text-xs font-bold text-slate-800 truncate">
-                      {pendingDelete.upload.key ? pendingDelete.upload.key.split('/').pop() : 'Image'}
+
+                {/* Bulk Summary vs Single Preview */}
+                {pendingDelete.type === 'bulk' ? (
+                  <div className="my-3.5 p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2">
+                    <p className="text-xs font-bold text-slate-800">
+                      Total Selected: {pendingDelete.uploads.length} files (
+                      {formatBytes(pendingDelete.uploads.reduce((acc, u) => acc + (u.size || 0), 0))})
                     </p>
-                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                      {formatBytes(pendingDelete.upload.size)}
-                    </p>
+                    {pendingDelete.inUse && (
+                      <p className="text-xs text-amber-700 font-semibold">
+                        ⚠️ {pendingDelete.inUseCount} of these files are currently active on your profile.
+                      </p>
+                    )}
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 rounded-2xl p-3 my-3.5">
+                    <div className="relative w-14 h-14 rounded-xl bg-slate-200 overflow-hidden shrink-0">
+                      <SafeImage
+                        src={pendingDelete.upload.url}
+                        alt="Thumbnail"
+                        fill
+                        className="object-cover"
+                        fallback={
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <FontAwesomeIcon icon={faImages} className="text-sm" />
+                          </div>
+                        }
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1 text-left">
+                      <p className="text-xs font-bold text-slate-800 truncate">
+                        {pendingDelete.upload.key ? pendingDelete.upload.key.split('/').pop() : 'Image'}
+                      </p>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                        {formatBytes(pendingDelete.upload.size)}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {pendingDelete.inUse ? (
-                    <>
-                      <p className="mb-2">
-                        This image is currently active as:{' '}
-                        <span className="font-bold text-slate-900">
-                          {pendingDelete.references.join(', ')}
-                        </span>
-                        .
-                      </p>
-                      <span className="text-xs text-amber-800 block font-medium bg-amber-50 p-3 rounded-xl border border-amber-200/80">
-                        Deleting this file will delete it from AWS S3, release{' '}
-                        <strong>{formatBytes(pendingDelete.upload.size)}</strong>, and safely clear the reference on your profile.
-                      </span>
-                    </>
+                    <span className="text-xs text-amber-800 block font-medium bg-amber-50 p-3 rounded-xl border border-amber-200/80">
+                      Deleting will remove files from AWS S3, release cloud storage, and safely unset any active avatar or background references on your public page.
+                    </span>
                   ) : (
-                    <>
-                      <p>
-                        Are you sure you want to permanently delete this upload?
-                      </p>
-                      <span className="text-xs text-slate-500 mt-1 block">
-                        File will be deleted from cloud storage and {formatBytes(pendingDelete.upload.size)} will be freed.
-                      </span>
-                    </>
+                    <p>
+                      Are you sure you want to permanently delete these files from your cloud storage?
+                    </p>
                   )}
                 </div>
               </div>
@@ -701,7 +877,11 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                 className="flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl transition cursor-pointer disabled:opacity-50 shadow-md shadow-red-600/20 active:scale-95"
               >
                 {isPending && <FontAwesomeIcon icon={faSpinner} className="animate-spin text-xs" />}
-                <span>Delete Upload</span>
+                <span>
+                  {pendingDelete.type === 'bulk'
+                    ? `Delete ${pendingDelete.uploads.length} Files`
+                    : 'Delete Upload'}
+                </span>
               </button>
             </div>
           </div>
