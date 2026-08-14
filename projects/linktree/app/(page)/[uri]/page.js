@@ -25,12 +25,14 @@ import {
   faPhone,
   faGlobe,
   faChevronRight,
+  faCircleCheck,
   faLink as faLinkSolid,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
+import PublicShareButton from '@/components/buttons/PublicShareButton';
 import { isLinkLive } from '@/lib/linkLifecycle';
 import { getTheme } from '@/lib/themes';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
@@ -117,124 +119,129 @@ const UserPage = async ({ params }) => {
   const liveLinks = (page.links || []).filter((link) => isLinkLive(link, renderNow));
 
   return (
-    <div className={`min-h-screen ${pageBgClass} ${currentTheme.textColor} transition-colors duration-300`}>
-      {/* Header Banner */}
-      <div
-        className="h-80 bg-slate-900 bg-cover bg-center transition-all duration-300 relative shadow-inner"
-        style={headerStyle}
-      >
-        <div className={`absolute inset-0 ${headerOverlayClass}`} />
-      </div>
+    <div className={`min-h-screen ${pageBgClass} ${currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between`}>
+      {/* Top Navbar */}
+      <header className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between z-20">
+        <Link 
+          href="/"
+          className="flex items-center gap-1.5 text-white/90 hover:text-white transition-colors font-bold text-lg tracking-tight focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none rounded-lg p-1"
+        >
+          <FontAwesomeIcon icon={faLinkSolid} className="text-sm text-blue-400" />
+          <span>linktree</span>
+        </Link>
+        <PublicShareButton 
+          url={typeof window !== 'undefined' ? window.location.href : undefined} 
+          title={page.displayName || page.uri} 
+        />
+      </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-28 sm:-mt-32 relative z-10 pb-16">
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-5 sm:p-8 shadow-2xl transition-all">
-          {/* Avatar Section */}
-          <div className="flex flex-col items-center -mt-18 sm:-mt-24 mb-5 sm:mb-6">
-            <div className="rounded-full ring-4 ring-white/20 shadow-xl overflow-hidden">
-              <ProfileAvatar
-                src={user?.image}
-                name={page.displayName || user?.name || uri}
-                size={128}
-              />
-            </div>
-          </div>
+      {/* Main Profile Container */}
+      <main className="max-w-2xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col items-center">
+        {/* Avatar Section */}
+        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full ring-4 ring-white/30 shadow-2xl overflow-hidden mb-4 shrink-0 bg-slate-800">
+          <ProfileAvatar
+            src={user?.image}
+            name={page.displayName || user?.name || uri}
+            size={128}
+          />
+        </div>
 
-          <h1 className={`text-2xl sm:text-3xl font-bold text-center mb-1.5 ${currentTheme.headingColor} tracking-tight break-words px-2`}>
+        {/* Name and Verified Badge */}
+        <div className="flex items-center justify-center gap-2 text-center px-2">
+          <h1 className={`text-2xl sm:text-3xl font-extrabold ${currentTheme.headingColor} tracking-tight break-words`}>
             {page.displayName || uri}
           </h1>
-
-          {page.location && (
-            <div className="flex justify-center mb-3">
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs sm:text-sm ${currentTheme.mutedTextColor} font-medium`}>
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="opacity-80 text-[11px]" />
-                <span className="truncate max-w-[240px]">{page.location}</span>
-              </div>
-            </div>
-          )}
-
-          {page.bio && (
-            <div className="max-w-md mx-auto text-center mb-8 px-2">
-              <p className={`${currentTheme.mutedTextColor} leading-relaxed text-sm sm:text-base break-words`}>
-                {page.bio}
-              </p>
-            </div>
-          )}
-
-          {/* Social Buttons */}
-          {page.buttons && Object.keys(page.buttons).length > 0 && (
-            <div className="flex flex-wrap gap-3 sm:gap-4 justify-center mt-2 mb-8">
-              {Object.keys(page.buttons).map((buttonKey) => (
-                <Link
-                  key={buttonKey}
-                  href={buttonLink(buttonKey, page.buttons[buttonKey])}
-                  aria-label={`Open ${buttonKey}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`rounded-full p-3.5 sm:p-4 flex items-center justify-center ${currentTheme.buttonStyle} backdrop-blur-sm 
-                           shadow-md hover:shadow-lg transition-all duration-200 w-12 h-12 sm:w-14 sm:h-14 min-w-[44px] min-h-[44px] hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none`}
-                >
-                  <FontAwesomeIcon
-                    className="h-5 w-5 sm:h-6 sm:w-6"
-                    icon={iconMapping[buttonKey] || faGlobe}
-                  />
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Links Grid - Server-authoritative lifecycle filtering (LINK-01..LINK-04) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 w-full max-w-3xl mx-auto">
-            {liveLinks.map((link, index) => {
-              const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
-              return (
-                <Link
-                  key={linkKey}
-                  href={link.url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  ping={`${process.env.NEXT_PUBLIC_URL || ''}api/click?url=${btoa(link.url || '')}&page=${page.uri}`}
-                  className={`group relative ${currentTheme.cardBg} ${currentTheme.cardBorder} rounded-2xl flex items-center p-4 sm:p-5 gap-4 
-                           transition-all duration-200 backdrop-blur-sm hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none min-h-[72px]`}
-                >
-                  <div className={`${currentTheme.iconBg} w-14 h-14 sm:w-16 sm:h-16 rounded-xl 
-                                flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/15 shadow-inner`}>
-                    <LinkIcon
-                      src={link.icon}
-                      title={link.title || 'Untitled Link'}
-                      size={64}
-                    />
-                  </div>
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <h3 className={`font-semibold text-base sm:text-lg truncate ${currentTheme.headingColor}`}>
-                      {link.title || 'Untitled Link'}
-                    </h3>
-                    {link.subtitle && (
-                      <p className={`${currentTheme.subtitleColor} text-xs sm:text-sm truncate mt-0.5`}>
-                        {link.subtitle}
-                      </p>
-                    )}
-                  </div>
-                  <FontAwesomeIcon
-                    icon={faChevronRight}
-                    className="text-xs opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-1"
-                  />
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Made with Linktree presentational footer badge */}
-          <div className="text-center mt-10 pt-4 border-t border-white/5">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-[11px] font-semibold text-white/90 backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95"
-            >
-              <FontAwesomeIcon icon={faLinkSolid} className="text-blue-400 text-[10px]" />
-              <span>Made with Linktree</span>
-            </Link>
-          </div>
+          <FontAwesomeIcon icon={faCircleCheck} className="text-blue-400 text-lg shrink-0" title="Verified Profile" />
         </div>
-      </div>
+
+        {/* Handle / Location Subtitle */}
+        <p className={`text-xs sm:text-sm font-medium ${currentTheme.mutedTextColor} text-center mt-1`}>
+          @{uri} {page.location ? `• ${page.location}` : ''}
+        </p>
+
+        {/* Bio */}
+        {page.bio && (
+          <div className="max-w-md mx-auto text-center mt-3 mb-6 px-2">
+            <p className={`${currentTheme.mutedTextColor} leading-relaxed text-xs sm:text-sm break-words`}>
+              {page.bio}
+            </p>
+          </div>
+        )}
+
+        {/* Social Buttons */}
+        {page.buttons && Object.keys(page.buttons).length > 0 && (
+          <div className="flex flex-wrap gap-3 sm:gap-3.5 justify-center my-3 mb-8">
+            {Object.keys(page.buttons).map((buttonKey) => (
+              <Link
+                key={buttonKey}
+                href={buttonLink(buttonKey, page.buttons[buttonKey])}
+                aria-label={`Open ${buttonKey}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`rounded-full flex items-center justify-center ${currentTheme.buttonStyle} backdrop-blur-md 
+                         shadow-md hover:shadow-lg transition-all duration-200 w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none`}
+              >
+                <FontAwesomeIcon
+                  className="h-4 w-4 sm:h-5 sm:w-5"
+                  icon={iconMapping[buttonKey] || faGlobe}
+                />
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Links Stack - Server-authoritative lifecycle filtering (LINK-01..LINK-04) */}
+        <div className="w-full space-y-3.5 max-w-xl mx-auto">
+          {liveLinks.map((link, index) => {
+            const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
+            return (
+              <Link
+                key={linkKey}
+                href={link.url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                ping={`${process.env.NEXT_PUBLIC_URL || ''}api/click?url=${btoa(link.url || '')}&page=${page.uri}`}
+                className={`group relative ${currentTheme.cardBg} ${currentTheme.cardBorder} rounded-2xl flex items-center p-4 sm:p-4.5 gap-4 
+                         transition-all duration-200 backdrop-blur-md hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none min-h-[68px] w-full`}
+              >
+                <div className={`${currentTheme.iconBg} w-12 h-12 rounded-xl 
+                              flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/15 shadow-inner`}>
+                  <LinkIcon
+                    src={link.icon}
+                    title={link.title || 'Untitled Link'}
+                    size={48}
+                  />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h3 className={`font-bold text-sm sm:text-base truncate ${currentTheme.headingColor}`}>
+                    {link.title || 'Untitled Link'}
+                  </h3>
+                  {link.subtitle && (
+                    <p className={`${currentTheme.subtitleColor} text-xs truncate mt-0.5`}>
+                      {link.subtitle}
+                    </p>
+                  )}
+                </div>
+                <FontAwesomeIcon
+                  icon={faChevronRight}
+                  className="text-xs opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-1"
+                />
+              </Link>
+            );
+          })}
+        </div>
+      </main>
+
+      {/* Made with Linktree Footer */}
+      <footer className="text-center py-6 pb-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-semibold text-white/90 backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95"
+        >
+          <FontAwesomeIcon icon={faLinkSolid} className="text-blue-400 text-[11px]" />
+          <span>Made with Linktree</span>
+        </Link>
+      </footer>
     </div>
   );
 };
