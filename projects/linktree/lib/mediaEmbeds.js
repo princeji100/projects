@@ -353,3 +353,42 @@ export function parseMediaUrl(input) {
 
   return null;
 }
+
+/**
+ * Builds an official, deterministic Apple Music embed iframe URL.
+ *
+ * @param {Object} media - Output from parseMediaUrl or Apple Music metadata
+ * @returns {string|null} - e.g. "https://embed.music.apple.com/us/album/abbey-road-2019-mix/1474815798"
+ */
+export function buildAppleMusicEmbedUrl(media) {
+  if (!media || typeof media !== 'object') {
+    return null;
+  }
+
+  const meta = media.metadata || media;
+  const storefront = typeof meta.storefront === 'string' ? meta.storefront.toLowerCase().trim() : '';
+  if (!/^[a-z]{2}$/.test(storefront) && storefront !== 'intl') {
+    return null;
+  }
+
+  const kind = media.kind || meta.kind;
+  const name = typeof meta.name === 'string' && meta.name ? encodeURIComponent(meta.name) : '';
+
+  if (kind === 'song' && meta.albumId && meta.songId) {
+    const slugPart = name ? `${name}/` : '';
+    return `https://embed.music.apple.com/${storefront}/album/${slugPart}${encodeURIComponent(meta.albumId)}?i=${encodeURIComponent(meta.songId)}`;
+  }
+
+  if (kind === 'album' && meta.albumId) {
+    const slugPart = name ? `${name}/` : '';
+    return `https://embed.music.apple.com/${storefront}/album/${slugPart}${encodeURIComponent(meta.albumId)}`;
+  }
+
+  if (kind === 'playlist' && meta.playlistId) {
+    const slugPart = name ? `${name}/` : '';
+    return `https://embed.music.apple.com/${storefront}/playlist/${slugPart}${encodeURIComponent(meta.playlistId)}`;
+  }
+
+  return null;
+}
+

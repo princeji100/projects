@@ -28,6 +28,7 @@ import LinktreeLogo from '@/components/media/LinktreeLogo';
 import PublicTipJar from '@/components/tipjar/PublicTipJar';
 import YouTubeEmbed from '@/components/media/YouTubeEmbed';
 import SpotifyEmbed from '@/components/media/SpotifyEmbed';
+import AppleMusicEmbed from '@/components/media/AppleMusicEmbed';
 
 export async function generateMetadata({ params }) {
   const { uri } = await params;
@@ -293,6 +294,20 @@ const UserPage = async ({ params }) => {
             if (media?.provider === 'spotify') {
               return (
                 <SpotifyEmbed
+                  key={linkKey}
+                  link={link}
+                  media={media}
+                  uri={page.uri}
+                  currentTheme={currentTheme}
+                  isLightText={isLightText}
+                />
+              );
+            }
+
+            // Apple Music Media Embed Card (Wave 11)
+            if (media?.provider === 'apple-music') {
+              return (
+                <AppleMusicEmbed
                   key={linkKey}
                   link={link}
                   media={media}
