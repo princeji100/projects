@@ -21,9 +21,13 @@ const PageButtonForm = ({ page, onButtonsChange }) => {
 
   useEffect(() => {
     if (onButtonsChange) {
-      onButtonsChange(buttonValues);
+      const ordered = {};
+      activeButtons.forEach((b) => {
+        ordered[b.key] = buttonValues[b.key] ?? '';
+      });
+      onButtonsChange(ordered);
     }
-  }, [buttonValues, onButtonsChange]);
+  }, [activeButtons, buttonValues, onButtonsChange]);
 
   const addButtonToProfile = (button) => {
     setActiveButtons((prev) => [...prev, button]);

@@ -9,11 +9,14 @@ import {
   faCopy,
   faExternalLinkAlt,
   faCheck,
+  faShareNodes,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import SectionBox from '../layout/SectionBox';
+import SafeImage from '@/components/media/SafeImage';
 
-const QRCodeCard = ({ uri, publicUrl }) => {
+const QRCodeCard = ({ uri, publicUrl, user }) => {
   const [copied, setCopied] = useState(false);
   const qrRef = useRef(null);
 
@@ -24,8 +27,8 @@ const QRCodeCard = ({ uri, publicUrl }) => {
     try {
       await navigator.clipboard.writeText(publicUrl);
       setCopied(true);
-      toast.success('Profile URL copied to clipboard');
-      setTimeout(() => setCopied(false), 2000);
+      toast.success('Profile URL copied to clipboard!');
+      setTimeout(() => setCopied(false), 2200);
     } catch {
       toast.error('Failed to copy URL');
     }
@@ -44,7 +47,7 @@ const QRCodeCard = ({ uri, publicUrl }) => {
     }
 
     try {
-      // Create a high-resolution 1024x1024 canvas for crisp physical scanning with quiet zone
+      // Create a high-resolution 1024x1024 canvas for crisp physical scanning
       const exportCanvas = document.createElement('canvas');
       exportCanvas.width = 1024;
       exportCanvas.height = 1024;
@@ -54,7 +57,7 @@ const QRCodeCard = ({ uri, publicUrl }) => {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, 1024, 1024);
 
-      // Draw the crisp QR code scaled up smoothly
+      // Draw the crisp QR code scaled up smoothly with margin
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(canvas, 64, 64, 896, 896);
 
@@ -65,7 +68,7 @@ const QRCodeCard = ({ uri, publicUrl }) => {
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      toast.success('QR Code downloaded as high-res PNG');
+      toast.success('High-Res QR Code (1024x1024) downloaded successfully!');
     } catch (err) {
       console.error('QR download error:', err);
       toast.error('Failed to download QR image');
@@ -78,14 +81,14 @@ const QRCodeCard = ({ uri, publicUrl }) => {
       : 'Canonical site URL is not configured (missing NEXT_PUBLIC_URL). Configure your site URL to generate scannable profile QR codes.';
 
     return (
-      <SectionBox>
-        <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-          <div className="text-slate-400 bg-slate-100 p-3.5 rounded-xl">
-            <FontAwesomeIcon icon={faQrcode} className="text-2xl" />
+      <SectionBox title="Share Profile">
+        <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left py-4">
+          <div className="text-slate-400 bg-slate-100 p-4 rounded-2xl">
+            <FontAwesomeIcon icon={faQrcode} className="text-3xl" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-800">Share Profile with QR Code</h2>
-            <p className="text-sm text-slate-500 mt-0.5">{message}</p>
+            <h3 className="text-lg font-bold text-slate-800">Share Profile with QR Code</h3>
+            <p className="text-sm text-slate-500 mt-1">{message}</p>
           </div>
         </div>
       </SectionBox>
@@ -93,84 +96,107 @@ const QRCodeCard = ({ uri, publicUrl }) => {
   }
 
   return (
-    <SectionBox>
-      <div className="flex flex-col md:flex-row items-center gap-8 justify-between">
-        {/* Info & Canonical URL */}
-        <div className="space-y-4 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start gap-3">
-            <div className="text-blue-600 bg-blue-50 p-2.5 rounded-xl">
-              <FontAwesomeIcon icon={faQrcode} className="text-2xl" />
+    <SectionBox title="Share Profile">
+      <div className="space-y-6">
+        {/* Header with Title & User Profile Badge */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <FontAwesomeIcon icon={faShareNodes} className="text-sm" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Share Profile</h2>
-              <p className="text-xs text-slate-500">
-                Scan or download your personalized QR code to share your links in the physical world
-              </p>
+              <h3 className="font-bold text-base text-slate-900">Share Your Linktree</h3>
+              <p className="text-xs text-slate-500">Scan or export your high-resolution QR code</p>
             </div>
           </div>
 
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 max-w-md">
-            <span className="text-xs font-mono text-slate-700 truncate">{publicUrl}</span>
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="text-xs font-medium text-slate-600 hover:text-blue-600 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer"
-                title="Copy URL"
-                aria-label="Copy public profile URL"
-              >
-                <FontAwesomeIcon icon={copied ? faCheck : faCopy} className={copied ? 'text-green-600' : ''} />
-              </button>
-              <a
-                href={publicUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-medium text-slate-600 hover:text-blue-600 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
-                title="Open in new tab"
-                aria-label="Open public profile in a new browser tab"
-              >
-                <FontAwesomeIcon icon={faExternalLinkAlt} />
-              </a>
+          {/* User handle badge */}
+          <div className="flex items-center gap-2 self-start sm:self-auto bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200/80">
+            <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 ring-1 ring-slate-300 shrink-0 flex items-center justify-center">
+              <SafeImage
+                src={user?.image}
+                width={20}
+                height={20}
+                alt={user?.name || uri}
+                className="object-cover w-full h-full"
+                fallback={<FontAwesomeIcon icon={faUser} className="text-[10px] text-slate-400" />}
+              />
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="flex items-center gap-2 px-5 py-2.5 min-h-[44px] bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-sm font-semibold transition-all shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer"
-            >
-              <FontAwesomeIcon icon={faDownload} />
-              <span>Download PNG</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="flex items-center gap-2 px-5 py-2.5 min-h-[44px] border border-slate-200 hover:bg-slate-50 active:scale-95 text-slate-700 rounded-xl text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer"
-            >
-              <FontAwesomeIcon icon={copied ? faCheck : faCopy} className={copied ? 'text-green-600' : ''} />
-              <span>{copied ? 'Copied' : 'Copy Link'}</span>
-            </button>
+            <span className="text-xs font-semibold text-slate-700">@{uri}</span>
           </div>
         </div>
 
-        {/* QR Code Canvas with High Contrast & Quiet Zone */}
-        <div
-          ref={qrRef}
-          className="bg-white p-4 rounded-2xl shadow-lg border border-slate-100 flex flex-col items-center gap-2 flex-shrink-0"
-        >
-          <QRCodeCanvas
-            value={publicUrl}
-            size={180}
-            level="H"
-            includeMargin={true}
-            bgColor="#ffffff"
-            fgColor="#000000"
-            marginSize={4}
-            className="rounded-lg"
-          />
-          <span className="text-[11px] font-medium text-slate-400">/{uri}</span>
+        {/* Content Body: QR Canvas + Action Controls */}
+        <div className="flex flex-col md:flex-row items-center gap-8 justify-between bg-slate-50/70 p-5 sm:p-6 rounded-2xl border border-slate-200/70">
+          {/* QR Code Container */}
+          <div
+            ref={qrRef}
+            className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col items-center gap-2 flex-shrink-0 transition-transform hover:scale-102 duration-200"
+          >
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+              My Linktree QR Code
+            </span>
+            <QRCodeCanvas
+              value={publicUrl}
+              size={180}
+              level="H"
+              includeMargin={true}
+              bgColor="#ffffff"
+              fgColor="#0f172a"
+              marginSize={3}
+              className="rounded-xl"
+            />
+            <span className="text-[11px] font-mono font-medium text-slate-400">/{uri}</span>
+          </div>
+
+          {/* Controls & Export Panel */}
+          <div className="space-y-4 text-center md:text-left flex-1 w-full">
+            {/* Copy URL Field */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Public Profile URL
+              </label>
+              <div className="bg-white p-2 sm:p-2.5 rounded-xl border border-slate-200 flex items-center justify-between gap-2 shadow-xs">
+                <span className="text-xs font-mono text-slate-700 truncate pl-1">{publicUrl}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                    title="Copy URL"
+                  >
+                    <FontAwesomeIcon icon={copied ? faCheck : faCopy} className={copied ? 'text-emerald-600' : 'text-slate-500'} />
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                  <a
+                    href={publicUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    title="Open in new tab"
+                  >
+                    <FontAwesomeIcon icon={faExternalLinkAlt} className="text-xs" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Download Buttons & Print Helper */}
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
+                <FontAwesomeIcon icon={faDownload} className="text-sm text-slate-300" />
+                <span>Download High-Res PNG (1024×1024)</span>
+              </button>
+
+              <p className="text-[11px] text-slate-400">
+                Ideal for print (stickers, flyers, business cards) & digital sharing.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </SectionBox>

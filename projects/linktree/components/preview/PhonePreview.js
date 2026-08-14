@@ -71,7 +71,8 @@ export default function PhonePreview({
   const renderNow = new Date();
   const visibleLinks = (rawLinks || []).filter((l) => isLinkLive(l, renderNow));
 
-  const buttonKeys = Object.keys(buttons || {}).filter((k) => Boolean(buttons[k]));
+  // Extract active button keys - show immediately when added or edited
+  const buttonKeys = Object.keys(buttons || {}).filter((k) => buttons[k] !== undefined && buttons[k] !== null);
 
   return (
     <div className="sticky top-24 self-start w-full space-y-3">
