@@ -3,12 +3,14 @@ import { redirect } from 'next/navigation';
 import connectToDatabase from '@/lib/connectToDB';
 import AllowedUser from '@/models/AllowedUser';
 import InviteRequest from '@/models/InviteRequest';
+import Feedback from '@/models/Feedback';
+import Page from '@/models/Page';
 import AdminAllowlistClient from '@/components/admin/AdminAllowlistClient';
 import { isUserAdmin, getAdminEmail } from '@/lib/admin';
 
 export const metadata = {
   title: 'Admin Control Center | Linktree',
-  description: 'Manage invite-only access and approve creator applications',
+  description: 'Manage invite-only access, handles, and user bug reports/feedback',
 };
 
 export default async function AdminPage() {
@@ -22,16 +24,38 @@ export default async function AdminPage() {
 
   // Direct database read from Server Component
   await connectToDatabase();
-  const [rawUsers, rawRequests] = await Promise.all([
+  const [rawUsers, rawRequests, rawFeedbacks, rawPages] = await Promise.all([
     AllowedUser.find({}).sort({ createdAt: -1 }).lean(),
     InviteRequest.find({}).sort({ createdAt: -1 }).lean(),
+    Feedback.find({}).sort({ createdAt: -1 }).lean(),
+    Page.find({}, { uri: 1, owner: 1, displayName: 1, links: 1, updatedAt: 1 }).lean(),
   ]);
 
-  const allowedUsers = rawUsers.map((user) => ({
-    _id: user._id.toString(),
-    email: user.email,
-    createdAt: user.createdAt ? user.createdAt.toISOString() : null,
-  }));
+  // Map pages by owner email for instant handle lookup
+  const pageMap = new Map();
+  rawPages.forEach((p) => {
+    if (p.owner) {
+      pageMap.set(p.owner.toLowerCase().trim(), {
+        uri: p.uri,
+        displayName: p.displayName || '',
+        linksCount: p.links ? p.links.length : 0,
+        updatedAt: p.updatedAt ? p.updatedAt.toISOString() : null,
+      });
+    }
+  });
+
+  const allowedUsers = rawUsers.map((user) => {
+    const emailKey = user.email.toLowerCase().trim();
+    const userPage = pageMap.get(emailKey);
+    return {
+      _id: user._id.toString(),
+      email: user.email,
+      handle: userPage?.uri || null,
+      displayName: userPage?.displayName || '',
+      linksCount: userPage?.linksCount || 0,
+      createdAt: user.createdAt ? user.createdAt.toISOString() : null,
+    };
+  });
 
   const inviteRequests = rawRequests.map((req) => ({
     _id: req._id.toString(),
@@ -42,11 +66,25 @@ export default async function AdminPage() {
     createdAt: req.createdAt ? req.createdAt.toISOString() : null,
   }));
 
+  const feedbacks = rawFeedbacks.map((f) => ({
+    _id: f._id.toString(),
+    userEmail: f.userEmail,
+    userName: f.userName || '',
+    type: f.type || 'feedback',
+    subject: f.subject || '',
+    message: f.message || '',
+    pageUri: f.pageUri || '',
+    status: f.status || 'open',
+    adminNote: f.adminNote || '',
+    createdAt: f.createdAt ? f.createdAt.toISOString() : null,
+  }));
+
   return (
     <div className="max-w-5xl mx-auto py-2">
       <AdminAllowlistClient
         initialAllowedUsers={allowedUsers}
         initialInviteRequests={inviteRequests}
+        initialFeedbacks={feedbacks}
         adminEmail={adminEmail}
       />
     </div>

@@ -13,11 +13,14 @@ import {
   faArrowUpRightFromSquare,
   faRightFromBracket,
   faUser,
+  faComments,
 } from '@fortawesome/free-solid-svg-icons';
 import SafeImage from '@/components/media/SafeImage';
+import FeedbackModal from '@/components/feedback/FeedbackModal';
 
 export default function UserNavDropdown({ user, uri, isAdmin = false, size = 'md' }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -114,6 +117,22 @@ export default function UserNavDropdown({ user, uri, isAdmin = false, size = 'md
             </div>
           )}
 
+          {/* Feedback & Bug Report for All Users */}
+          <div className="p-1 border-b border-slate-100">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setIsOpen(false);
+                setIsFeedbackOpen(true);
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors text-left cursor-pointer"
+            >
+              <FontAwesomeIcon icon={faComments} className="w-4 text-center text-purple-600" />
+              <span>Feedback &amp; Bug Report</span>
+            </button>
+          </div>
+
           {/* Logout Action */}
           <div className="p-1">
             <button
@@ -131,6 +150,12 @@ export default function UserNavDropdown({ user, uri, isAdmin = false, size = 'md
           </div>
         </div>
       )}
+
+      {/* Global Feedback Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { requireSession } from '@/lib/requireSession';
 import connectToDatabase from '@/lib/connectToDB';
 import AllowedUser from '@/models/AllowedUser';
 import InviteRequest from '@/models/InviteRequest';
+import Feedback from '@/models/Feedback';
 import clientPromise from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
@@ -188,5 +189,52 @@ export async function deleteInviteRequest(requestId) {
   } catch (error) {
     console.error('Error deleting invite request:', error);
     return { success: false, error: 'Failed to delete request' };
+  }
+}
+
+/**
+ * Updates the status of a user feedback or bug report (open, resolved, closed).
+ */
+export async function updateFeedbackStatus(feedbackId, status, adminNote = '') {
+  const auth = await verifyAdminCaller();
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
+  }
+
+  if (!['open', 'resolved', 'closed'].includes(status)) {
+    return { success: false, error: 'Invalid status' };
+  }
+
+  try {
+    await connectToDatabase();
+    await Feedback.findByIdAndUpdate(feedbackId, {
+      status,
+      adminNote: adminNote.trim(),
+    });
+    revalidatePath('/dashboard/admin');
+    return { success: true, message: `Feedback marked as ${status}` };
+  } catch (error) {
+    console.error('Error updating feedback status:', error);
+    return { success: false, error: 'Failed to update feedback status' };
+  }
+}
+
+/**
+ * Deletes a feedback or bug report record.
+ */
+export async function deleteFeedback(feedbackId) {
+  const auth = await verifyAdminCaller();
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
+  }
+
+  try {
+    await connectToDatabase();
+    await Feedback.findByIdAndDelete(feedbackId);
+    revalidatePath('/dashboard/admin');
+    return { success: true, message: 'Feedback report deleted' };
+  } catch (error) {
+    console.error('Error deleting feedback report:', error);
+    return { success: false, error: 'Failed to delete feedback' };
   }
 }
