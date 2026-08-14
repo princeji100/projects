@@ -10,5 +10,5 @@ export default function PageTitle({ isAdmin = false }) {
   const currentItem = navItems.find((item) => item.href === pathname);
   const title = currentItem ? currentItem.label : 'Settings';
 
-  return <h1 className="text-base font-semibold text-slate-700">{title}</h1>;
+  return <h1 className="text-lg font-bold text-slate-800 tracking-tight">{title}</h1>;
 }
