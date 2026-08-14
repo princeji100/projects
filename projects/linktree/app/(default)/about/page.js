@@ -113,7 +113,7 @@ export default function AboutPage() {
                 Full-Stack Software Engineer specializing in modern web ecosystems, cloud infrastructure, and interactive developer platforms. This Linktree application is built from scratch as an exclusive, multi-tenant link platform.
               </p>
 
-              {/* Primary Portfolio & Linktree Badges */}
+              {/* Primary Portfolio & External Social Badges */}
               <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
                 {/* Main Portfolio Link */}
                 <a
@@ -127,25 +127,25 @@ export default function AboutPage() {
                   <FontAwesomeIcon icon={faExternalLinkAlt} className="text-[10px] text-slate-400" />
                 </a>
 
-                {/* Linktree Profile Link */}
-                <Link
-                  href="/princeji"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold rounded-xl transition-all active:scale-95"
-                >
-                  <span>View Linktree: /princeji</span>
-                  <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
-                </Link>
-
                 {/* GitHub */}
                 <a
                   href="https://github.com/princeji100"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all"
+                  className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all active:scale-95"
                   title="GitHub Profile"
                 >
                   <FontAwesomeIcon icon={faGithub} className="text-sm" />
                   <span>GitHub</span>
+                </a>
+
+                {/* Contact Email */}
+                <a
+                  href="mailto:Princesrivastav216@gmail.com"
+                  className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-semibold rounded-xl transition-all active:scale-95"
+                >
+                  <FontAwesomeIcon icon={faEnvelope} className="text-xs" />
+                  <span>Get in Touch</span>
                 </a>
               </div>
             </div>
