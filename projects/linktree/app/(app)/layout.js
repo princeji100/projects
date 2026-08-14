@@ -16,6 +16,7 @@ import Link from "next/link";
 import connectToDatabase from "@/lib/connectToDB";
 import PageTitle from "@/components/layout/PageTitle";
 import LinktreeLogo from "@/components/media/LinktreeLogo";
+import UserNavDropdown from "@/components/layout/UserNavDropdown";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,21 +86,13 @@ export default async function AppLayout({ children }) {
                   <span>Share</span>
                 </button>
               )}
-              <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-                <div className="rounded-full bg-slate-100 overflow-hidden w-9 h-9 ring-1 ring-slate-200 shrink-0 flex items-center justify-center">
-                  <SafeImage 
-                    src={session?.user?.image} 
-                    width={36} 
-                    height={36} 
-                    alt={session?.user?.name || 'User avatar'}
-                    className="object-cover object-center w-full h-full"
-                    fallback={
-                      <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
-                        <FontAwesomeIcon icon={faUser} className="text-sm" />
-                      </div>
-                    }
-                  />
-                </div>
+              <div className="flex items-center pl-2 border-l border-slate-200">
+                <UserNavDropdown
+                  user={session?.user}
+                  uri={page?.uri}
+                  isAdmin={isAdmin}
+                  size="md"
+                />
               </div>
             </div>
           </header>
@@ -131,20 +124,12 @@ export default async function AppLayout({ children }) {
                   <span>Share</span>
                 </button>
               )}
-              <div className="rounded-full bg-slate-100 overflow-hidden w-8 h-8 ring-1 ring-slate-200 flex items-center justify-center">
-                <SafeImage 
-                  src={session?.user?.image} 
-                  width={32} 
-                  height={32} 
-                  alt={session?.user?.name || 'User avatar'}
-                  className="object-cover object-center w-full h-full"
-                  fallback={
-                    <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
-                      <FontAwesomeIcon icon={faUser} className="text-xs" />
-                    </div>
-                  }
-                />
-              </div>
+              <UserNavDropdown
+                user={session?.user}
+                uri={page?.uri}
+                isAdmin={isAdmin}
+                size="sm"
+              />
             </div>
           </header>
 
