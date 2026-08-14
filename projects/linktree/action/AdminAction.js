@@ -59,7 +59,7 @@ export async function addAllowedUser(rawEmail) {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    revalidatePath('/account/admin');
+    revalidatePath('/dashboard/admin');
     return { success: true, message: `Added ${email} to allowlist` };
   } catch (error) {
     console.error('Error adding allowed user:', error);
@@ -108,7 +108,7 @@ export async function removeAllowedUser(rawEmail) {
       console.error('Warning: Failed to clear database sessions for revoked user:', sessionErr);
     }
 
-    revalidatePath('/account/admin');
+    revalidatePath('/dashboard/admin');
     return { success: true, message: `Removed ${email} from allowlist and revoked sessions` };
   } catch (error) {
     console.error('Error removing allowed user:', error);

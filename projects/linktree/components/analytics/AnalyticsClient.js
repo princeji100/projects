@@ -41,7 +41,7 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
     if (range === selectedRange) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set('range', range);
-    router.push(`/account/analytics?${params.toString()}`);
+    router.push(`/dashboard/analytics?${params.toString()}`);
   };
 
   const handleCopy = async () => {

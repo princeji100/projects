@@ -13,7 +13,7 @@ const HeroForm = () => {
            const username = window.localStorage.getItem('Choiceusername');
            setUsername(username);
            window.localStorage.removeItem('Choiceusername');
-           redirect(`/account?Choiceusername=${username}`);
+           redirect(`/dashboard?Choiceusername=${username}`);
         }
     }, []);
 
@@ -23,10 +23,10 @@ const HeroForm = () => {
         if (trimmed.length > 0) {
             window.localStorage.setItem('Choiceusername', trimmed);
             if (session) {
-                redirect(`/account?Choiceusername=${trimmed}`);
+                redirect(`/dashboard?Choiceusername=${trimmed}`);
             } else {
                 await signIn('google');
-                redirect(`/account?Choiceusername=${trimmed}`);
+                redirect(`/dashboard?Choiceusername=${trimmed}`);
             }
         }
     };

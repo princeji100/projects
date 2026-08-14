@@ -16,7 +16,7 @@ export default async function AdminPage() {
   // D-03 / D-04 / D-05: Strict server-side authorization gate.
   // If not logged in, ADMIN_EMAIL unset, or caller does not match ADMIN_EMAIL, fail closed.
   if (!session || !adminEmail || session.user.email.toLowerCase().trim() !== adminEmail) {
-    redirect('/account');
+    redirect('/dashboard');
   }
 
   // Direct database read from Server Component

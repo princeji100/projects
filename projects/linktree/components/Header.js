@@ -34,7 +34,7 @@ const Header = () => {
           {session ? (
             <div className="flex items-center gap-3">
               <Link 
-                href={'/account'} 
+                href={'/dashboard'} 
                 className="hidden sm:inline-flex px-3.5 py-2 font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-colors"
               >
                 Dashboard

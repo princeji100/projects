@@ -18,14 +18,14 @@ import {
  */
 export function getNavItems(isAdmin = false) {
   const items = [
-    { href: '/account', label: 'Settings', icon: faGear },
-    { href: '/account/uploads', label: 'Uploads', icon: faImages },
-    { href: '/account/analytics', label: 'Analytics', icon: faChartLine },
+    { href: '/dashboard', label: 'Settings', icon: faGear },
+    { href: '/dashboard/uploads', label: 'Uploads', icon: faImages },
+    { href: '/dashboard/analytics', label: 'Analytics', icon: faChartLine },
   ];
 
   if (isAdmin) {
     items.push({
-      href: '/account/admin',
+      href: '/dashboard/admin',
       label: 'Admin',
       icon: faUserShield,
       isAdmin: true,

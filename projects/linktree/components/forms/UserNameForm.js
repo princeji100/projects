@@ -22,7 +22,7 @@ const UserNameForm = () => {
     try {
       const result = await handleFormSubmit(formdata);
       if (result?.success) {
-        router.push('/account?created=' + encodeURIComponent(name.trim().toLowerCase()));
+        router.push('/dashboard?created=' + encodeURIComponent(name.trim().toLowerCase()));
       } else {
         setErrorMessage(result?.error || 'Username is not available');
       }

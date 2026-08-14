@@ -35,6 +35,20 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/account',
+        destination: '/dashboard',
+        permanent: true,
+      },
+      {
+        source: '/account/:path*',
+        destination: '/dashboard/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

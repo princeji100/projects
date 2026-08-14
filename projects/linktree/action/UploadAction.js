@@ -147,8 +147,8 @@ export async function deleteUpload(uploadId) {
       }
     }
 
-    revalidatePath('/account/uploads');
-    revalidatePath('/account');
+    revalidatePath('/dashboard/uploads');
+    revalidatePath('/dashboard');
     return { success: true, message: 'Upload permanently deleted and references cleared' };
   } catch (error) {
     console.error('Error during upload deletion cascade:', error);
