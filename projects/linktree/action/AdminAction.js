@@ -3,6 +3,7 @@
 import { requireSession } from '@/lib/requireSession';
 import connectToDatabase from '@/lib/connectToDB';
 import AllowedUser from '@/models/AllowedUser';
+import InviteRequest from '@/models/InviteRequest';
 import clientPromise from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
@@ -113,5 +114,82 @@ export async function removeAllowedUser(rawEmail) {
   } catch (error) {
     console.error('Error removing allowed user:', error);
     return { success: false, error: 'Failed to remove user from allowlist' };
+  }
+}
+
+/**
+ * Approves a pending invite request and automatically adds the user to the allowlist.
+ */
+export async function approveInviteRequest(requestId) {
+  const auth = await verifyAdminCaller();
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
+  }
+
+  try {
+    await connectToDatabase();
+    const req = await InviteRequest.findById(requestId);
+    if (!req) {
+      return { success: false, error: 'Request not found' };
+    }
+
+    const email = req.email.toLowerCase().trim();
+
+    // 1. Add email to AllowedUser allowlist
+    await AllowedUser.findOneAndUpdate(
+      { email },
+      { email },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    // 2. Mark request as approved
+    req.status = 'approved';
+    await req.save();
+
+    revalidatePath('/dashboard/admin');
+    return { success: true, message: `Approved ${email}! They can now sign in with Google.` };
+  } catch (error) {
+    console.error('Error approving invite request:', error);
+    return { success: false, error: 'Failed to approve request' };
+  }
+}
+
+/**
+ * Rejects a pending invite request.
+ */
+export async function rejectInviteRequest(requestId) {
+  const auth = await verifyAdminCaller();
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
+  }
+
+  try {
+    await connectToDatabase();
+    await InviteRequest.findByIdAndUpdate(requestId, { status: 'rejected' });
+    revalidatePath('/dashboard/admin');
+    return { success: true, message: 'Request marked as rejected' };
+  } catch (error) {
+    console.error('Error rejecting invite request:', error);
+    return { success: false, error: 'Failed to reject request' };
+  }
+}
+
+/**
+ * Deletes an invite request record entirely.
+ */
+export async function deleteInviteRequest(requestId) {
+  const auth = await verifyAdminCaller();
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
+  }
+
+  try {
+    await connectToDatabase();
+    await InviteRequest.findByIdAndDelete(requestId);
+    revalidatePath('/dashboard/admin');
+    return { success: true, message: 'Invite request deleted' };
+  } catch (error) {
+    console.error('Error deleting invite request:', error);
+    return { success: false, error: 'Failed to delete request' };
   }
 }
