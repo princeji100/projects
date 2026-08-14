@@ -24,7 +24,7 @@ const Login = () => {
   const { data: session } = useSession()
   
   if(session){
-    redirect('/')
+    redirect('/dashboard')
   }
 
   return (

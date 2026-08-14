@@ -15,7 +15,7 @@ const Header = () => {
       <div className="max-w-5xl flex justify-between items-center mx-auto px-4 sm:px-6 py-3">
         <div className="flex gap-4 sm:gap-6 items-center">
           <Link 
-            href={'/'} 
+            href={session ? '/dashboard' : '/'} 
             className="hover:opacity-85 transition-opacity focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-lg p-1"
           >
             <LinktreeLogo />

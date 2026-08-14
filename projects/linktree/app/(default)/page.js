@@ -1,8 +1,15 @@
 import HeroForm from "@/components/forms/HeroForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSparkles, faQrcode, faChartLine, faPaintBrush } from "@fortawesome/free-solid-svg-icons";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    redirect('/dashboard');
+  }
   return (
     <div className="min-h-[calc(100vh-80px)] flex flex-col justify-between">
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-12 w-full">
