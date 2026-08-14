@@ -15,6 +15,7 @@ import Page from "@/models/Page";
 import Link from "next/link";
 import connectToDatabase from "@/lib/connectToDB";
 import PageTitle from "@/components/layout/PageTitle";
+import LinktreeLogo from "@/components/media/LinktreeLogo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,9 +57,8 @@ export default async function AppLayout({ children }) {
           <header className="hidden md:flex sticky top-0 z-40 bg-white border-b border-slate-200 px-6 h-16 items-center justify-between shadow-xs">
             {/* Left: Brand + Page Title */}
             <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-2 text-slate-900 hover:opacity-80 transition-opacity">
-                <span className="text-emerald-500 text-xl">✦</span>
-                <span className="font-extrabold text-lg tracking-tight">Linktree</span>
+              <Link href="/" className="hover:opacity-85 transition-opacity focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none rounded-lg p-1">
+                <LinktreeLogo />
               </Link>
               <div className="h-6 w-px bg-slate-200" />
               <PageTitle isAdmin={isAdmin} />
@@ -107,9 +107,8 @@ export default async function AppLayout({ children }) {
           {/* ═══ Mobile Top Bar ═══ */}
           <header className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-3 min-w-0">
-              <Link href="/" className="flex items-center gap-1.5">
-                <span className="text-emerald-500 text-lg">✦</span>
-                <span className="font-extrabold text-base tracking-tight text-slate-900">Linktree</span>
+              <Link href="/" className="hover:opacity-85 transition-opacity focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none rounded-lg p-1">
+                <LinktreeLogo iconSize="w-5 h-5" textSize="text-base" />
               </Link>
             </div>
             <div className="flex items-center gap-2 shrink-0">

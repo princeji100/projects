@@ -18,7 +18,7 @@ import {
  */
 export function getNavItems(isAdmin = false) {
   const items = [
-    { href: '/account', label: 'My Page', icon: faFileLines },
+    { href: '/account', label: 'Settings', icon: faGear },
     { href: '/account/uploads', label: 'Uploads', icon: faImages },
     { href: '/account/analytics', label: 'Analytics', icon: faChartLine },
   ];

@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLink } from '@fortawesome/free-solid-svg-icons';
 import { useSession } from "next-auth/react";
 
+import LinktreeLogo from "./media/LinktreeLogo";
+
 const Header = () => {
   const { data: session } = useSession();
 
@@ -14,14 +16,9 @@ const Header = () => {
         <div className="flex gap-4 sm:gap-6 items-center">
           <Link 
             href={'/'} 
-            className="flex gap-2 items-center text-blue-600 hover:text-blue-700 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-lg p-1"
+            className="hover:opacity-85 transition-opacity focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-lg p-1"
           >
-            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
-              <FontAwesomeIcon icon={faLink} className="text-sm" />
-            </div>
-            <span className="font-bold text-lg text-slate-900 tracking-tight">
-              Linktree
-            </span>
+            <LinktreeLogo />
           </Link>
           <nav className="flex items-center gap-2 text-slate-600 text-sm font-medium">
             <Link 
