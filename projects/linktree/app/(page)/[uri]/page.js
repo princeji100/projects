@@ -27,6 +27,7 @@ import { getBaseUrl } from '@/lib/siteUrl';
 import LinktreeLogo from '@/components/media/LinktreeLogo';
 import PublicTipJar from '@/components/tipjar/PublicTipJar';
 import YouTubeEmbed from '@/components/media/YouTubeEmbed';
+import SpotifyEmbed from '@/components/media/SpotifyEmbed';
 
 export async function generateMetadata({ params }) {
   const { uri } = await params;
@@ -278,6 +279,20 @@ const UserPage = async ({ params }) => {
             if (media?.provider === 'youtube') {
               return (
                 <YouTubeEmbed
+                  key={linkKey}
+                  link={link}
+                  media={media}
+                  uri={page.uri}
+                  currentTheme={currentTheme}
+                  isLightText={isLightText}
+                />
+              );
+            }
+
+            // Spotify Media Embed Card (Wave 10)
+            if (media?.provider === 'spotify') {
+              return (
+                <SpotifyEmbed
                   key={linkKey}
                   link={link}
                   media={media}
