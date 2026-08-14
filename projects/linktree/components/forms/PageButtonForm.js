@@ -3,14 +3,14 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SectionBox from '../layout/SectionBox';
 import { faGripLines, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SubmitButton from '../buttons/SubmitButton';
 import { SavePageButton } from '@/action/PageAction';
 import { toast } from 'react-toastify';
 import { ReactSortable } from 'react-sortablejs';
 import { allButtons, getSocialButton } from '@/lib/socialButtons';
 
-const PageButtonForm = ({ page }) => {
+const PageButtonForm = ({ page, onButtonsChange }) => {
   const pageSavedButtonsKeys = Object.keys(page?.buttons || {});
   const pageSavedButtonsData = pageSavedButtonsKeys
     .map((key) => getSocialButton(key))
@@ -18,6 +18,12 @@ const PageButtonForm = ({ page }) => {
 
   const [activeButtons, setActiveButtons] = useState(pageSavedButtonsData || []);
   const [buttonValues, setButtonValues] = useState(page?.buttons || {});
+
+  useEffect(() => {
+    if (onButtonsChange) {
+      onButtonsChange(buttonValues);
+    }
+  }, [buttonValues, onButtonsChange]);
 
   const addButtonToProfile = (button) => {
     setActiveButtons((prev) => [...prev, button]);

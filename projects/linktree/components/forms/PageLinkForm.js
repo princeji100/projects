@@ -27,10 +27,16 @@ import {
   fromLocalDatetimeInput,
 } from '@/lib/linkLifecycle';
 
-const PageLinkForm = ({ page }) => {
+const PageLinkForm = ({ page, onLinksChange }) => {
   const [links, setLinks] = useState(page?.links || []);
   const [openScheduleIndex, setOpenScheduleIndex] = useState(null);
   const [clientNow, setClientNow] = useState(() => new Date());
+
+  useEffect(() => {
+    if (onLinksChange) {
+      onLinksChange(links);
+    }
+  }, [links, onLinksChange]);
 
   // Lightweight client timer to keep live status badges visually fresh without page refresh
   useEffect(() => {
