@@ -11,6 +11,8 @@ import { useSession } from 'next-auth/react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faPen, faMobileScreen } from "@fortawesome/free-solid-svg-icons";
 
+import CoolLoadingScreen from "@/components/layout/CoolLoadingScreen";
+
 const AccountPage = () => {
     const router = useRouter();
     const { data: session, status } = useSession();
@@ -45,11 +47,7 @@ const AccountPage = () => {
     }, [status, router]);
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            </div>
-        );
+        return <CoolLoadingScreen message="Loading your dashboard..." />;
     }
 
     if (error) {
