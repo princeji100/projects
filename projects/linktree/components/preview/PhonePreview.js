@@ -71,22 +71,7 @@ export default function PhonePreview({
   const renderNow = new Date();
   const visibleLinks = (rawLinks || []).filter((l) => isLinkLive(l, renderNow));
 
-  // If user has no active links yet, show realistic sample preview buttons matching profile-settings.png
-  const hasRealLinks = visibleLinks.length > 0;
-  const displayLinks = hasRealLinks
-    ? visibleLinks
-    : [
-        { title: 'Portfolio', subtitle: 'Explore my projects & work', icon: '' },
-        { title: 'Instagram', subtitle: 'Follow my creative journey', icon: '' },
-        { title: 'YouTube', subtitle: 'Watch tutorials & vlogs', icon: '' },
-        { title: 'Newsletter', subtitle: 'Weekly tips for creators', icon: '' },
-      ];
-
   const buttonKeys = Object.keys(buttons || {}).filter((k) => Boolean(buttons[k]));
-  const hasRealButtons = buttonKeys.length > 0;
-  const displayButtonKeys = hasRealButtons ? buttonKeys : ['instagram', 'twitter', 'github', 'youtube'];
-
-  const displayBio = bio || (hasRealLinks ? '' : 'Creating art, sharing moments, and exploring creative frontiers. ✨🎨');
 
   return (
     <div className="sticky top-6 self-start w-full space-y-3">
@@ -155,70 +140,72 @@ export default function PhonePreview({
             </p>
 
             {/* Bio */}
-            {displayBio && (
+            {bio && (
               <p className={`text-[11px] ${currentTheme.subtitleColor} text-center mt-2 px-2 line-clamp-3 leading-snug break-words`}>
-                {displayBio}
+                {bio}
               </p>
             )}
 
             {/* Social Buttons Row */}
-            <div className="flex flex-wrap gap-2 justify-center my-3">
-              {displayButtonKeys.map((key) => {
-                const btn = getSocialButton(key);
-                return (
-                  <div
-                    key={key}
-                    className={`w-7 h-7 rounded-full flex items-center justify-center ${currentTheme.buttonStyle} shadow-2xs backdrop-blur-xs text-[11px] shrink-0`}
-                  >
-                    <FontAwesomeIcon icon={btn.icon} />
-                  </div>
-                );
-              })}
-            </div>
+            {buttonKeys.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-center my-3">
+                {buttonKeys.map((key) => {
+                  const btn = getSocialButton(key);
+                  return (
+                    <div
+                      key={key}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center ${currentTheme.buttonStyle} shadow-2xs backdrop-blur-xs text-[11px] shrink-0`}
+                    >
+                      <FontAwesomeIcon icon={btn.icon} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Links Stack */}
             <div className="w-full space-y-2.5 mt-2">
-              {displayLinks.map((link, idx) => (
-                <div
-                  key={link._id || idx}
-                  className={`w-full p-3 rounded-2xl ${
-                    currentTheme.id === 'minimal-light'
-                      ? 'bg-white text-slate-900 border border-slate-200/90 shadow-xs hover:bg-slate-50'
-                      : 'bg-white/15 hover:bg-white/20 border border-white/20 shadow-xs backdrop-blur-md'
-                  } flex items-center justify-between gap-3 transition-all duration-200`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    {link.icon ? (
+              {visibleLinks.length === 0 ? (
+                <div className={`text-center py-8 border border-dashed rounded-2xl p-4 ${currentTheme.id === 'minimal-light' ? 'border-slate-300' : 'border-white/15'}`}>
+                  <p className={`text-[11px] ${currentTheme.mutedTextColor} opacity-70`}>
+                    No active links yet. Add a link to see it appear here!
+                  </p>
+                </div>
+              ) : (
+                visibleLinks.map((link, idx) => (
+                  <div
+                    key={link._id || idx}
+                    className={`w-full p-3 rounded-2xl ${
+                      currentTheme.id === 'minimal-light'
+                        ? 'bg-white text-slate-900 border border-slate-200/90 shadow-xs'
+                        : 'bg-white/15 border border-white/20 shadow-xs backdrop-blur-md'
+                    } flex items-center gap-3 transition-all duration-200`}
+                  >
+                    {link.icon && (
                       <div
-                        className={`w-7 h-7 rounded-lg ${currentTheme.iconBg} flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10`}
+                        className={`w-8 h-8 rounded-lg ${currentTheme.iconBg} flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10`}
                       >
-                        <LinkIcon src={link.icon} title={link.title} size={28} />
+                        <LinkIcon src={link.icon} title={link.title} size={32} />
                       </div>
-                    ) : null}
-                    <div className="min-w-0 flex-1 text-center">
-                      <p className={`text-xs font-bold truncate ${currentTheme.id === 'minimal-light' ? 'text-slate-900' : 'text-white'}`}>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-xs font-bold truncate ${currentTheme.headingColor}`}>
                         {link.title || 'Untitled Link'}
                       </p>
                       {link.subtitle && (
-                        <p className={`text-[10px] truncate opacity-70 ${currentTheme.id === 'minimal-light' ? 'text-slate-600' : 'text-white/80'}`}>
+                        <p className={`text-[10px] truncate ${currentTheme.subtitleColor}`}>
                           {link.subtitle}
                         </p>
                       )}
                     </div>
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="text-[9px] opacity-40 shrink-0"
+                    />
                   </div>
-                  <FontAwesomeIcon
-                    icon={faChevronRight}
-                    className={`text-[9px] opacity-40 shrink-0 ${currentTheme.id === 'minimal-light' ? 'text-slate-700' : 'text-white'}`}
-                  />
-                </div>
-              ))}
+                ))
+              )}
             </div>
-
-            {!hasRealLinks && (
-              <p className="text-[10px] text-white/50 text-center mt-3 italic">
-                (Sample preview — add real links below to customize)
-              </p>
-            )}
           </div>
 
           {/* Phone Footer Branding */}
