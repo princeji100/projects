@@ -8,46 +8,12 @@ import {
   faRotateRight,
   faCircleCheck,
   faChevronRight,
-  faGlobe,
 } from '@fortawesome/free-solid-svg-icons';
-import {
-  faDiscord,
-  faFacebook,
-  faGithub,
-  faInstagram,
-  faLinkedin,
-  faPinterest,
-  faReddit,
-  faSnapchat,
-  faTelegram,
-  faTwitter,
-  faViber,
-  faWhatsapp,
-  faYoutube,
-} from '@fortawesome/free-brands-svg-icons';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
 import { getTheme } from '@/lib/themes';
+import { getSocialButton } from '@/lib/socialButtons';
 import { isLinkLive } from '@/lib/linkLifecycle';
-
-const socialIcons = {
-  email: faGlobe,
-  mobile: faGlobe,
-  instagram: faInstagram,
-  facebook: faFacebook,
-  discord: faDiscord,
-  youtube: faYoutube,
-  whatsapp: faWhatsapp,
-  telegram: faTelegram,
-  viber: faViber,
-  snapchat: faSnapchat,
-  pinterest: faPinterest,
-  reddit: faReddit,
-  website: faGlobe,
-  github: faGithub,
-  twitter: faTwitter,
-  linkedin: faLinkedin,
-};
 
 /**
  * Live Phone Mockup Preview Component
@@ -75,20 +41,21 @@ export default function PhonePreview({
   const bgColor = previewBgColor !== undefined ? previewBgColor : page?.bgColor || '#000000';
   const bgImage = previewBgImage !== undefined ? previewBgImage : page?.bgImage || '';
   const avatar = previewAvatar !== undefined ? previewAvatar : page?.avatar || user?.image || '';
-  const displayName = previewDisplayName !== undefined ? previewDisplayName : page?.displayName || user?.name || uri;
+  const displayName = previewDisplayName !== undefined && previewDisplayName !== '' 
+    ? previewDisplayName 
+    : page?.displayName || user?.name || uri;
   const bio = previewBio !== undefined ? previewBio : page?.bio || '';
   const location = previewLocation !== undefined ? previewLocation : page?.location || '';
   const rawLinks = previewLinks !== undefined ? previewLinks : page?.links || [];
   const buttons = previewButtons !== undefined ? previewButtons : page?.buttons || {};
 
-  const currentTheme = bgType === 'preset' ? getTheme(themeKey) : getTheme('default');
+  const isPreset = bgType === 'preset' || !bgType;
+  const currentTheme = isPreset ? getTheme(themeKey) : getTheme('default');
 
   let previewStyle = {};
   let previewBgClass = '';
 
-  if (bgType === 'preset') {
-    previewBgClass = currentTheme.pageBg;
-  } else if (bgType === 'color') {
+  if (bgType === 'color' && bgColor) {
     previewStyle = { backgroundColor: bgColor };
   } else if (bgType === 'image' && bgImage) {
     previewStyle = {
@@ -97,7 +64,7 @@ export default function PhonePreview({
       backgroundPosition: 'center',
     };
   } else {
-    previewStyle = { backgroundColor: '#0f172a' };
+    previewBgClass = currentTheme.pageBg;
   }
 
   const renderNow = new Date();
@@ -181,14 +148,17 @@ export default function PhonePreview({
             {/* Social Buttons Row */}
             {buttonKeys.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-center my-3">
-                {buttonKeys.map((key) => (
-                  <div
-                    key={key}
-                    className={`w-7 h-7 rounded-full flex items-center justify-center ${currentTheme.buttonStyle} shadow-2xs backdrop-blur-xs text-[11px] shrink-0`}
-                  >
-                    <FontAwesomeIcon icon={socialIcons[key] || faGlobe} />
-                  </div>
-                ))}
+                {buttonKeys.map((key) => {
+                  const btn = getSocialButton(key);
+                  return (
+                    <div
+                      key={key}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center ${currentTheme.buttonStyle} shadow-2xs backdrop-blur-xs text-[11px] shrink-0`}
+                    >
+                      <FontAwesomeIcon icon={btn.icon} />
+                    </div>
+                  );
+                })}
               </div>
             )}
 

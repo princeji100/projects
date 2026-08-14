@@ -6,9 +6,9 @@ import { faShareNodes, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 
 /**
- * Public profile Share button with Web Share API and clipboard copy fallback.
+ * Public profile Share button with theme contrast support and clipboard copy fallback.
  */
-export default function PublicShareButton({ url, title }) {
+export default function PublicShareButton({ url, title, isDark = true }) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
@@ -20,7 +20,7 @@ export default function PublicShareButton({ url, title }) {
         });
         return;
       } catch {
-        // User cancelled or unsupported, fallback to clipboard below
+        // Fallback to clipboard below
       }
     }
 
@@ -41,7 +41,11 @@ export default function PublicShareButton({ url, title }) {
       type="button"
       onClick={handleShare}
       aria-label="Share profile"
-      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-semibold backdrop-blur-md transition-all shadow-xs active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none"
+      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md transition-all shadow-xs active:scale-95 cursor-pointer border ${
+        isDark
+          ? 'bg-white/15 hover:bg-white/25 border-white/20 text-white focus-visible:ring-white/40'
+          : 'bg-slate-200/80 hover:bg-slate-300 border-slate-300 text-slate-800 focus-visible:ring-slate-400'
+      } focus-visible:ring-2 focus-visible:outline-none`}
     >
       <FontAwesomeIcon icon={copied ? faCheck : faShareNodes} className="text-xs" />
       <span>{copied ? 'Copied' : 'Share'}</span>

@@ -5,25 +5,7 @@ import User from '@/models/User';
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import {
-  faDiscord,
-  faFacebook,
-  faGithub,
-  faInstagram,
-  faLinkedin,
-  faPinterest,
-  faReddit,
-  faSnapchat,
-  faTelegram,
-  faTwitter,
-  faViber,
-  faWhatsapp,
-  faYoutube,
-} from '@fortawesome/free-brands-svg-icons';
-import {
   faMapMarkerAlt,
-  faEnvelope,
-  faPhone,
-  faGlobe,
   faChevronRight,
   faCircleCheck,
   faLink as faLinkSolid,
@@ -35,27 +17,9 @@ import LinkIcon from '@/components/media/LinkIcon';
 import PublicShareButton from '@/components/buttons/PublicShareButton';
 import { isLinkLive } from '@/lib/linkLifecycle';
 import { getTheme } from '@/lib/themes';
+import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
 import { getBaseUrl } from '@/lib/siteUrl';
-
-const iconMapping = {
-  email: faEnvelope,
-  mobile: faPhone,
-  instagram: faInstagram,
-  facebook: faFacebook,
-  discord: faDiscord,
-  youtube: faYoutube,
-  whatsapp: faWhatsapp,
-  telegram: faTelegram,
-  viber: faViber,
-  snapchat: faSnapchat,
-  pinterest: faPinterest,
-  reddit: faReddit,
-  website: faGlobe,
-  github: faGithub,
-  twitter: faTwitter,
-  linkedin: faLinkedin,
-};
 
 const UserPage = async ({ params }) => {
   // FIX-06: Next.js 15 requires awaiting dynamic route params
@@ -93,45 +57,56 @@ const UserPage = async ({ params }) => {
     }
   };
 
-  // Phase 4: Theme resolution - preset styling ONLY applies when bgType === 'preset'
-  const isPreset = page.bgType === 'preset';
-  const defaultTheme = getTheme('default');
-  const currentTheme = isPreset ? getTheme(page.theme) : defaultTheme;
+  // Theme & Background resolution
+  const isPreset = page.bgType === 'preset' || !page.bgType;
+  const currentTheme = isPreset ? getTheme(page.theme) : getTheme('default');
 
-  let headerStyle = {};
-  let pageBgClass = isPreset ? currentTheme.pageBg : 'bg-blue-950';
-  let headerOverlayClass = isPreset
-    ? currentTheme.headerOverlay
-    : 'bg-gradient-to-b from-black/20 via-transparent to-blue-950/90';
+  let pageStyle = {};
+  let pageBgClass = '';
 
-  if (isPreset) {
-    headerStyle = { backgroundColor: currentTheme.headerBg };
-  } else if (page.bgType === 'color') {
-    headerStyle = { backgroundColor: page.bgColor || '#000' };
+  if (page.bgType === 'color' && page.bgColor) {
+    pageStyle = { backgroundColor: page.bgColor };
   } else if (page.bgType === 'image' && page.bgImage) {
-    headerStyle = { backgroundImage: `url(${page.bgImage})` };
+    pageStyle = {
+      backgroundImage: `url(${page.bgImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    };
   } else {
-    headerStyle = { backgroundColor: '#1e293b' };
+    pageBgClass = currentTheme.pageBg;
   }
 
-  // Phase 3: Single now capture per render pass
   const renderNow = new Date();
   const liveLinks = (page.links || []).filter((link) => isLinkLive(link, renderNow));
 
+  const resolvedDisplayName = page.displayName || user?.name || uri;
+  const resolvedAvatar = page.avatar || user?.image || '';
+
+  const buttonKeys = Object.keys(page.buttons || {}).filter((k) => Boolean(page.buttons[k]));
+
+  const isDarkTheme = currentTheme.id !== 'minimal-light';
+
   return (
-    <div className={`min-h-screen ${pageBgClass} ${currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between`}>
+    <div
+      style={pageStyle}
+      className={`min-h-screen ${pageBgClass} ${currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between`}
+    >
       {/* Top Navbar */}
       <header className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between z-20">
         <Link 
           href="/"
-          className="flex items-center gap-1.5 text-white/90 hover:text-white transition-colors font-bold text-lg tracking-tight focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none rounded-lg p-1"
+          className={`flex items-center gap-1.5 font-bold text-lg tracking-tight focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-1 transition-opacity hover:opacity-80 ${
+            isDarkTheme ? 'text-white' : 'text-slate-900'
+          }`}
         >
-          <FontAwesomeIcon icon={faLinkSolid} className="text-sm text-blue-400" />
+          <FontAwesomeIcon icon={faLinkSolid} className="text-sm text-blue-500" />
           <span>linktree</span>
         </Link>
         <PublicShareButton 
           url={typeof window !== 'undefined' ? window.location.href : undefined} 
-          title={page.displayName || page.uri} 
+          title={resolvedDisplayName} 
+          isDark={isDarkTheme}
         />
       </header>
 
@@ -140,8 +115,8 @@ const UserPage = async ({ params }) => {
         {/* Avatar Section */}
         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full ring-4 ring-white/30 shadow-2xl overflow-hidden mb-4 shrink-0 bg-slate-800">
           <ProfileAvatar
-            src={user?.image}
-            name={page.displayName || user?.name || uri}
+            src={resolvedAvatar}
+            name={resolvedDisplayName}
             size={128}
           />
         </div>
@@ -149,7 +124,7 @@ const UserPage = async ({ params }) => {
         {/* Name and Verified Badge */}
         <div className="flex items-center justify-center gap-2 text-center px-2">
           <h1 className={`text-2xl sm:text-3xl font-extrabold ${currentTheme.headingColor} tracking-tight break-words`}>
-            {page.displayName || uri}
+            {resolvedDisplayName}
           </h1>
           <FontAwesomeIcon icon={faCircleCheck} className="text-blue-400 text-lg shrink-0" title="Verified Profile" />
         </div>
@@ -169,24 +144,27 @@ const UserPage = async ({ params }) => {
         )}
 
         {/* Social Buttons */}
-        {page.buttons && Object.keys(page.buttons).length > 0 && (
+        {buttonKeys.length > 0 && (
           <div className="flex flex-wrap gap-3 sm:gap-3.5 justify-center my-3 mb-8">
-            {Object.keys(page.buttons).map((buttonKey) => (
-              <Link
-                key={buttonKey}
-                href={buttonLink(buttonKey, page.buttons[buttonKey])}
-                aria-label={`Open ${buttonKey}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`rounded-full flex items-center justify-center ${currentTheme.buttonStyle} backdrop-blur-md 
-                         shadow-md hover:shadow-lg transition-all duration-200 w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none`}
-              >
-                <FontAwesomeIcon
-                  className="h-4 w-4 sm:h-5 sm:w-5"
-                  icon={iconMapping[buttonKey] || faGlobe}
-                />
-              </Link>
-            ))}
+            {buttonKeys.map((buttonKey) => {
+              const btn = getSocialButton(buttonKey);
+              return (
+                <Link
+                  key={buttonKey}
+                  href={buttonLink(buttonKey, page.buttons[buttonKey])}
+                  aria-label={`Open ${btn.label || buttonKey}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`rounded-full flex items-center justify-center ${currentTheme.buttonStyle} backdrop-blur-md 
+                           shadow-md hover:shadow-lg transition-all duration-200 w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none`}
+                >
+                  <FontAwesomeIcon
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                    icon={btn.icon}
+                  />
+                </Link>
+              );
+            })}
           </div>
         )}
 
@@ -202,7 +180,7 @@ const UserPage = async ({ params }) => {
                 rel="noopener noreferrer"
                 ping={`${process.env.NEXT_PUBLIC_URL || ''}api/click?url=${btoa(link.url || '')}&page=${page.uri}`}
                 className={`group relative ${currentTheme.cardBg} ${currentTheme.cardBorder} rounded-2xl flex items-center p-4 sm:p-4.5 gap-4 
-                         transition-all duration-200 backdrop-blur-md hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none min-h-[68px] w-full`}
+                         transition-all duration-200 backdrop-blur-md hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[68px] w-full`}
               >
                 <div className={`${currentTheme.iconBg} w-12 h-12 rounded-xl 
                               flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/15 shadow-inner`}>
@@ -236,9 +214,13 @@ const UserPage = async ({ params }) => {
       <footer className="text-center py-6 pb-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-semibold text-white/90 backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95"
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95 ${
+            isDarkTheme
+              ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white/90'
+              : 'bg-slate-200/80 hover:bg-slate-300 border-slate-300 text-slate-800'
+          }`}
         >
-          <FontAwesomeIcon icon={faLinkSolid} className="text-blue-400 text-[11px]" />
+          <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-[11px]" />
           <span>Made with Linktree</span>
         </Link>
       </footer>
