@@ -154,7 +154,8 @@ export default function PhonePreview({
                   return (
                     <div
                       key={key}
-                      className={`w-7 h-7 rounded-full flex items-center justify-center ${currentTheme.buttonStyle} shadow-2xs backdrop-blur-xs text-[11px] shrink-0`}
+                      style={{ backgroundColor: btn.color || '#64748b' }}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white shadow-sm text-[11px] shrink-0"
                     >
                       <FontAwesomeIcon icon={btn.icon} />
                     </div>

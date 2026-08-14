@@ -3,11 +3,15 @@ import {
   faChartLine,
   faImages,
   faUserShield,
+  faHouse,
+  faLink,
+  faPaintBrush,
+  faGear,
 } from '@fortawesome/free-solid-svg-icons';
 
 /**
  * Single source of truth for authorized dashboard navigation items.
- * Used identically across desktop sidebar and mobile navigation.
+ * Icon-centric sidebar matching docs/screenshots/profile-settings.png
  *
  * @param {boolean} isAdmin
  * @returns {Array<{ href: string, label: string, icon: any, isAdmin?: boolean }>}

@@ -155,8 +155,9 @@ const UserPage = async ({ params }) => {
                   aria-label={`Open ${btn.label || buttonKey}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`rounded-full flex items-center justify-center ${currentTheme.buttonStyle} backdrop-blur-md 
-                           shadow-md hover:shadow-lg transition-all duration-200 w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none`}
+                  style={{ backgroundColor: btn.color || '#64748b' }}
+                  className="rounded-full flex items-center justify-center text-white
+                           shadow-md hover:shadow-lg transition-all duration-200 w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none hover:brightness-110"
                 >
                   <FontAwesomeIcon
                     className="h-4 w-4 sm:h-5 sm:w-5"
