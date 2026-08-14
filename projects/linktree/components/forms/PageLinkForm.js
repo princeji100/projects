@@ -13,6 +13,7 @@ import {
   faClock,
   faChevronDown,
   faChevronUp,
+  faImages,
 } from '@fortawesome/free-solid-svg-icons';
 import SubmitButton from '../buttons/SubmitButton';
 import { useState, useEffect } from 'react';
@@ -26,11 +27,13 @@ import {
   toLocalDatetimeInput,
   fromLocalDatetimeInput,
 } from '@/lib/linkLifecycle';
+import MediaLibraryPickerModal from '@/components/media/MediaLibraryPickerModal';
 
 const PageLinkForm = ({ page, onLinksChange }) => {
   const [links, setLinks] = useState(page?.links || []);
   const [openScheduleIndex, setOpenScheduleIndex] = useState(null);
   const [clientNow, setClientNow] = useState(() => new Date());
+  const [pickerLinkIndex, setPickerLinkIndex] = useState(null);
 
   useEffect(() => {
     if (onLinksChange) {
@@ -234,29 +237,40 @@ const PageLinkForm = ({ page, onLinksChange }) => {
                       )}
                     </div>
 
-                    <label className="w-full">
-                      <input
-                        onChange={(e) => handelUpload(e, index)}
-                        id={`icon-${index}`}
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        className="hidden"
-                        aria-label={`Change icon for ${link.title || 'link'}`}
-                      />
-                      <span className="flex items-center justify-center gap-2 px-3 py-2 min-h-[40px] border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-blue-500 shadow-xs">
-                        <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
-                        Change icon
-                      </span>
-                    </label>
+                    <div className="w-full flex flex-col gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setPickerLinkIndex(index)}
+                        className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer active:scale-95 shadow-2xs"
+                      >
+                        <FontAwesomeIcon icon={faImages} className="text-blue-600 text-xs" />
+                        <span>From Library</span>
+                      </button>
+
+                      <label className="w-full">
+                        <input
+                          onChange={(e) => handelUpload(e, index)}
+                          id={`icon-${index}`}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="hidden"
+                          aria-label={`Change icon for ${link.title || 'link'}`}
+                        />
+                        <span className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-blue-500 shadow-2xs">
+                          <FontAwesomeIcon icon={faCloudArrowUp} className="text-slate-400 text-xs" />
+                          <span>Upload New</span>
+                        </span>
+                      </label>
+                    </div>
 
                     <button
                       type="button"
                       onClick={() => removeLink(index)}
                       aria-label={`Remove ${link.title || 'link'}`}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2 min-h-[40px] text-xs font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none cursor-pointer"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none cursor-pointer"
                     >
-                      <FontAwesomeIcon icon={faTrash} />
-                      Remove
+                      <FontAwesomeIcon icon={faTrash} className="text-xs" />
+                      <span>Remove</span>
                     </button>
                   </div>
 
@@ -423,6 +437,19 @@ const PageLinkForm = ({ page, onLinksChange }) => {
           </SubmitButton>
         </div>
       </form>
+
+      {/* Media Library Picker Modal for Link Icons */}
+      <MediaLibraryPickerModal
+        isOpen={pickerLinkIndex !== null}
+        title="Choose Link Icon from Library"
+        currentValue={pickerLinkIndex !== null ? links[pickerLinkIndex]?.icon || '' : ''}
+        onClose={() => setPickerLinkIndex(null)}
+        onSelect={(selectedUrl) => {
+          if (pickerLinkIndex !== null) {
+            handelLinkChange(pickerLinkIndex, 'icon', selectedUrl);
+          }
+        }}
+      />
     </SectionBox>
   );
 };

@@ -10,6 +10,37 @@ import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { revalidatePath } from 'next/cache';
 
 /**
+ * Retrieves the list of all uploads owned by the active session user.
+ */
+export async function getUserUploads() {
+  const session = await requireSession();
+  if (!session?.user?.email) {
+    return { success: false, error: 'Authentication required' };
+  }
+
+  try {
+    await connectToDatabase();
+    const uploads = await Upload.find({ owner: session.user.email })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return {
+      success: true,
+      uploads: uploads.map((u) => ({
+        _id: u._id.toString(),
+        key: u.key,
+        url: u.url,
+        size: u.size,
+        createdAt: u.createdAt ? u.createdAt.toISOString() : null,
+      })),
+    };
+  } catch (error) {
+    console.error('Error fetching user uploads:', error);
+    return { success: false, error: 'Failed to fetch uploads list' };
+  }
+}
+
+/**
  * Checks where an upload is currently referenced by the user (Avatar, Background, Link Icons).
  */
 export async function getUploadReferences(uploadId) {

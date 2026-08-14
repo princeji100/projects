@@ -13,6 +13,7 @@ import {
   faWandMagicSparkles,
   faFont,
   faEye,
+  faImages,
 } from '@fortawesome/free-solid-svg-icons';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import SubmitButton from '../buttons/SubmitButton';
@@ -23,6 +24,7 @@ import { useState, useEffect } from 'react';
 import upload from '@/lib/upload';
 import SectionBox from '../layout/SectionBox';
 import { themes } from '@/lib/themes';
+import MediaLibraryPickerModal from '@/components/media/MediaLibraryPickerModal';
 
 const gradientPresets = [
   { name: 'Sunset', from: '#f43f5e', to: '#fb923c' },
@@ -50,6 +52,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
   const [location, setLocation] = useState(page?.location || '');
   const [bio, setBio] = useState(page?.bio || '');
   const [isUploading, setIsUploading] = useState(false);
+  const [pickerConfig, setPickerConfig] = useState({ isOpen: false, title: '', target: null });
 
   useEffect(() => {
     if (onStateChange) {
@@ -146,7 +149,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {avatar && avatar !== user?.image && (
                 <button
                   type="button"
@@ -158,9 +161,18 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
                 </button>
               )}
 
-              <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer focus-within:ring-2 focus-within:ring-blue-500">
-                <FontAwesomeIcon icon={faCloudArrowUp} className="text-sm" />
-                <span>{isUploading ? 'Uploading...' : 'Upload New Image'}</span>
+              <button
+                type="button"
+                onClick={() => setPickerConfig({ isOpen: true, title: 'Choose Profile Avatar', target: 'avatar' })}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer active:scale-95"
+              >
+                <FontAwesomeIcon icon={faImages} className="text-xs text-blue-600" />
+                <span>Choose from Library</span>
+              </button>
+
+              <label className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer focus-within:ring-2 focus-within:ring-blue-500">
+                <FontAwesomeIcon icon={faCloudArrowUp} className="text-xs" />
+                <span>{isUploading ? 'Uploading...' : 'Upload New'}</span>
                 <input
                   type="file"
                   onChange={(e) => handleImageUpload(e, setAvatar)}
@@ -486,20 +498,32 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Header Background Image:
               </label>
-              <label className="bg-white hover:bg-slate-50 border border-slate-200 transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-xs px-4 py-3.5 rounded-xl">
-                <input type="hidden" name="bgImage" value={bgImage} />
-                <input
-                  type="file"
-                  onChange={(e) => handleImageUpload(e, setBgImage)}
-                  className="hidden"
-                  accept="image/jpeg,image/png,image/webp"
-                  aria-label="Upload custom background image"
-                />
-                <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
-                <span className="text-slate-700 text-xs font-semibold">
-                  {bgImage ? 'Change Custom Image' : 'Upload Background Image'}
-                </span>
-              </label>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPickerConfig({ isOpen: true, title: 'Choose Background Image', target: 'bgImage' })}
+                  className="bg-white hover:bg-slate-50 border border-slate-200 transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-xs px-4 py-3 rounded-xl active:scale-95 text-slate-700 text-xs font-semibold"
+                >
+                  <FontAwesomeIcon icon={faImages} className="text-blue-600" />
+                  <span>Choose from Library</span>
+                </button>
+
+                <label className="bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-xs px-4 py-3 rounded-xl active:scale-95 text-xs font-semibold focus-within:ring-2 focus-within:ring-blue-500">
+                  <input type="hidden" name="bgImage" value={bgImage} />
+                  <input
+                    type="file"
+                    onChange={(e) => handleImageUpload(e, setBgImage)}
+                    className="hidden"
+                    accept="image/jpeg,image/png,image/webp"
+                    aria-label="Upload custom background image"
+                  />
+                  <FontAwesomeIcon icon={faCloudArrowUp} className="text-white" />
+                  <span>
+                    {isUploading ? 'Uploading...' : bgImage ? 'Upload New Image' : 'Upload Image'}
+                  </span>
+                </label>
+              </div>
 
               {/* Image Contrast Overlay Toggle */}
               <div className="flex items-center justify-between pt-1">
@@ -598,6 +622,21 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
           <span>Save Changes</span>
         </SubmitButton>
       </div>
+
+      {/* Media Library Picker Modal */}
+      <MediaLibraryPickerModal
+        isOpen={pickerConfig.isOpen}
+        title={pickerConfig.title}
+        currentValue={pickerConfig.target === 'avatar' ? avatar : bgImage}
+        onClose={() => setPickerConfig({ isOpen: false, title: '', target: null })}
+        onSelect={(selectedUrl) => {
+          if (pickerConfig.target === 'avatar') {
+            setAvatar(selectedUrl);
+          } else if (pickerConfig.target === 'bgImage') {
+            setBgImage(selectedUrl);
+          }
+        }}
+      />
     </form>
   );
 };
