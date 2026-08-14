@@ -59,15 +59,9 @@ body{
     print-color-adjust: exact !important;
   }
 
-  /* Hide app navigation chrome, header, sidebar, mobile bar, toasts, buttons, interactive filters */
-  aside,
-  header,
-  nav,
+  /* Hide elements explicitly marked as no-print (dashboard chrome, interactive controls) */
   .no-print,
-  .print\\:hidden,
-  .Toastify,
-  [role="group"][aria-label="Analytics date range filter"],
-  button {
+  .Toastify {
     display: none !important;
   }
 

@@ -45,20 +45,72 @@ await check('component-print-action: uses browser-native window.print() and zero
   assert.ok(!deps.includes('html2pdf.js'));
 });
 
-// 2. Print Stylesheet Coverage in globals.css
-await check('print-css-rules: hides chrome, sidebars, mobile bars, toasts, buttons and applies A4 & contrast rules', async () => {
+// 2. Scoped Print CSS (Wave 15B1: no global element-type hiding)
+await check('scoped-print-css: hides chrome via .no-print class, not global aside/header/nav/button selectors', async () => {
   const cssSrc = fs.readFileSync(
     path.join(process.cwd(), 'app/globals.css'),
     'utf8'
   );
 
+  // Safe global rules still present
   assert.ok(cssSrc.includes('@media print'), 'Must define @media print block');
   assert.ok(cssSrc.includes('size: A4'), 'Must configure A4 page size');
-  assert.ok(cssSrc.includes('aside'), 'Must hide sidebar');
-  assert.ok(cssSrc.includes('header'), 'Must hide header');
-  assert.ok(cssSrc.includes('button'), 'Must hide buttons in print');
   assert.ok(cssSrc.includes('print-break-inside-avoid'), 'Must support card page-break prevention');
   assert.ok(cssSrc.includes('print-color-adjust'), 'Must preserve print color contrast');
+  assert.ok(cssSrc.includes('.no-print'), 'Must use .no-print class for hiding');
+
+  // Extract the @media print block content
+  const printBlock = cssSrc.slice(cssSrc.indexOf('@media print'));
+
+  // Must NOT contain standalone element-type selectors that hide globally
+  // (these selectors would match: "  aside," or "  button {" at the start of a line)
+  const dangerousGlobalPatterns = [
+    /^\s+aside\s*[,{]/m,
+    /^\s+header\s*[,{]/m,
+    /^\s+nav\s*[,{]/m,
+    /^\s+button\s*[,{]/m,
+  ];
+  for (const pattern of dangerousGlobalPatterns) {
+    assert.ok(
+      !pattern.test(printBlock),
+      `Print block must not globally hide element type: ${pattern}`
+    );
+  }
+
+  // Dashboard chrome elements must carry no-print class
+  const layoutSrc = fs.readFileSync(
+    path.join(process.cwd(), 'app/(app)/layout.js'),
+    'utf8'
+  );
+  // Both headers (desktop + mobile)
+  const headerMatches = layoutSrc.match(/<header\s[^>]*className="[^"]*"/g) || [];
+  assert.ok(headerMatches.length >= 2, 'Layout must have at least 2 header elements');
+  for (const h of headerMatches) {
+    assert.ok(h.includes('no-print'), `Header must have no-print class: ${h.slice(0, 60)}...`);
+  }
+  // Desktop sidebar aside
+  assert.ok(
+    layoutSrc.includes('aside') && /<aside\s[^>]*no-print/.test(layoutSrc),
+    'Desktop sidebar <aside> must have no-print class'
+  );
+
+  // MobileNavBar
+  const mobileNavSrc = fs.readFileSync(
+    path.join(process.cwd(), 'components/layout/MobileNavBar.js'),
+    'utf8'
+  );
+  assert.ok(mobileNavSrc.includes('no-print'), 'MobileNavBar must have no-print class');
+
+  // Analytics interactive controls wrapper
+  const clientSrc = fs.readFileSync(
+    path.join(process.cwd(), 'components/analytics/AnalyticsClient.js'),
+    'utf8'
+  );
+  // The wrapper div around range switcher + CSV + Print buttons
+  assert.ok(
+    /flex.*gap.*no-print/.test(clientSrc) || clientSrc.includes('no-print'),
+    'Analytics action controls wrapper must have no-print class'
+  );
 });
 
 // 3. Print Report Header & Daily Table Fallback Fidelity

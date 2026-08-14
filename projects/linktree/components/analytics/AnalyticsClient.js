@@ -132,7 +132,7 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
           </div>
 
           {/* Right Action Controls: Date Range Toggle & Export CSV */}
-          <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap sm:flex-nowrap no-print">
             {/* Formatted Date Range Pill */}
             <div className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-600">
               <FontAwesomeIcon icon={faCalendarAlt} className="text-slate-400 text-xs" />

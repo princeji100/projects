@@ -58,7 +58,7 @@ export default async function AppLayout({ children }) {
           />
 
           {/* ═══ Desktop Top Header Bar ═══ */}
-          <header className="hidden md:flex sticky top-0 z-40 bg-white border-b border-slate-200 px-6 h-16 items-center justify-between shadow-xs">
+          <header className="hidden md:flex sticky top-0 z-40 bg-white border-b border-slate-200 px-6 h-16 items-center justify-between shadow-xs no-print">
             {/* Left: Brand + Page Title */}
             <div className="flex items-center gap-4">
               <Link href="/dashboard" className="hover:opacity-85 transition-opacity focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-lg p-1">
@@ -88,7 +88,7 @@ export default async function AppLayout({ children }) {
           </header>
 
           {/* ═══ Mobile Top Bar ═══ */}
-          <header className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-xs">
+          <header className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-xs no-print">
             <div className="flex items-center gap-3 min-w-0">
               <Link href="/dashboard" className="hover:opacity-85 transition-opacity focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-lg p-1">
                 <LinktreeLogo boxSize="w-7 h-7" iconSize="text-xs" textSize="text-base" />
@@ -112,7 +112,7 @@ export default async function AppLayout({ children }) {
 
           <main className="min-h-[calc(100vh-4rem)] relative">
             {/* ═══ Desktop Icon Sidebar (Permanently Fixed) ═══ */}
-            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-20 py-4 shrink-0 shadow-xs fixed left-0 top-16 bottom-0 z-30 overflow-y-auto">
+            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-20 py-4 shrink-0 shadow-xs fixed left-0 top-16 bottom-0 z-30 overflow-y-auto no-print">
               <AppSidebar isAdmin={isAdmin} />
             </aside>
 
