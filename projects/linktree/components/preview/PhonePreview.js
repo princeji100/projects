@@ -17,7 +17,8 @@ import { isLinkLive } from '@/lib/linkLifecycle';
 
 /**
  * Live Phone Mockup Preview Component
- * Renders a sticky, responsive smartphone frame with real-time profile synchronization.
+ * Renders a pixel-perfect smartphone frame matching docs/screenshots/profile-settings.png
+ * Supports real-time state synchronization with smart showcase fallbacks when no links/buttons exist yet.
  */
 export default function PhonePreview({
   page,
@@ -70,27 +71,42 @@ export default function PhonePreview({
   const renderNow = new Date();
   const visibleLinks = (rawLinks || []).filter((l) => isLinkLive(l, renderNow));
 
+  // If user has no active links yet, show realistic sample preview buttons matching profile-settings.png
+  const hasRealLinks = visibleLinks.length > 0;
+  const displayLinks = hasRealLinks
+    ? visibleLinks
+    : [
+        { title: 'Portfolio', subtitle: 'Explore my projects & work', icon: '' },
+        { title: 'Instagram', subtitle: 'Follow my creative journey', icon: '' },
+        { title: 'YouTube', subtitle: 'Watch tutorials & vlogs', icon: '' },
+        { title: 'Newsletter', subtitle: 'Weekly tips for creators', icon: '' },
+      ];
+
   const buttonKeys = Object.keys(buttons || {}).filter((k) => Boolean(buttons[k]));
+  const hasRealButtons = buttonKeys.length > 0;
+  const displayButtonKeys = hasRealButtons ? buttonKeys : ['instagram', 'twitter', 'github', 'youtube'];
+
+  const displayBio = bio || (hasRealLinks ? '' : 'Creating art, sharing moments, and exploring creative frontiers. ✨🎨');
 
   return (
     <div className="sticky top-6 self-start w-full space-y-3">
-      {/* Header bar above phone */}
+      {/* Live Preview Header Controls */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-slate-800 tracking-tight">Live Mobile Preview</h2>
+          <h2 className="text-base font-bold text-slate-800 tracking-tight">Live Preview</h2>
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Live Sync
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {page?.uri && (
             <Link
               href={`/${page.uri}`}
               target="_blank"
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 text-xs font-semibold rounded-lg border border-slate-200 shadow-2xs transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 text-xs font-semibold rounded-lg border border-slate-200 shadow-2xs transition-all"
             >
-              <span>Open</span>
+              <span>View Link</span>
               <FontAwesomeIcon icon={faExternalLinkAlt} className="text-[10px]" />
             </Link>
           )}
@@ -106,10 +122,10 @@ export default function PhonePreview({
         </div>
       </div>
 
-      {/* Smartphone Bezel */}
-      <div className="relative mx-auto w-[280px] sm:w-[310px] lg:w-[320px] h-[550px] sm:h-[590px] lg:h-[610px] max-h-[calc(100vh-6rem)] bg-slate-950 rounded-[44px] p-3 shadow-2xl ring-1 ring-slate-800 ring-offset-4 ring-offset-slate-100 flex flex-col justify-between select-none">
-        {/* Dynamic Island / Speaker */}
-        <div className="absolute top-4.5 left-1/2 -translate-x-1/2 w-24 h-4.5 bg-black rounded-full z-30 flex items-center justify-end px-2 pointer-events-none">
+      {/* Realistic Smartphone Frame matching profile-settings.png */}
+      <div className="relative mx-auto w-[290px] sm:w-[320px] lg:w-[330px] h-[580px] sm:h-[620px] max-h-[calc(100vh-6rem)] bg-slate-950 rounded-[46px] p-3.5 shadow-2xl ring-1 ring-slate-800 ring-offset-4 ring-offset-slate-100 flex flex-col justify-between select-none">
+        {/* Dynamic Island / Speaker Pill */}
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 w-24 h-4.5 bg-black rounded-full z-30 flex items-center justify-end px-2 pointer-events-none">
           <div className="w-2.5 h-2.5 rounded-full bg-slate-900 ring-1 ring-white/10" />
         </div>
 
@@ -117,17 +133,17 @@ export default function PhonePreview({
         <div
           key={refreshKey}
           style={previewStyle}
-          className={`w-full h-full rounded-[34px] overflow-y-auto overflow-x-hidden ${previewBgClass} ${currentTheme.textColor} p-4 pt-10 flex flex-col items-center justify-between no-scrollbar transition-all duration-300 relative`}
+          className={`w-full h-full rounded-[36px] overflow-y-auto overflow-x-hidden ${previewBgClass} ${currentTheme.textColor} p-4 pt-11 flex flex-col items-center justify-between no-scrollbar transition-all duration-300 relative`}
         >
           <div className="w-full flex flex-col items-center">
-            {/* Avatar */}
-            <div className="w-20 h-20 rounded-full ring-3 ring-white/30 shadow-lg overflow-hidden shrink-0 mb-3 bg-slate-800">
-              <ProfileAvatar src={avatar} name={displayName} size={80} />
+            {/* Avatar with glowing ring */}
+            <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full ring-3 ring-white/40 shadow-xl overflow-hidden shrink-0 mb-3 bg-slate-800">
+              <ProfileAvatar src={avatar} name={displayName} size={88} />
             </div>
 
-            {/* Display Name & Verified Badge */}
+            {/* Display Name & Verified Checkmark Badge */}
             <div className="flex items-center gap-1.5 justify-center text-center px-2">
-              <h3 className={`text-base font-bold truncate ${currentTheme.headingColor}`}>
+              <h3 className={`text-base sm:text-lg font-extrabold truncate ${currentTheme.headingColor} tracking-tight`}>
                 {displayName}
               </h3>
               <FontAwesomeIcon icon={faCircleCheck} className="text-blue-400 text-xs shrink-0" />
@@ -139,66 +155,70 @@ export default function PhonePreview({
             </p>
 
             {/* Bio */}
-            {bio && (
+            {displayBio && (
               <p className={`text-[11px] ${currentTheme.subtitleColor} text-center mt-2 px-2 line-clamp-3 leading-snug break-words`}>
-                {bio}
+                {displayBio}
               </p>
             )}
 
             {/* Social Buttons Row */}
-            {buttonKeys.length > 0 && (
-              <div className="flex flex-wrap gap-2 justify-center my-3">
-                {buttonKeys.map((key) => {
-                  const btn = getSocialButton(key);
-                  return (
-                    <div
-                      key={key}
-                      className={`w-7 h-7 rounded-full flex items-center justify-center ${currentTheme.buttonStyle} shadow-2xs backdrop-blur-xs text-[11px] shrink-0`}
-                    >
-                      <FontAwesomeIcon icon={btn.icon} />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-2 justify-center my-3">
+              {displayButtonKeys.map((key) => {
+                const btn = getSocialButton(key);
+                return (
+                  <div
+                    key={key}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center ${currentTheme.buttonStyle} shadow-2xs backdrop-blur-xs text-[11px] shrink-0`}
+                  >
+                    <FontAwesomeIcon icon={btn.icon} />
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Links Stack */}
-            <div className="w-full space-y-2 mt-2">
-              {visibleLinks.length === 0 ? (
-                <div className="text-center py-6 border border-dashed border-white/15 rounded-2xl p-4">
-                  <p className={`text-[11px] ${currentTheme.mutedTextColor} opacity-70 italic`}>
-                    No active links yet. Add a link to see it appear live here!
-                  </p>
-                </div>
-              ) : (
-                visibleLinks.map((link, idx) => (
-                  <div
-                    key={link._id || idx}
-                    className={`w-full p-2.5 rounded-xl ${currentTheme.cardBg} ${currentTheme.cardBorder} flex items-center gap-2.5 shadow-2xs backdrop-blur-xs transition-all`}
-                  >
-                    <div
-                      className={`w-8 h-8 rounded-lg ${currentTheme.iconBg} flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10`}
-                    >
-                      <LinkIcon src={link.icon} title={link.title} size={32} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-xs font-semibold truncate ${currentTheme.headingColor}`}>
+            <div className="w-full space-y-2.5 mt-2">
+              {displayLinks.map((link, idx) => (
+                <div
+                  key={link._id || idx}
+                  className={`w-full p-3 rounded-2xl ${
+                    currentTheme.id === 'minimal-light'
+                      ? 'bg-white text-slate-900 border border-slate-200/90 shadow-xs hover:bg-slate-50'
+                      : 'bg-white/15 hover:bg-white/20 border border-white/20 shadow-xs backdrop-blur-md'
+                  } flex items-center justify-between gap-3 transition-all duration-200`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    {link.icon ? (
+                      <div
+                        className={`w-7 h-7 rounded-lg ${currentTheme.iconBg} flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10`}
+                      >
+                        <LinkIcon src={link.icon} title={link.title} size={28} />
+                      </div>
+                    ) : null}
+                    <div className="min-w-0 flex-1 text-center">
+                      <p className={`text-xs font-bold truncate ${currentTheme.id === 'minimal-light' ? 'text-slate-900' : 'text-white'}`}>
                         {link.title || 'Untitled Link'}
                       </p>
                       {link.subtitle && (
-                        <p className={`text-[10px] truncate ${currentTheme.subtitleColor}`}>
+                        <p className={`text-[10px] truncate opacity-70 ${currentTheme.id === 'minimal-light' ? 'text-slate-600' : 'text-white/80'}`}>
                           {link.subtitle}
                         </p>
                       )}
                     </div>
-                    <FontAwesomeIcon
-                      icon={faChevronRight}
-                      className="text-[9px] opacity-40 shrink-0"
-                    />
                   </div>
-                ))
-              )}
+                  <FontAwesomeIcon
+                    icon={faChevronRight}
+                    className={`text-[9px] opacity-40 shrink-0 ${currentTheme.id === 'minimal-light' ? 'text-slate-700' : 'text-white'}`}
+                  />
+                </div>
+              ))}
             </div>
+
+            {!hasRealLinks && (
+              <p className="text-[10px] text-white/50 text-center mt-3 italic">
+                (Sample preview — add real links below to customize)
+              </p>
+            )}
           </div>
 
           {/* Phone Footer Branding */}
