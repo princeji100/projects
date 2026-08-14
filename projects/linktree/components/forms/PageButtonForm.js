@@ -59,9 +59,8 @@ const PageButtonForm = ({ page, onButtonsChange }) => {
   };
 
   return (
-    <SectionBox>
+    <SectionBox title="Buttons">
       <form onSubmit={saveButton} className="space-y-6">
-        <h2 className="text-2xl font-bold text-slate-800 mb-6">Buttons</h2>
 
         <ReactSortable
           handle=".grip"

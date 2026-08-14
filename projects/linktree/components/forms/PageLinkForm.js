@@ -146,27 +146,23 @@ const PageLinkForm = ({ page, onLinksChange }) => {
   };
 
   return (
-    <SectionBox>
+    <SectionBox 
+      title="Links" 
+      action={
+        <button
+          type="button"
+          onClick={addNewLink}
+          className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 font-medium text-sm"
+        >
+          <FontAwesomeIcon
+            className="bg-blue-600 text-white p-1.5 rounded-full w-4 h-4"
+            icon={faPlus}
+          />
+          <span>Add new</span>
+        </button>
+      }
+    >
       <form onSubmit={save} className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">Links</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Manage your links, active visibility, and automated scheduling
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={addNewLink}
-            className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 font-medium"
-          >
-            <FontAwesomeIcon
-              className="bg-blue-600 text-white p-1.5 rounded-full w-5 h-5"
-              icon={faPlus}
-            />
-            <span>Add new</span>
-          </button>
-        </div>
 
         <ReactSortable
           handle=".handle"

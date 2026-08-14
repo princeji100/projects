@@ -145,7 +145,6 @@ const AccountPage = () => {
                         user={session?.user}
                         onStateChange={setLivePreviewState}
                     />
-                    <QRCodeCard uri={pageData?.uri} publicUrl={pageData?.publicUrl} />
                     <PageButtonForm
                         page={pageData}
                         onButtonsChange={setLiveButtons}
@@ -155,6 +154,7 @@ const AccountPage = () => {
                         user={session?.user}
                         onLinksChange={setLiveLinks}
                     />
+                    <QRCodeCard uri={pageData?.uri} publicUrl={pageData?.publicUrl} />
                 </div>
 
                 {/* Live Phone Mockup Preview Column (Sticky on desktop, full view when preview tab active on mobile) */}

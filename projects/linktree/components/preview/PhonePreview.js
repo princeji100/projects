@@ -74,7 +74,7 @@ export default function PhonePreview({
   const buttonKeys = Object.keys(buttons || {}).filter((k) => Boolean(buttons[k]));
 
   return (
-    <div className="sticky top-6 self-start w-full space-y-3">
+    <div className="sticky top-24 self-start w-full space-y-3">
       {/* Live Preview Header Controls */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">

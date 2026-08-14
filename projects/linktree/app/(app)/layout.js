@@ -14,6 +14,7 @@ import { faLink, faUser, faShareNodes } from "@fortawesome/free-solid-svg-icons"
 import Page from "@/models/Page";
 import Link from "next/link";
 import connectToDatabase from "@/lib/connectToDB";
+import PageTitle from "@/components/layout/PageTitle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +44,7 @@ export default async function AppLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-100 text-slate-900`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900`}>
         <SessionWrapper>
           <ToastContainer 
             position="bottom-right"
@@ -60,12 +61,12 @@ export default async function AppLayout({ children }) {
                 <span className="font-extrabold text-lg tracking-tight">Linktree</span>
               </Link>
               <div className="h-6 w-px bg-slate-200" />
-              <h1 className="text-base font-semibold text-slate-700">Settings</h1>
+              <PageTitle isAdmin={isAdmin} />
             </div>
 
             {/* Right: Avatar + Share */}
             <div className="flex items-center gap-3">
-              {page?.uri && (
+              {page?.uri ? (
                 <Link
                   href={`/${page.uri}`}
                   target="_blank"
@@ -74,6 +75,15 @@ export default async function AppLayout({ children }) {
                   <FontAwesomeIcon icon={faShareNodes} className="text-xs" />
                   <span>Share</span>
                 </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-400 text-xs font-semibold rounded-full shadow-xs cursor-not-allowed"
+                >
+                  <FontAwesomeIcon icon={faShareNodes} className="text-xs" />
+                  <span>Share</span>
+                </button>
               )}
               <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
                 <div className="rounded-full bg-slate-100 overflow-hidden w-9 h-9 ring-1 ring-slate-200 shrink-0 flex items-center justify-center">
@@ -103,7 +113,7 @@ export default async function AppLayout({ children }) {
               </Link>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {page?.uri && (
+              {page?.uri ? (
                 <Link
                   href={`/${page.uri}`}
                   target="_blank"
@@ -112,6 +122,15 @@ export default async function AppLayout({ children }) {
                   <FontAwesomeIcon icon={faShareNodes} className="text-[10px]" />
                   <span>Share</span>
                 </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 text-slate-400 text-xs font-semibold rounded-full shadow-xs cursor-not-allowed"
+                >
+                  <FontAwesomeIcon icon={faShareNodes} className="text-[10px]" />
+                  <span>Share</span>
+                </button>
               )}
               <div className="rounded-full bg-slate-100 overflow-hidden w-8 h-8 ring-1 ring-slate-200 flex items-center justify-center">
                 <SafeImage 
@@ -132,19 +151,19 @@ export default async function AppLayout({ children }) {
 
           <main className="md:flex min-h-[calc(100vh-4rem)]">
             {/* ═══ Desktop Icon Sidebar (matching screenshot) ═══ */}
-            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-20 py-6 shrink-0 shadow-xs">
-              <div className="sticky top-22 flex flex-col items-center gap-1 flex-1">
+            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-64 py-6 shrink-0 shadow-xs">
+              <div className="sticky top-22 flex flex-col items-center gap-1 flex-1 w-full">
                 {/* User Avatar at top of sidebar */}
-                <div className="rounded-full bg-slate-100 overflow-hidden w-12 h-12 ring-2 ring-slate-200 flex items-center justify-center shadow-xs mb-4">
+                <div className="rounded-full bg-slate-100 overflow-hidden w-16 h-16 ring-2 ring-slate-200 flex items-center justify-center shadow-xs mb-3">
                   <SafeImage 
                     src={session?.user?.image} 
-                    width={48} 
-                    height={48} 
+                    width={64} 
+                    height={64} 
                     alt={session?.user?.name || 'User avatar'}
                     className="object-cover object-center w-full h-full"
                     fallback={
                       <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
-                        <FontAwesomeIcon icon={faUser} className="text-base" />
+                        <FontAwesomeIcon icon={faUser} className="text-2xl" />
                       </div>
                     }
                   />
@@ -153,7 +172,7 @@ export default async function AppLayout({ children }) {
                   <Link 
                     href={`/${page.uri}`} 
                     target="_blank" 
-                    className="text-[9px] text-slate-400 hover:text-blue-600 transition-colors font-medium mb-4 truncate max-w-[72px] text-center"
+                    className="text-xs text-slate-400 hover:text-blue-600 transition-colors font-medium mb-4 truncate max-w-[200px] text-center"
                   >
                     @{page.uri}
                   </Link>
@@ -165,7 +184,9 @@ export default async function AppLayout({ children }) {
 
             {/* ═══ Main Content Area ═══ */}
             <div className="grow min-w-0 p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
-              {children}
+              <div className="max-w-[1200px] mx-auto">
+                {children}
+              </div>
             </div>
           </main>
 

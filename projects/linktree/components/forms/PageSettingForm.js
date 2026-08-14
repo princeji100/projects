@@ -81,13 +81,8 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
   return (
     <form onSubmit={saveBaseSettings} className="space-y-6">
       {/* Profile Details Card */}
-      <SectionBox>
+      <SectionBox title="Profile Details">
         <div className="space-y-5">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-lg font-bold text-slate-800">Profile Details</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Customize your personal identity and avatar</p>
-          </div>
-
           {/* Avatar Upload Block */}
           <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/70 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -172,12 +167,8 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
       </SectionBox>
 
       {/* Page Appearance Card */}
-      <SectionBox>
+      <SectionBox title="Page Appearance">
         <div className="space-y-5">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-lg font-bold text-slate-800">Page Appearance</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Customize theme presets, colors, and background imagery</p>
-          </div>
 
           {/* Background Type Toggle */}
           <div>

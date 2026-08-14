@@ -16,7 +16,7 @@ const AppSidebar = ({ isAdmin = false }) => {
   const navItems = getNavItems(isAdmin);
 
   return (
-    <nav aria-label="Dashboard navigation" className="flex flex-col items-center gap-1 w-full">
+    <nav aria-label="Dashboard navigation" className="flex flex-col gap-1 w-full px-3">
       {navItems.map((item) => {
         const isActive = pathname === item.href;
         return (
@@ -24,44 +24,40 @@ const AppSidebar = ({ isAdmin = false }) => {
             key={item.href}
             href={item.href}
             aria-current={isActive ? 'page' : undefined}
-            className={`flex flex-col items-center justify-center w-16 h-16 rounded-2xl transition-all duration-150 group focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
+            className={`flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl transition-all duration-150 font-medium group focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
               isActive
-                ? 'text-blue-600 bg-blue-50 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                ? 'text-blue-700 bg-blue-50 font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <FontAwesomeIcon
               icon={item.icon}
-              className={`text-base mb-1 ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'}`}
+              className={`text-base w-5 text-center ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}`}
             />
-            <span className={`text-[10px] font-semibold leading-tight ${isActive ? 'text-blue-600' : 'text-slate-500 group-hover:text-slate-800'}`}>
-              {item.label}
-            </span>
+            <span className="text-sm">{item.label}</span>
           </Link>
         );
       })}
 
-      {/* Spacer to push bottom items down */}
-      <div className="flex-1 min-h-8" />
+      <div className="my-2 border-t border-slate-100" />
 
       {/* Help icon */}
       <button
         type="button"
-        className="flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
-        title="Help"
+        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all cursor-pointer font-medium text-sm text-left"
       >
-        <FontAwesomeIcon icon={faQuestionCircle} className="text-base mb-1" />
+        <FontAwesomeIcon icon={faQuestionCircle} className="text-base w-5 text-center text-slate-400" />
+        <span>Help & Support</span>
       </button>
 
       {/* Logout icon */}
       <button
         type="button"
         onClick={() => signOut()}
-        className="flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"
-        title="Logout"
+        className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer font-medium text-sm text-left"
       >
-        <FontAwesomeIcon icon={faRightFromBracket} className="text-base mb-1" />
-        <span className="text-[10px] font-semibold leading-tight">Logout</span>
+        <FontAwesomeIcon icon={faRightFromBracket} className="text-base w-5 text-center text-slate-400 group-hover:text-red-500" />
+        <span>Logout</span>
       </button>
     </nav>
   );
