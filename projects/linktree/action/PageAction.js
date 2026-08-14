@@ -56,6 +56,7 @@ const SavePageSetting = async (formData) => {
             'bgImageOverlay',
             'textColor',
             'theme',
+            'font',
         ];
         const dataToUpdate = {};
         for (const key of dataKey) {
@@ -72,6 +73,9 @@ const SavePageSetting = async (formData) => {
         }
         if (!dataToUpdate.theme) {
             dataToUpdate.theme = 'default';
+        }
+        if (dataToUpdate.font) {
+            dataToUpdate.font = String(dataToUpdate.font).trim().toLowerCase();
         }
         await Page.updateOne({ owner: gate.session.user.email }, dataToUpdate);
         if (formData.has('avatar')) {

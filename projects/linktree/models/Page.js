@@ -28,8 +28,8 @@ const PageSchema = new Schema({
     bgGradientDirection: { type: String, default: '180deg' },
     bgImage: { type: String, default: '' },
     bgImageOverlay: { type: Boolean, default: true },
-    textColor: { type: String, default: '' },
     theme: { type: String, default: 'default' },
+    font: { type: String, default: 'default' },
     buttons: { type: Object, default: {} },
     links: { type: [LinkSchema], default: [] },
 }, {
