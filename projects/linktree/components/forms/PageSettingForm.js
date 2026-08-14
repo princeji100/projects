@@ -126,6 +126,9 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
     });
   };
 
+  // Check which top-level category is active
+  const isColorCategory = bgType === 'color' || bgType === 'gradient';
+
   return (
     <form onSubmit={saveBaseSettings} className="space-y-6">
       {/* Profile Details Card */}
@@ -241,52 +244,42 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
       <SectionBox title="Page Appearance">
         <div className="space-y-6">
 
-          {/* Background Type Toggle */}
+          {/* Top-Level Background Type Switcher: 3 Categories */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               Background Type
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
+            <div className="inline-flex w-full bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
               <button
                 type="button"
                 onClick={() => setBgType('preset')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   bgType === 'preset'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <FontAwesomeIcon icon={faPaintBrush} className="text-xs" />
-                <span>Preset</span>
+                <span>Theme Preset</span>
               </button>
+
               <button
                 type="button"
-                onClick={() => setBgType('gradient')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  bgType === 'gradient'
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <FontAwesomeIcon icon={faWandMagicSparkles} className="text-xs text-amber-400" />
-                <span>Gradient</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setBgType('color')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  bgType === 'color'
+                onClick={() => setBgType(bgType === 'gradient' ? 'gradient' : 'color')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  isColorCategory
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <FontAwesomeIcon icon={faPalette} className="text-xs" />
-                <span>Color</span>
+                <span>Custom Color</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setBgType('image')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   bgType === 'image'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -346,120 +339,144 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
             </div>
           )}
 
-          {/* Custom Gradient Builder */}
-          {bgType === 'gradient' && (
+          {/* Custom Color Section (With Solid vs Gradient Sub-Tabs) */}
+          {isColorCategory && (
             <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-4">
-              <div className="flex items-center justify-between">
+              {/* Solid vs Gradient Sub-Toggle */}
+              <div className="flex items-center justify-between gap-3">
                 <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                  Custom 2-Color Gradient
+                  Color Mode:
                 </span>
-                {/* Real-time gradient sample swatch */}
-                <div
-                  style={{
-                    background: `linear-gradient(${bgGradientDirection}, ${bgGradientFrom}, ${bgGradientTo})`,
-                  }}
-                  className="w-16 h-6 rounded-lg border border-black/15 shadow-inner"
-                />
-              </div>
-
-              {/* Quick Gradient Presets */}
-              <div>
-                <span className="block text-[11px] font-medium text-slate-500 mb-2">
-                  Quick Gradient Starters:
-                </span>
-                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                  {gradientPresets.map((gp) => (
-                    <button
-                      key={gp.name}
-                      type="button"
-                      onClick={() => {
-                        setBgGradientFrom(gp.from);
-                        setBgGradientTo(gp.to);
-                      }}
-                      title={gp.name}
-                      style={{
-                        background: `linear-gradient(135deg, ${gp.from}, ${gp.to})`,
-                      }}
-                      className="h-8 rounded-lg border border-black/10 shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Color Pickers & Direction Selector */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <label htmlFor="gradientStart" className="text-xs font-medium text-slate-600">
-                    Start Color
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="gradientStart"
-                      type="color"
-                      name="bgGradientFrom"
-                      value={bgGradientFrom}
-                      onChange={(e) => setBgGradientFrom(e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300"
-                    />
-                    <span className="text-xs font-mono font-semibold text-slate-700">{bgGradientFrom}</span>
-                  </div>
-                </div>
-
-                <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <label htmlFor="gradientEnd" className="text-xs font-medium text-slate-600">
-                    End Color
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="gradientEnd"
-                      type="color"
-                      name="bgGradientTo"
-                      value={bgGradientTo}
-                      onChange={(e) => setBgGradientTo(e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300"
-                    />
-                    <span className="text-xs font-mono font-semibold text-slate-700">{bgGradientTo}</span>
-                  </div>
-                </div>
-
-                <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <label htmlFor="gradientDirection" className="text-xs font-medium text-slate-600">
-                    Direction
-                  </label>
-                  <select
-                    id="gradientDirection"
-                    name="bgGradientDirection"
-                    value={bgGradientDirection}
-                    onChange={(e) => setBgGradientDirection(e.target.value)}
-                    className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 cursor-pointer focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                <div className="inline-flex bg-white p-1 rounded-xl border border-slate-200 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setBgType('color')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      bgType === 'color'
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
                   >
-                    <option value="180deg">Vertical ↓</option>
-                    <option value="90deg">Horizontal →</option>
-                    <option value="135deg">Diagonal ↘</option>
-                    <option value="45deg">Diagonal ↗</option>
-                  </select>
+                    Solid Color
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBgType('gradient')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      bgType === 'gradient'
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={faWandMagicSparkles} className="text-[10px]" />
+                    <span>Gradient</span>
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Custom Solid Color Selector */}
-          {bgType === 'color' && (
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between">
-              <label htmlFor="customBgColor" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Select Background Color:
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="customBgColor"
-                  type="color"
-                  name="bgColor"
-                  value={bgColor}
-                  onChange={(e) => setBgColor(e.target.value)}
-                  className="w-10 h-9 rounded-lg cursor-pointer border border-slate-300"
-                />
-                <span className="text-xs font-mono text-slate-700 font-semibold">{bgColor}</span>
-              </div>
+              {/* 1. Solid Color Selector */}
+              {bgType === 'color' && (
+                <div className="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <label htmlFor="customBgColor" className="text-xs font-semibold text-slate-700">
+                    Select Background Color:
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="customBgColor"
+                      type="color"
+                      name="bgColor"
+                      value={bgColor}
+                      onChange={(e) => setBgColor(e.target.value)}
+                      className="w-10 h-9 rounded-lg cursor-pointer border border-slate-300"
+                    />
+                    <span className="text-xs font-mono text-slate-700 font-semibold">{bgColor}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Gradient Builder */}
+              {bgType === 'gradient' && (
+                <div className="space-y-4 pt-1">
+                  {/* Quick Gradient Presets */}
+                  <div>
+                    <span className="block text-[11px] font-medium text-slate-500 mb-2">
+                      Quick Gradient Starters:
+                    </span>
+                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                      {gradientPresets.map((gp) => (
+                        <button
+                          key={gp.name}
+                          type="button"
+                          onClick={() => {
+                            setBgGradientFrom(gp.from);
+                            setBgGradientTo(gp.to);
+                          }}
+                          title={gp.name}
+                          style={{
+                            background: `linear-gradient(135deg, ${gp.from}, ${gp.to})`,
+                          }}
+                          className="h-8 rounded-lg border border-black/10 shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Color Pickers & Direction Selector */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <label htmlFor="gradientStart" className="text-xs font-medium text-slate-600">
+                        Start Color
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id="gradientStart"
+                          type="color"
+                          name="bgGradientFrom"
+                          value={bgGradientFrom}
+                          onChange={(e) => setBgGradientFrom(e.target.value)}
+                          className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300"
+                        />
+                        <span className="text-xs font-mono font-semibold text-slate-700">{bgGradientFrom}</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <label htmlFor="gradientEnd" className="text-xs font-medium text-slate-600">
+                        End Color
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id="gradientEnd"
+                          type="color"
+                          name="bgGradientTo"
+                          value={bgGradientTo}
+                          onChange={(e) => setBgGradientTo(e.target.value)}
+                          className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300"
+                        />
+                        <span className="text-xs font-mono font-semibold text-slate-700">{bgGradientTo}</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <label htmlFor="gradientDirection" className="text-xs font-medium text-slate-600">
+                        Direction
+                      </label>
+                      <select
+                        id="gradientDirection"
+                        name="bgGradientDirection"
+                        value={bgGradientDirection}
+                        onChange={(e) => setBgGradientDirection(e.target.value)}
+                        className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 cursor-pointer focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      >
+                        <option value="180deg">Vertical ↓</option>
+                        <option value="90deg">Horizontal →</option>
+                        <option value="135deg">Diagonal ↘</option>
+                        <option value="45deg">Diagonal ↗</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
