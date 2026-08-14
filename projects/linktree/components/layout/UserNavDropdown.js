@@ -100,6 +100,20 @@ export default function UserNavDropdown({ user, uri, isAdmin = false, size = 'md
             )}
           </div>
 
+          {/* Admin Control Center Link for Admin */}
+          {isAdmin && (
+            <div className="p-1 border-b border-slate-100">
+              <Link
+                href="/dashboard/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-xl transition-colors"
+              >
+                <FontAwesomeIcon icon={faUserShield} className="w-4 text-center text-amber-600" />
+                <span>Admin Control Center</span>
+              </Link>
+            </div>
+          )}
+
           {/* Logout Action */}
           <div className="p-1">
             <button

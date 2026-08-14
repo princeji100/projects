@@ -3,7 +3,7 @@
 import LoginWithGoogle from '@/components/buttons/LoginWithGoogle';
 import RequestInviteForm from '@/components/forms/RequestInviteForm';
 import { useSession } from 'next-auth/react';
-import { redirect, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -128,11 +128,14 @@ const LoginContent = () => {
 };
 
 const Login = () => {
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session, status } = useSession();
 
-  if (session) {
-    redirect('/dashboard');
-  }
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.replace('/dashboard');
+    }
+  }, [status, router]);
 
   return (
     <div className="min-h-[calc(100vh-80px)] flex flex-col justify-center py-12 px-4 sm:px-6">
