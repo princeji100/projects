@@ -20,11 +20,13 @@ import { getTheme } from '@/lib/themes';
 import { getFont } from '@/lib/fonts';
 import { getLinkBadge } from '@/lib/linkBadges';
 import { validateUpiId } from '@/lib/tipJar';
+import { parseMediaUrl } from '@/lib/mediaEmbeds';
 import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
 import { getBaseUrl } from '@/lib/siteUrl';
 import LinktreeLogo from '@/components/media/LinktreeLogo';
 import PublicTipJar from '@/components/tipjar/PublicTipJar';
+import YouTubeEmbed from '@/components/media/YouTubeEmbed';
 
 export async function generateMetadata({ params }) {
   const { uri } = await params;
@@ -270,6 +272,22 @@ const UserPage = async ({ params }) => {
         <div className="w-full space-y-3.5 max-w-xl mx-auto">
           {liveLinks.map((link, index) => {
             const linkKey = link._id?.toString() || link.id?.toString() || `${link.url}-${index}`;
+            const media = parseMediaUrl(link.url);
+
+            // YouTube Media Embed Card (Wave 9)
+            if (media?.provider === 'youtube') {
+              return (
+                <YouTubeEmbed
+                  key={linkKey}
+                  link={link}
+                  media={media}
+                  uri={page.uri}
+                  currentTheme={currentTheme}
+                  isLightText={isLightText}
+                />
+              );
+            }
+
             return (
               <Link
                 key={linkKey}
