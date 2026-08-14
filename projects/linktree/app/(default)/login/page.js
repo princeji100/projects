@@ -10,7 +10,6 @@ import {
   faLock,
   faShieldHalved,
   faEnvelope,
-  faSparkles,
   faUserPlus,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';

@@ -4,7 +4,7 @@ import {
   faCompass,
   faArrowRight,
   faHouse,
-  faSparkles,
+  faWandMagicSparkles,
   faShieldHalved,
 } from '@fortawesome/free-solid-svg-icons';
 import LinktreeLogo from '@/components/media/LinktreeLogo';
@@ -82,7 +82,7 @@ export default function ProfileNotFound() {
               href="/"
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-95 text-white text-xs font-bold px-6 py-3.5 rounded-2xl transition-all shadow-lg shadow-blue-600/30 cursor-pointer"
             >
-              <FontAwesomeIcon icon={faSparkles} className="w-3.5 h-3.5 text-blue-200" />
+              <FontAwesomeIcon icon={faWandMagicSparkles} className="w-3.5 h-3.5 text-blue-200" />
               <span>Claim a Handle</span>
               <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
             </Link>

@@ -9,7 +9,6 @@ import {
   faChevronRight,
   faCircleCheck,
   faLink as faLinkSolid,
-  faSparkles,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
@@ -20,10 +19,12 @@ import { isLinkLive } from '@/lib/linkLifecycle';
 import { getTheme } from '@/lib/themes';
 import { getFont } from '@/lib/fonts';
 import { getLinkBadge } from '@/lib/linkBadges';
+import { validateUpiId } from '@/lib/tipJar';
 import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
 import { getBaseUrl } from '@/lib/siteUrl';
 import LinktreeLogo from '@/components/media/LinktreeLogo';
+import PublicTipJar from '@/components/tipjar/PublicTipJar';
 
 export async function generateMetadata({ params }) {
   const { uri } = await params;
@@ -120,6 +121,20 @@ const UserPage = async ({ params }) => {
   const resolvedAvatar = page.avatar || user?.image || '';
 
   const buttonKeys = Object.keys(page.buttons || {}).filter((k) => Boolean(page.buttons[k]));
+
+  // Server-authoritative Tip Jar eligibility check
+  let tipJarPayload = null;
+  if (page.tipJar?.enabled && page.tipJar.upiId) {
+    const upiValidation = validateUpiId(page.tipJar.upiId);
+    if (upiValidation.ok && upiValidation.upiId) {
+      tipJarPayload = {
+        upiId: upiValidation.upiId,
+        name: page.tipJar.name || '',
+        amount: page.tipJar.amount || '',
+        message: page.tipJar.message || '',
+      };
+    }
+  }
 
   const textColor = page.textColor || '';
   const customHeadingStyle = textColor ? { color: textColor } : {};
@@ -244,6 +259,11 @@ const UserPage = async ({ params }) => {
               );
             })}
           </div>
+        )}
+
+        {/* Tip Jar Component (Server-Authoritative Eligibility) */}
+        {tipJarPayload && (
+          <PublicTipJar tipJar={tipJarPayload} isLightText={isLightText} />
         )}
 
         {/* Links Stack - Server-authoritative lifecycle filtering (LINK-01..LINK-04) */}

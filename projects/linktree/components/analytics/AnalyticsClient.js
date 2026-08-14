@@ -17,7 +17,6 @@ import {
   faChartLine,
   faCalendarAlt,
   faArrowTrendUp,
-  faSparkles,
   faBullseye,
 } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';

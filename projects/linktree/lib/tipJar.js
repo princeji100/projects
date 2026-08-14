@@ -185,3 +185,49 @@ export function sanitizeTipJarConfig(raw) {
     },
   };
 }
+
+/**
+ * Builds a deterministic, generic UPI payment intent URI (upi://pay?...).
+ * Uses URLSearchParams for safe encoding of all parameters without raw string interpolation.
+ *
+ * @param {Object} config
+ * @param {string} [config.upiId] - Mandatory VPA
+ * @param {string} [config.name] - Optional Payee Name
+ * @param {string} [config.amount] - Optional Amount in INR
+ * @param {string} [config.message] - Optional Payment Note
+ * @returns {string} - e.g. "upi://pay?pa=creator%40upi&pn=Prince&am=100&tn=Chai&cu=INR"
+ */
+export function buildUpiPaymentUri(config) {
+  if (!config || typeof config !== 'object') {
+    return '';
+  }
+
+  const rawUpiId = typeof config.upiId === 'string' ? config.upiId.trim() : '';
+  const upiRes = validateUpiId(rawUpiId);
+  if (!upiRes.ok || !upiRes.upiId) {
+    return '';
+  }
+
+  const params = new URLSearchParams();
+  params.set('pa', upiRes.upiId);
+
+  if (typeof config.name === 'string' && config.name.trim()) {
+    params.set('pn', config.name.trim().slice(0, MAX_NAME_LENGTH));
+  }
+
+  if (config.amount) {
+    const amountRes = normalizeTipAmount(config.amount);
+    if (amountRes.ok && amountRes.amount) {
+      params.set('am', amountRes.amount);
+    }
+  }
+
+  if (typeof config.message === 'string' && config.message.trim()) {
+    params.set('tn', config.message.trim().slice(0, MAX_MESSAGE_LENGTH));
+  }
+
+  params.set('cu', 'INR');
+
+  return `upi://pay?${params.toString()}`;
+}
+

@@ -1,7 +1,7 @@
 import HeroForm from "@/components/forms/HeroForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSparkles,
+  faWandMagicSparkles,
   faQrcode,
   faChartLine,
   faPaintBrush,
@@ -243,7 +243,7 @@ export default async function Home() {
 
             <div className="bg-slate-800/80 backdrop-blur-md p-5 rounded-2xl border border-slate-700/80 space-y-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base">
-                <FontAwesomeIcon icon={faSparkles} />
+                <FontAwesomeIcon icon={faWandMagicSparkles} />
               </div>
               <h3 className="text-base font-bold text-white">Premium Cloud Bandwidth</h3>
               <p className="text-xs text-slate-400 leading-relaxed">

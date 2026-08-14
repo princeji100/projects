@@ -8,7 +8,6 @@ import SubmitButton from '../buttons/SubmitButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowRight,
-  faSparkles,
   faLink,
   faCheckCircle,
   faShieldHalved,

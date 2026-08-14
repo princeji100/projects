@@ -15,7 +15,6 @@ import {
   faCheckCircle,
   faArrowRight,
   faCircleQuestion,
-  faSparkles,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faGithub,
