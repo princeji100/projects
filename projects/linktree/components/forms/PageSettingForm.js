@@ -10,6 +10,9 @@ import {
   faLocationDot,
   faUser,
   faRotateLeft,
+  faWandMagicSparkles,
+  faFont,
+  faEye,
 } from '@fortawesome/free-solid-svg-icons';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import SubmitButton from '../buttons/SubmitButton';
@@ -19,13 +22,29 @@ import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
 import upload from '@/lib/upload';
 import SectionBox from '../layout/SectionBox';
-import { themes, getTheme } from '@/lib/themes';
+import { themes } from '@/lib/themes';
+
+const gradientPresets = [
+  { name: 'Sunset', from: '#f43f5e', to: '#fb923c' },
+  { name: 'Ocean', from: '#0284c7', to: '#38bdf8' },
+  { name: 'Cyber', from: '#ec4899', to: '#8b5cf6' },
+  { name: 'Neon', from: '#10b981', to: '#06b6d4' },
+  { name: 'Midnight', from: '#0f172a', to: '#581c87' },
+  { name: 'Royal', from: '#4f46e5', to: '#c026d3' },
+  { name: 'Emerald', from: '#065f46', to: '#10b981' },
+  { name: 'Amber Glow', from: '#d97706', to: '#dc2626' },
+];
 
 const PageSettingForm = ({ page, user, onStateChange }) => {
   const [bgType, setBgType] = useState(page?.bgType || 'preset');
   const [theme, setTheme] = useState(page?.theme || 'default');
   const [bgColor, setBgColor] = useState(page?.bgColor || '#000000');
+  const [bgGradientFrom, setBgGradientFrom] = useState(page?.bgGradientFrom || '#3b82f6');
+  const [bgGradientTo, setBgGradientTo] = useState(page?.bgGradientTo || '#9333ea');
+  const [bgGradientDirection, setBgGradientDirection] = useState(page?.bgGradientDirection || '180deg');
   const [bgImage, setBgImage] = useState(page?.bgImage || '');
+  const [bgImageOverlay, setBgImageOverlay] = useState(page?.bgImageOverlay ?? true);
+  const [textColor, setTextColor] = useState(page?.textColor || '');
   const [avatar, setAvatar] = useState(page?.avatar || user?.image || '');
   const [displayName, setDisplayName] = useState(page?.displayName || '');
   const [location, setLocation] = useState(page?.location || '');
@@ -38,14 +57,34 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
         bgType,
         theme,
         bgColor,
+        bgGradientFrom,
+        bgGradientTo,
+        bgGradientDirection,
         bgImage,
+        bgImageOverlay,
+        textColor,
         avatar,
         displayName,
         location,
         bio,
       });
     }
-  }, [bgType, theme, bgColor, bgImage, avatar, displayName, location, bio, onStateChange]);
+  }, [
+    bgType,
+    theme,
+    bgColor,
+    bgGradientFrom,
+    bgGradientTo,
+    bgGradientDirection,
+    bgImage,
+    bgImageOverlay,
+    textColor,
+    avatar,
+    displayName,
+    location,
+    bio,
+    onStateChange,
+  ]);
 
   const saveBaseSettings = async (e) => {
     e.preventDefault();
@@ -54,7 +93,12 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
       formData.set('bgType', bgType);
       formData.set('theme', theme);
       formData.set('bgColor', bgColor);
+      formData.set('bgGradientFrom', bgGradientFrom);
+      formData.set('bgGradientTo', bgGradientTo);
+      formData.set('bgGradientDirection', bgGradientDirection);
       formData.set('bgImage', bgImage);
+      formData.set('bgImageOverlay', String(bgImageOverlay));
+      formData.set('textColor', textColor);
       formData.set('avatar', avatar);
 
       const result = await SavePageSetting(formData);
@@ -195,30 +239,42 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
 
       {/* Page Appearance Card */}
       <SectionBox title="Page Appearance">
-        <div className="space-y-5">
+        <div className="space-y-6">
 
           {/* Background Type Toggle */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               Background Type
             </label>
-            <div className="inline-flex w-full bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
               <button
                 type="button"
                 onClick={() => setBgType('preset')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   bgType === 'preset'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <FontAwesomeIcon icon={faPaintBrush} className="text-xs" />
-                <span>Theme Preset</span>
+                <span>Preset</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBgType('gradient')}
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  bgType === 'gradient'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <FontAwesomeIcon icon={faWandMagicSparkles} className="text-xs text-amber-400" />
+                <span>Gradient</span>
               </button>
               <button
                 type="button"
                 onClick={() => setBgType('color')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   bgType === 'color'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -230,7 +286,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
               <button
                 type="button"
                 onClick={() => setBgType('image')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   bgType === 'image'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -246,7 +302,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
           {bgType === 'preset' && (
             <div>
               <span className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">
-                Theme Preset Swatches
+                Curated Theme Presets
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {themes.map((t) => {
@@ -290,31 +346,130 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
             </div>
           )}
 
-          {/* Custom Color Selector */}
+          {/* Custom Gradient Builder */}
+          {bgType === 'gradient' && (
+            <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  Custom 2-Color Gradient
+                </span>
+                {/* Real-time gradient sample swatch */}
+                <div
+                  style={{
+                    background: `linear-gradient(${bgGradientDirection}, ${bgGradientFrom}, ${bgGradientTo})`,
+                  }}
+                  className="w-16 h-6 rounded-lg border border-black/15 shadow-inner"
+                />
+              </div>
+
+              {/* Quick Gradient Presets */}
+              <div>
+                <span className="block text-[11px] font-medium text-slate-500 mb-2">
+                  Quick Gradient Starters:
+                </span>
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                  {gradientPresets.map((gp) => (
+                    <button
+                      key={gp.name}
+                      type="button"
+                      onClick={() => {
+                        setBgGradientFrom(gp.from);
+                        setBgGradientTo(gp.to);
+                      }}
+                      title={gp.name}
+                      style={{
+                        background: `linear-gradient(135deg, ${gp.from}, ${gp.to})`,
+                      }}
+                      className="h-8 rounded-lg border border-black/10 shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Color Pickers & Direction Selector */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <label htmlFor="gradientStart" className="text-xs font-medium text-slate-600">
+                    Start Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="gradientStart"
+                      type="color"
+                      name="bgGradientFrom"
+                      value={bgGradientFrom}
+                      onChange={(e) => setBgGradientFrom(e.target.value)}
+                      className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300"
+                    />
+                    <span className="text-xs font-mono font-semibold text-slate-700">{bgGradientFrom}</span>
+                  </div>
+                </div>
+
+                <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <label htmlFor="gradientEnd" className="text-xs font-medium text-slate-600">
+                    End Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="gradientEnd"
+                      type="color"
+                      name="bgGradientTo"
+                      value={bgGradientTo}
+                      onChange={(e) => setBgGradientTo(e.target.value)}
+                      className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300"
+                    />
+                    <span className="text-xs font-mono font-semibold text-slate-700">{bgGradientTo}</span>
+                  </div>
+                </div>
+
+                <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <label htmlFor="gradientDirection" className="text-xs font-medium text-slate-600">
+                    Direction
+                  </label>
+                  <select
+                    id="gradientDirection"
+                    name="bgGradientDirection"
+                    value={bgGradientDirection}
+                    onChange={(e) => setBgGradientDirection(e.target.value)}
+                    className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 cursor-pointer focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  >
+                    <option value="180deg">Vertical ↓</option>
+                    <option value="90deg">Horizontal →</option>
+                    <option value="135deg">Diagonal ↘</option>
+                    <option value="45deg">Diagonal ↗</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Custom Solid Color Selector */}
           {bgType === 'color' && (
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center gap-4">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between">
               <label htmlFor="customBgColor" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Select Background Color:
               </label>
-              <input
-                id="customBgColor"
-                type="color"
-                name="bgColor"
-                value={bgColor}
-                onChange={(e) => setBgColor(e.target.value)}
-                className="w-12 h-10 rounded-lg cursor-pointer border border-slate-300"
-              />
-              <span className="text-xs font-mono text-slate-600 font-semibold">{bgColor}</span>
+              <div className="flex items-center gap-2">
+                <input
+                  id="customBgColor"
+                  type="color"
+                  name="bgColor"
+                  value={bgColor}
+                  onChange={(e) => setBgColor(e.target.value)}
+                  className="w-10 h-9 rounded-lg cursor-pointer border border-slate-300"
+                />
+                <span className="text-xs font-mono text-slate-700 font-semibold">{bgColor}</span>
+              </div>
             </div>
           )}
 
           {/* Custom Image Upload */}
           {bgType === 'image' && (
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+            <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-4">
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Header Background Image:
               </label>
-              <label className="bg-white hover:bg-slate-50 border border-slate-200 transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-xs px-4 py-3 rounded-xl">
+              <label className="bg-white hover:bg-slate-50 border border-slate-200 transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-xs px-4 py-3.5 rounded-xl">
                 <input type="hidden" name="bgImage" value={bgImage} />
                 <input
                   type="file"
@@ -325,11 +480,97 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
                 />
                 <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
                 <span className="text-slate-700 text-xs font-semibold">
-                  {bgImage ? 'Change Image' : 'Upload Background Image'}
+                  {bgImage ? 'Change Custom Image' : 'Upload Background Image'}
                 </span>
               </label>
+
+              {/* Image Contrast Overlay Toggle */}
+              <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faEye} className="text-xs text-slate-400" />
+                  <div>
+                    <span className="text-xs font-semibold text-slate-800">Dark Contrast Overlay</span>
+                    <p className="text-[11px] text-slate-500">Darkens photo slightly for crystal clear text readability</p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={bgImageOverlay}
+                  onChange={(e) => setBgImageOverlay(e.target.checked)}
+                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+              </div>
             </div>
           )}
+
+          {/* Text Color & Readability Control */}
+          <div className="pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2 mb-2">
+              <FontAwesomeIcon icon={faFont} className="text-xs text-slate-500" />
+              <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Text & Content Color
+              </label>
+            </div>
+            <p className="text-[11px] text-slate-500 mb-3">
+              Ensure your name, bio, and links are clearly readable on any background.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setTextColor('')}
+                className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  textColor === ''
+                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs font-bold'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span>Theme Default</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTextColor('#ffffff')}
+                className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  textColor === '#ffffff'
+                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs font-bold'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span className="w-3.5 h-3.5 rounded-full bg-white border border-slate-300 shadow-2xs" />
+                <span>Light Text (White)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTextColor('#0f172a')}
+                className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  textColor === '#0f172a'
+                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-2xs font-bold'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span className="w-3.5 h-3.5 rounded-full bg-slate-900 shadow-2xs" />
+                <span>Dark Text (Black)</span>
+              </button>
+            </div>
+
+            {/* Custom Hex Color Picker if needed */}
+            <div className="mt-3 bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+              <span className="text-xs font-medium text-slate-600">Custom Text Color:</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={textColor || '#ffffff'}
+                  onChange={(e) => setTextColor(e.target.value)}
+                  className="w-7 h-7 rounded-lg cursor-pointer border border-slate-300"
+                />
+                <span className="text-xs font-mono font-semibold text-slate-700">
+                  {textColor || 'Auto'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </SectionBox>
 

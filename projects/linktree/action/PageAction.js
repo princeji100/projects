@@ -43,15 +43,32 @@ const SavePageSetting = async (formData) => {
 
     try {
         await connectToDatabase();
-        const dataKey = ['displayName', 'location', 'bio', 'bgType', 'bgColor', 'bgImage', 'theme'];
+        const dataKey = [
+            'displayName',
+            'location',
+            'bio',
+            'bgType',
+            'bgColor',
+            'bgGradientFrom',
+            'bgGradientTo',
+            'bgGradientDirection',
+            'bgImage',
+            'bgImageOverlay',
+            'textColor',
+            'theme',
+        ];
         const dataToUpdate = {};
         for (const key of dataKey) {
             if (formData.has(key)) {
-                dataToUpdate[key] = formData.get(key);
+                let val = formData.get(key);
+                if (key === 'bgImageOverlay') {
+                    val = val === 'true' || val === true || val === '1';
+                }
+                dataToUpdate[key] = val;
             }
         }
-        if (dataToUpdate.bgType && !['color', 'image', 'preset'].includes(dataToUpdate.bgType)) {
-            dataToUpdate.bgType = 'color';
+        if (dataToUpdate.bgType && !['color', 'gradient', 'image', 'preset'].includes(dataToUpdate.bgType)) {
+            dataToUpdate.bgType = 'preset';
         }
         if (!dataToUpdate.theme) {
             dataToUpdate.theme = 'default';

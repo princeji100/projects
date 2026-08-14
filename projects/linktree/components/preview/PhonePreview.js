@@ -4,10 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faExternalLinkAlt,
   faRotateRight,
-  faCircleCheck,
+  faExternalLinkAlt,
   faChevronRight,
+  faCircleCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
@@ -15,18 +15,18 @@ import { getTheme } from '@/lib/themes';
 import { getSocialButton } from '@/lib/socialButtons';
 import { isLinkLive } from '@/lib/linkLifecycle';
 
-/**
- * Live Phone Mockup Preview Component
- * Renders a pixel-perfect smartphone frame matching docs/screenshots/profile-settings.png
- * Supports real-time state synchronization with smart showcase fallbacks when no links/buttons exist yet.
- */
 export default function PhonePreview({
   page,
   user,
   previewTheme,
   previewBgType,
   previewBgColor,
+  previewBgGradientFrom,
+  previewBgGradientTo,
+  previewBgGradientDirection,
   previewBgImage,
+  previewBgImageOverlay,
+  previewTextColor,
   previewAvatar,
   previewDisplayName,
   previewBio,
@@ -40,7 +40,12 @@ export default function PhonePreview({
   const themeKey = previewTheme !== undefined ? previewTheme : page?.theme || 'default';
   const bgType = previewBgType !== undefined ? previewBgType : page?.bgType || 'preset';
   const bgColor = previewBgColor !== undefined ? previewBgColor : page?.bgColor || '#000000';
+  const bgGradientFrom = previewBgGradientFrom !== undefined ? previewBgGradientFrom : page?.bgGradientFrom || '#3b82f6';
+  const bgGradientTo = previewBgGradientTo !== undefined ? previewBgGradientTo : page?.bgGradientTo || '#9333ea';
+  const bgGradientDirection = previewBgGradientDirection !== undefined ? previewBgGradientDirection : page?.bgGradientDirection || '180deg';
   const bgImage = previewBgImage !== undefined ? previewBgImage : page?.bgImage || '';
+  const bgImageOverlay = previewBgImageOverlay !== undefined ? previewBgImageOverlay : page?.bgImageOverlay ?? true;
+  const textColor = previewTextColor !== undefined ? previewTextColor : page?.textColor || '';
   const avatar = previewAvatar !== undefined ? previewAvatar : page?.avatar || user?.image || '';
   const displayName = previewDisplayName !== undefined && previewDisplayName !== '' 
     ? previewDisplayName 
@@ -56,7 +61,11 @@ export default function PhonePreview({
   let previewStyle = {};
   let previewBgClass = '';
 
-  if (bgType === 'color' && bgColor) {
+  if (bgType === 'gradient') {
+    previewStyle = {
+      background: `linear-gradient(${bgGradientDirection}, ${bgGradientFrom}, ${bgGradientTo})`,
+    };
+  } else if (bgType === 'color' && bgColor) {
     previewStyle = { backgroundColor: bgColor };
   } else if (bgType === 'image' && bgImage) {
     previewStyle = {
@@ -73,6 +82,10 @@ export default function PhonePreview({
 
   // Extract active button keys - show immediately when added or edited
   const buttonKeys = Object.keys(buttons || {}).filter((k) => buttons[k] !== undefined && buttons[k] !== null);
+
+  const customHeadingStyle = textColor ? { color: textColor } : {};
+  const customSubtextStyle = textColor ? { color: textColor, opacity: 0.8 } : {};
+  const isLightText = textColor ? textColor.toLowerCase() === '#ffffff' : currentTheme.id !== 'minimal-light';
 
   return (
     <div className="sticky top-20 w-full space-y-3">
@@ -129,9 +142,14 @@ export default function PhonePreview({
         <div
           key={refreshKey}
           style={previewStyle}
-          className={`w-full h-full rounded-[36px] overflow-y-auto overflow-x-hidden ${previewBgClass} ${currentTheme.textColor} p-4 pt-11 flex flex-col items-center justify-between no-scrollbar transition-all duration-300 relative`}
+          className={`w-full h-full rounded-[36px] overflow-y-auto overflow-x-hidden ${previewBgClass} ${textColor ? '' : currentTheme.textColor} p-4 pt-11 flex flex-col items-center justify-between no-scrollbar transition-all duration-300 relative`}
         >
-          <div className="w-full flex flex-col items-center">
+          {/* Background Contrast Overlay for custom images */}
+          {bgType === 'image' && bgImageOverlay && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[0.5px] pointer-events-none rounded-[36px] z-0" />
+          )}
+
+          <div className="relative z-10 w-full flex flex-col items-center">
             {/* Avatar with glowing ring */}
             <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full ring-3 ring-white/40 shadow-xl overflow-hidden shrink-0 mb-3 bg-slate-800">
               <ProfileAvatar src={avatar} name={displayName} size={88} />
@@ -139,20 +157,29 @@ export default function PhonePreview({
 
             {/* Display Name & Verified Checkmark Badge */}
             <div className="flex items-center gap-1.5 justify-center text-center px-2">
-              <h3 className={`text-base sm:text-lg font-extrabold truncate ${currentTheme.headingColor} tracking-tight`}>
+              <h3
+                style={customHeadingStyle}
+                className={`text-base sm:text-lg font-extrabold truncate ${textColor ? '' : currentTheme.headingColor} tracking-tight`}
+              >
                 {displayName}
               </h3>
               <FontAwesomeIcon icon={faCircleCheck} className="text-blue-400 text-xs shrink-0" />
             </div>
 
             {/* Handle / Location */}
-            <p className={`text-[11px] ${currentTheme.mutedTextColor} font-medium mt-0.5 truncate max-w-full`}>
+            <p
+              style={customSubtextStyle}
+              className={`text-[11px] ${textColor ? '' : currentTheme.mutedTextColor} font-medium mt-0.5 truncate max-w-full`}
+            >
               @{uri} {location ? `• ${location}` : ''}
             </p>
 
             {/* Bio */}
             {bio && (
-              <p className={`text-[11px] ${currentTheme.subtitleColor} text-center mt-2 px-2 line-clamp-3 leading-snug break-words`}>
+              <p
+                style={customSubtextStyle}
+                className={`text-[11px] ${textColor ? '' : currentTheme.subtitleColor} text-center mt-2 px-2 line-clamp-3 leading-snug break-words`}
+              >
                 {bio}
               </p>
             )}
@@ -178,8 +205,15 @@ export default function PhonePreview({
             {/* Links Stack */}
             <div className="w-full space-y-2.5 mt-2">
               {visibleLinks.length === 0 ? (
-                <div className={`text-center py-8 border border-dashed rounded-2xl p-4 ${currentTheme.id === 'minimal-light' ? 'border-slate-300' : 'border-white/15'}`}>
-                  <p className={`text-[11px] ${currentTheme.mutedTextColor} opacity-70`}>
+                <div
+                  className={`text-center py-8 border border-dashed rounded-2xl p-4 ${
+                    isLightText ? 'border-white/20' : 'border-slate-300'
+                  }`}
+                >
+                  <p
+                    style={customSubtextStyle}
+                    className={`text-[11px] ${textColor ? '' : currentTheme.mutedTextColor} opacity-80`}
+                  >
                     No active links yet. Add a link to see it appear here!
                   </p>
                 </div>
@@ -188,9 +222,9 @@ export default function PhonePreview({
                   <div
                     key={link._id || idx}
                     className={`w-full p-3 rounded-2xl ${
-                      currentTheme.id === 'minimal-light'
-                        ? 'bg-white text-slate-900 border border-slate-200/90 shadow-xs'
-                        : 'bg-white/15 border border-white/20 shadow-xs backdrop-blur-md'
+                      isLightText
+                        ? 'bg-white/15 border border-white/25 shadow-xs backdrop-blur-md text-white'
+                        : 'bg-white/90 text-slate-900 border border-slate-200/90 shadow-xs'
                     } flex items-center gap-3 transition-all duration-200`}
                   >
                     {link.icon && (
@@ -201,18 +235,26 @@ export default function PhonePreview({
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className={`text-xs font-bold truncate ${currentTheme.headingColor}`}>
+                      <p
+                        className={`text-xs font-bold truncate ${
+                          isLightText ? 'text-white' : 'text-slate-900'
+                        }`}
+                      >
                         {link.title || 'Untitled Link'}
                       </p>
                       {link.subtitle && (
-                        <p className={`text-[10px] truncate ${currentTheme.subtitleColor}`}>
+                        <p
+                          className={`text-[10px] truncate ${
+                            isLightText ? 'text-white/75' : 'text-slate-500'
+                          }`}
+                        >
                           {link.subtitle}
                         </p>
                       )}
                     </div>
                     <FontAwesomeIcon
                       icon={faChevronRight}
-                      className="text-[9px] opacity-40 shrink-0"
+                      className={`text-[9px] ${isLightText ? 'text-white/40' : 'text-slate-400'} shrink-0`}
                     />
                   </div>
                 ))
@@ -221,15 +263,20 @@ export default function PhonePreview({
           </div>
 
           {/* Phone Footer Branding */}
-          <div className="pt-4 pb-1 text-center">
-            <span className="text-[9px] font-semibold text-white/40 tracking-wider uppercase">
+          <div className="relative z-10 pt-4 pb-1 text-center">
+            <span
+              style={customSubtextStyle}
+              className={`text-[9px] font-semibold tracking-wider uppercase ${
+                isLightText ? 'text-white/40' : 'text-slate-400'
+              }`}
+            >
               linktree
             </span>
           </div>
         </div>
 
         {/* Home Indicator Bar */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/40 rounded-full pointer-events-none" />
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/40 rounded-full pointer-events-none z-30" />
       </div>
     </div>
   );

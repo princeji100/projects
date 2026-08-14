@@ -64,7 +64,12 @@ const UserPage = async ({ params }) => {
   let pageStyle = {};
   let pageBgClass = '';
 
-  if (page.bgType === 'color' && page.bgColor) {
+  if (page.bgType === 'gradient') {
+    pageStyle = {
+      background: `linear-gradient(${page.bgGradientDirection || '180deg'}, ${page.bgGradientFrom || '#3b82f6'}, ${page.bgGradientTo || '#9333ea'})`,
+      backgroundAttachment: 'fixed',
+    };
+  } else if (page.bgType === 'color' && page.bgColor) {
     pageStyle = { backgroundColor: page.bgColor };
   } else if (page.bgType === 'image' && page.bgImage) {
     pageStyle = {
@@ -85,19 +90,27 @@ const UserPage = async ({ params }) => {
 
   const buttonKeys = Object.keys(page.buttons || {}).filter((k) => Boolean(page.buttons[k]));
 
-  const isDarkTheme = currentTheme.id !== 'minimal-light';
+  const textColor = page.textColor || '';
+  const customHeadingStyle = textColor ? { color: textColor } : {};
+  const customSubtextStyle = textColor ? { color: textColor, opacity: 0.85 } : {};
+  const isLightText = textColor ? textColor.toLowerCase() === '#ffffff' : currentTheme.id !== 'minimal-light';
 
   return (
     <div
       style={pageStyle}
-      className={`min-h-screen ${pageBgClass} ${currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between`}
+      className={`min-h-screen ${pageBgClass} ${textColor ? '' : currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between relative`}
     >
+      {/* Background Contrast Overlay for custom images */}
+      {page.bgType === 'image' && (page.bgImageOverlay ?? true) && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[0.5px] pointer-events-none z-0" />
+      )}
+
       {/* Top Navbar */}
-      <header className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between z-20">
+      <header className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <Link 
           href="/"
           className={`flex items-center gap-1.5 font-bold text-lg tracking-tight focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-1 transition-opacity hover:opacity-80 ${
-            isDarkTheme ? 'text-white' : 'text-slate-900'
+            isLightText ? 'text-white' : 'text-slate-900'
           }`}
         >
           <FontAwesomeIcon icon={faLinkSolid} className="text-sm text-blue-500" />
@@ -106,12 +119,12 @@ const UserPage = async ({ params }) => {
         <PublicShareButton 
           url={typeof window !== 'undefined' ? window.location.href : undefined} 
           title={resolvedDisplayName} 
-          isDark={isDarkTheme}
+          isDark={isLightText}
         />
       </header>
 
       {/* Main Profile Container */}
-      <main className="max-w-2xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col items-center">
+      <main className="relative z-10 max-w-2xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col items-center">
         {/* Avatar Section */}
         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full ring-4 ring-white/30 shadow-2xl overflow-hidden mb-4 shrink-0 bg-slate-800">
           <ProfileAvatar
@@ -123,21 +136,30 @@ const UserPage = async ({ params }) => {
 
         {/* Name and Verified Badge */}
         <div className="flex items-center justify-center gap-2 text-center px-2">
-          <h1 className={`text-2xl sm:text-3xl font-extrabold ${currentTheme.headingColor} tracking-tight break-words`}>
+          <h1
+            style={customHeadingStyle}
+            className={`text-2xl sm:text-3xl font-extrabold ${textColor ? '' : currentTheme.headingColor} tracking-tight break-words`}
+          >
             {resolvedDisplayName}
           </h1>
           <FontAwesomeIcon icon={faCircleCheck} className="text-blue-400 text-lg shrink-0" title="Verified Profile" />
         </div>
 
         {/* Handle / Location Subtitle */}
-        <p className={`text-xs sm:text-sm font-medium ${currentTheme.mutedTextColor} text-center mt-1`}>
+        <p
+          style={customSubtextStyle}
+          className={`text-xs sm:text-sm font-medium ${textColor ? '' : currentTheme.mutedTextColor} text-center mt-1`}
+        >
           @{uri} {page.location ? `• ${page.location}` : ''}
         </p>
 
         {/* Bio */}
         {page.bio && (
           <div className="max-w-md mx-auto text-center mt-3 mb-6 px-2">
-            <p className={`${currentTheme.mutedTextColor} leading-relaxed text-xs sm:text-sm break-words`}>
+            <p
+              style={customSubtextStyle}
+              className={`${textColor ? '' : currentTheme.mutedTextColor} leading-relaxed text-xs sm:text-sm break-words`}
+            >
               {page.bio}
             </p>
           </div>
@@ -180,7 +202,11 @@ const UserPage = async ({ params }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 ping={`${process.env.NEXT_PUBLIC_URL || ''}api/click?url=${btoa(link.url || '')}&page=${page.uri}`}
-                className={`group relative ${currentTheme.cardBg} ${currentTheme.cardBorder} rounded-2xl flex items-center p-4 sm:p-4.5 gap-4 
+                className={`group relative ${
+                  isLightText
+                    ? 'bg-white/15 border-white/20 text-white'
+                    : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-sm'
+                } border rounded-2xl flex items-center p-4 sm:p-4.5 gap-4 
                          transition-all duration-200 backdrop-blur-md hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[68px] w-full`}
               >
                 <div className={`${currentTheme.iconBg} w-12 h-12 rounded-xl 
@@ -192,18 +218,28 @@ const UserPage = async ({ params }) => {
                   />
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <h3 className={`font-bold text-sm sm:text-base truncate ${currentTheme.headingColor}`}>
+                  <h3
+                    className={`font-bold text-sm sm:text-base truncate ${
+                      isLightText ? 'text-white' : 'text-slate-900'
+                    }`}
+                  >
                     {link.title || 'Untitled Link'}
                   </h3>
                   {link.subtitle && (
-                    <p className={`${currentTheme.subtitleColor} text-xs truncate mt-0.5`}>
+                    <p
+                      className={`text-xs truncate mt-0.5 ${
+                        isLightText ? 'text-white/75' : 'text-slate-500'
+                      }`}
+                    >
                       {link.subtitle}
                     </p>
                   )}
                 </div>
                 <FontAwesomeIcon
                   icon={faChevronRight}
-                  className="text-xs opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-1"
+                  className={`text-xs ${
+                    isLightText ? 'text-white/40' : 'text-slate-400'
+                  } group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-1`}
                 />
               </Link>
             );
@@ -212,11 +248,11 @@ const UserPage = async ({ params }) => {
       </main>
 
       {/* Made with Linktree Footer */}
-      <footer className="text-center py-6 pb-8">
+      <footer className="relative z-10 text-center py-6 pb-8">
         <Link
           href="/"
           className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95 ${
-            isDarkTheme
+            isLightText
               ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white/90'
               : 'bg-slate-200/80 hover:bg-slate-300 border-slate-300 text-slate-800'
           }`}
