@@ -6,7 +6,6 @@ import {
   faHouse,
   faSparkles,
   faShieldHalved,
-  faGlobe,
 } from '@fortawesome/free-solid-svg-icons';
 import LinktreeLogo from '@/components/media/LinktreeLogo';
 
@@ -54,13 +53,13 @@ export default function ProfileNotFound() {
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
 
           {/* Glowing Animated Icon */}
-          <div className="relative mx-auto w-20 h-20">
-            <div className="w-20 h-20 bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 text-blue-400 rounded-3xl flex items-center justify-center ring-1 ring-blue-500/30 shadow-inner">
-              <FontAwesomeIcon icon={faCompass} className="text-3xl animate-spin-slow" />
+          <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 text-blue-400 rounded-3xl flex items-center justify-center ring-1 ring-blue-500/30 shadow-inner">
+              <FontAwesomeIcon icon={faCompass} className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400" />
             </div>
-            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-blue-500"></span>
             </span>
           </div>
 
@@ -83,22 +82,22 @@ export default function ProfileNotFound() {
               href="/"
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-95 text-white text-xs font-bold px-6 py-3.5 rounded-2xl transition-all shadow-lg shadow-blue-600/30 cursor-pointer"
             >
-              <FontAwesomeIcon icon={faSparkles} className="text-blue-200 text-xs" />
+              <FontAwesomeIcon icon={faSparkles} className="w-3.5 h-3.5 text-blue-200" />
               <span>Claim a Handle</span>
-              <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" />
+              <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
             </Link>
             <Link
               href="/"
               className="inline-flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 active:scale-95 text-slate-200 text-xs font-semibold px-5 py-3.5 rounded-2xl transition-all"
             >
-              <FontAwesomeIcon icon={faHouse} className="text-slate-400 text-xs" />
+              <FontAwesomeIcon icon={faHouse} className="w-3.5 h-3.5 text-slate-400" />
               <span>Back Home</span>
             </Link>
           </div>
 
           {/* Security & Authenticity Footnote */}
           <div className="pt-4 border-t border-slate-800/80 flex items-center justify-center gap-2 text-[11px] text-slate-500">
-            <FontAwesomeIcon icon={faShieldHalved} className="text-blue-500" />
+            <FontAwesomeIcon icon={faShieldHalved} className="w-3.5 h-3.5 text-blue-500 shrink-0 inline-block" />
             <span>Verified Invite-Only Creator Platform</span>
           </div>
         </div>
