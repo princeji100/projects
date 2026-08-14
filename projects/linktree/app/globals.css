@@ -71,7 +71,7 @@ body{
   }
 
   .grow,
-  .max-w-\\[1200px\\] {
+  .max-w-\[1200px\] {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
@@ -86,7 +86,7 @@ body{
   /* High-contrast borders & solid backgrounds */
   .bg-white,
   .bg-slate-50,
-  .bg-slate-50\\/80 {
+  .bg-slate-50\/80 {
     background-color: #ffffff !important;
     border-color: #cbd5e1 !important;
     box-shadow: none !important;
