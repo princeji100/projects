@@ -7,6 +7,9 @@ import {
   faSave,
   faPaintBrush,
   faCheck,
+  faLocationDot,
+  faUser,
+  faRotateLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import SubmitButton from '../buttons/SubmitButton';
@@ -24,7 +27,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
   const [bgColor, setBgColor] = useState(page?.bgColor || '#000000');
   const [bgImage, setBgImage] = useState(page?.bgImage || '');
   const [avatar, setAvatar] = useState(page?.avatar || user?.image || '');
-  const [displayName, setDisplayName] = useState(page?.displayName || user?.name || '');
+  const [displayName, setDisplayName] = useState(page?.displayName || '');
   const [location, setLocation] = useState(page?.location || '');
   const [bio, setBio] = useState(page?.bio || '');
   const [isUploading, setIsUploading] = useState(false);
@@ -46,15 +49,16 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
 
   const saveBaseSettings = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    formData.append('bgType', bgType);
-    formData.append('theme', theme);
-    formData.append('bgColor', bgColor);
-    formData.append('bgImage', bgImage);
-    formData.append('avatar', avatar);
-
     try {
+      const formData = new FormData(e.target);
+      formData.set('bgType', bgType);
+      formData.set('theme', theme);
+      formData.set('bgColor', bgColor);
+      formData.set('bgImage', bgImage);
+      formData.set('avatar', avatar);
+
       const result = await SavePageSetting(formData);
+
       if (result?.success) {
         toast.success('Settings saved successfully');
       } else {
@@ -95,25 +99,39 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
               </div>
             </div>
 
-            <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer focus-within:ring-2 focus-within:ring-blue-500">
-              <FontAwesomeIcon icon={faCloudArrowUp} className="text-sm" />
-              <span>{isUploading ? 'Uploading...' : 'Upload New Image'}</span>
-              <input
-                type="file"
-                onChange={(e) => handleImageUpload(e, setAvatar)}
-                className="hidden"
-                accept="image/jpeg,image/png,image/webp"
-                aria-label="Upload new profile image"
-              />
-              <input type="hidden" name="avatar" value={avatar} />
-            </label>
+            <div className="flex items-center gap-2">
+              {avatar && avatar !== user?.image && (
+                <button
+                  type="button"
+                  onClick={() => setAvatar(user?.image || '')}
+                  title="Reset to Google profile photo"
+                  className="p-2.5 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 rounded-xl border border-slate-200 shadow-2xs text-xs font-medium transition-colors cursor-pointer"
+                >
+                  <FontAwesomeIcon icon={faRotateLeft} />
+                </button>
+              )}
+
+              <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer focus-within:ring-2 focus-within:ring-blue-500">
+                <FontAwesomeIcon icon={faCloudArrowUp} className="text-sm" />
+                <span>{isUploading ? 'Uploading...' : 'Upload New Image'}</span>
+                <input
+                  type="file"
+                  onChange={(e) => handleImageUpload(e, setAvatar)}
+                  className="hidden"
+                  accept="image/jpeg,image/png,image/webp"
+                  aria-label="Upload new profile image"
+                />
+                <input type="hidden" name="avatar" value={avatar} />
+              </label>
+            </div>
           </div>
 
           {/* Inputs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             <div>
-              <label htmlFor="displayNameInput" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Display Name
+              <label htmlFor="displayNameInput" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <FontAwesomeIcon icon={faUser} className="text-[10px] text-slate-400" />
+                <span>Display Name</span>
               </label>
               <input
                 id="displayNameInput"
@@ -128,8 +146,9 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
             </div>
 
             <div>
-              <label htmlFor="locationInput" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Location
+              <label htmlFor="locationInput" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <FontAwesomeIcon icon={faLocationDot} className="text-[10px] text-slate-400" />
+                <span>Location</span>
               </label>
               <input
                 id="locationInput"
@@ -150,7 +169,15 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
               <label htmlFor="bioInput" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Bio
               </label>
-              <span className="text-[11px] text-slate-400 font-mono">{bio.length}/160</span>
+              <span
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full transition-colors ${
+                  bio.length >= 150
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200 font-bold'
+                    : 'bg-slate-100 text-slate-500 font-medium'
+                }`}
+              >
+                {bio.length}/160
+              </span>
             </div>
             <textarea
               id="bioInput"
@@ -158,7 +185,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               maxLength={160}
-              placeholder="Tell us about yourself..."
+              placeholder="Tell visitors about yourself or your work..."
               spellCheck="false"
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-white min-h-[90px]"
             />
