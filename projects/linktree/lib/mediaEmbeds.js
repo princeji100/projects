@@ -392,3 +392,42 @@ export function buildAppleMusicEmbedUrl(media) {
   return null;
 }
 
+/**
+ * Builds an official, deterministic SoundCloud embed iframe URL.
+ * Uses official w.soundcloud.com player with validated canonical URL.
+ *
+ * @param {Object} media - Output from parseMediaUrl or SoundCloud metadata
+ * @returns {string|null} - e.g. "https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fartist%2Ftrack&auto_play=false&show_comments=false&hide_related=true"
+ */
+export function buildSoundCloudEmbedUrl(media) {
+  if (!media || typeof media !== 'object') {
+    return null;
+  }
+
+  if (media.provider !== 'soundcloud' || !media.canonicalUrl) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(media.canonicalUrl);
+    if (!APPROVED_SOUNDCLOUD_HOSTS.has(parsed.hostname.toLowerCase())) {
+      return null;
+    }
+
+    const params = new URLSearchParams({
+      url: media.canonicalUrl,
+      auto_play: 'false',
+      hide_related: 'true',
+      show_comments: 'false',
+      show_user: 'true',
+      show_reposts: 'false',
+      show_teaser: 'false',
+    });
+
+    return `https://w.soundcloud.com/player/?${params.toString()}`;
+  } catch {
+    return null;
+  }
+}
+
+

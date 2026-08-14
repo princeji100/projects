@@ -29,6 +29,7 @@ import PublicTipJar from '@/components/tipjar/PublicTipJar';
 import YouTubeEmbed from '@/components/media/YouTubeEmbed';
 import SpotifyEmbed from '@/components/media/SpotifyEmbed';
 import AppleMusicEmbed from '@/components/media/AppleMusicEmbed';
+import SoundCloudEmbed from '@/components/media/SoundCloudEmbed';
 
 export async function generateMetadata({ params }) {
   const { uri } = await params;
@@ -308,6 +309,20 @@ const UserPage = async ({ params }) => {
             if (media?.provider === 'apple-music') {
               return (
                 <AppleMusicEmbed
+                  key={linkKey}
+                  link={link}
+                  media={media}
+                  uri={page.uri}
+                  currentTheme={currentTheme}
+                  isLightText={isLightText}
+                />
+              );
+            }
+
+            // SoundCloud Media Embed Card (Wave 12)
+            if (media?.provider === 'soundcloud') {
+              return (
+                <SoundCloudEmbed
                   key={linkKey}
                   link={link}
                   media={media}
