@@ -31,7 +31,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: `Account Dashboard`,
+  title: `Settings | Linktree`,
   description: "Manage your Linktree profile and links",
 };
 

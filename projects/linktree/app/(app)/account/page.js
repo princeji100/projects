@@ -137,7 +137,7 @@ const AccountPage = () => {
             </button>
 
             {/* Dashboard Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Main Settings Forms Column (Hidden on mobile if user switched to preview tab) */}
                 <div className={`lg:col-span-7 xl:col-span-7 space-y-6 ${mobileTab === 'preview' ? 'hidden lg:block' : 'block'}`}>
                     <PageSettingForm
@@ -162,7 +162,7 @@ const AccountPage = () => {
                 </div>
 
                 {/* Live Phone Mockup Preview Column (Sticky on desktop, full view when preview tab active on mobile) */}
-                <div className={`lg:col-span-5 xl:col-span-5 ${mobileTab === 'preview' ? 'block' : 'hidden lg:block'}`}>
+                <div className={`lg:col-span-5 xl:col-span-5 ${mobileTab === 'preview' ? 'block' : 'hidden lg:block'} relative`}>
                     <PhonePreview {...previewProps} />
                 </div>
             </div>
