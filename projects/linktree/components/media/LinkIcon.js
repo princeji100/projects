@@ -29,6 +29,7 @@ export default function LinkIcon({
       width={size}
       height={size}
       className={`object-cover w-full h-full ${className}`}
+      unoptimized
       onError={() => setHasError(true)}
     />
   );

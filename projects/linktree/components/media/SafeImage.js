@@ -13,6 +13,7 @@ export default function SafeImage({
   style,
   priority = false,
   fallback = null,
+  unoptimized = true,
 }) {
   const [hasError, setHasError] = useState(false);
 
@@ -36,6 +37,7 @@ export default function SafeImage({
       className={className}
       style={style}
       priority={priority}
+      unoptimized={unoptimized}
       onError={() => setHasError(true)}
     />
   );

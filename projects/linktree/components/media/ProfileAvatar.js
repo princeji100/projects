@@ -32,6 +32,7 @@ export default function ProfileAvatar({
       height={size}
       alt={alt}
       priority={priority}
+      unoptimized
       onError={() => setHasError(true)}
     />
   );

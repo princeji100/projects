@@ -51,12 +51,16 @@ export default async function UploadsPage() {
     });
   }
 
-  const initialUploads = rawUploads.map((u) => ({
-    _id: u._id.toString(),
-    key: u.key,
-    size: u.size,
-    url: u.url,
-    createdAt: u.createdAt ? u.createdAt.toISOString() : null,
+  const initialUploads = (rawUploads || []).map((u) => ({
+    _id: u._id ? u._id.toString() : String(Math.random()),
+    key: u.key || '',
+    size: typeof u.size === 'number' ? u.size : 0,
+    url: u.url || '',
+    createdAt: u.createdAt
+      ? u.createdAt instanceof Date
+        ? u.createdAt.toISOString()
+        : String(u.createdAt)
+      : null,
   }));
 
   return (

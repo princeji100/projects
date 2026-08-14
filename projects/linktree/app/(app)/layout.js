@@ -4,11 +4,11 @@ import SessionWrapper from "@/components/SessionWrapper";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import Image from 'next/image';
+import SafeImage from "@/components/media/SafeImage";
 import AppSidebar from "@/components/layout/AppSidebar";
 import { ToastContainer } from 'react-toastify';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLink } from "@fortawesome/free-solid-svg-icons";
+import { faLink, faUser } from "@fortawesome/free-solid-svg-icons";
 import Page from "@/models/Page";
 import Link from "next/link";
 import connectToDatabase from "@/lib/connectToDB";
@@ -51,13 +51,18 @@ export default async function AppLayout({ children }) {
           <main className="md:flex min-h-screen transition-all">
             <aside className="bg-white shadow-md min-w-48 p-4 py-8 border-r border-slate-100">
               <div className="sticky top-0 p-2">
-                <div className="rounded-full bg-slate-100 overflow-hidden w-[90px] h-[90px] mx-auto ring-2 ring-slate-100">
-                  <Image 
-                    src={session.user.image} 
+                <div className="rounded-full bg-slate-100 overflow-hidden w-[90px] h-[90px] mx-auto ring-2 ring-slate-100 flex items-center justify-center">
+                  <SafeImage 
+                    src={session?.user?.image} 
                     width={90} 
                     height={90} 
-                    alt={session.user.name}
-                    className="object-cover object-center"
+                    alt={session?.user?.name || 'User avatar'}
+                    className="object-cover object-center w-full h-full"
+                    fallback={
+                      <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
+                        <FontAwesomeIcon icon={faUser} className="text-3xl" />
+                      </div>
+                    }
                   />
                 </div>
                 {page && (
