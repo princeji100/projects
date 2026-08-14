@@ -19,6 +19,7 @@ import LinktreeLogo from "@/components/media/LinktreeLogo";
 import UserNavDropdown from "@/components/layout/UserNavDropdown";
 import HeaderShareButton from "@/components/buttons/HeaderShareButton";
 import { getPublicProfileUrl } from "@/lib/siteUrl";
+import { isUserAdmin } from "@/lib/admin";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,8 +44,7 @@ export default async function AppLayout({ children }) {
   
   await connectToDatabase();
   const page = await Page.findOne({ owner: session?.user?.email });
-  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase()?.trim();
-  const isAdmin = Boolean(session?.user?.email && adminEmail && session.user.email.toLowerCase().trim() === adminEmail);
+  const isAdmin = isUserAdmin(session?.user?.email);
   const publicUrl = getPublicProfileUrl(page?.uri);
 
   return (

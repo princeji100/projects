@@ -4,6 +4,7 @@ import connectToDatabase from '@/lib/connectToDB';
 import AllowedUser from '@/models/AllowedUser';
 import InviteRequest from '@/models/InviteRequest';
 import AdminAllowlistClient from '@/components/admin/AdminAllowlistClient';
+import { isUserAdmin, getAdminEmail } from '@/lib/admin';
 
 export const metadata = {
   title: 'Admin Control Center | Linktree',
@@ -12,10 +13,10 @@ export const metadata = {
 
 export default async function AdminPage() {
   const session = await requireSession();
-  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase()?.trim();
+  const adminEmail = getAdminEmail();
 
   // Strict server-side authorization gate.
-  if (!session || !adminEmail || session.user.email.toLowerCase().trim() !== adminEmail) {
+  if (!session?.user?.email || !isUserAdmin(session.user.email)) {
     redirect('/dashboard');
   }
 

@@ -7,11 +7,13 @@ import InviteRequest from '@/models/InviteRequest';
 import clientPromise from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
+import { isUserAdmin, getAdminEmail } from '@/lib/admin';
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Verifies that the caller has a valid session and is the configured ADMIN_EMAIL.
- * Fails closed if ADMIN_EMAIL is unset, malformed, or does not match.
+ * Fails closed if caller is not the admin.
  */
 async function verifyAdminCaller() {
   const session = await requireSession();
@@ -19,17 +21,12 @@ async function verifyAdminCaller() {
     return { ok: false, error: 'Authentication required', status: 401 };
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase()?.trim();
-  if (!adminEmail) {
-    // Fail closed if ADMIN_EMAIL is not configured
-    return { ok: false, error: 'Admin access is not configured on this system', status: 403 };
-  }
-
   const callerEmail = session.user.email.toLowerCase().trim();
-  if (callerEmail !== adminEmail) {
+  if (!isUserAdmin(callerEmail)) {
     return { ok: false, error: 'Forbidden: Admin access required', status: 403 };
   }
 
+  const adminEmail = getAdminEmail();
   return { ok: true, session, adminEmail };
 }
 
