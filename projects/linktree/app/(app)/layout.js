@@ -110,14 +110,14 @@ export default async function AppLayout({ children }) {
             </div>
           </header>
 
-          <main className="md:flex min-h-[calc(100vh-4rem)]">
-            {/* ═══ Desktop Icon Sidebar (Fixed & Sticky) ═══ */}
-            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-20 py-4 shrink-0 shadow-xs sticky top-16 h-[calc(100vh-4rem)] z-20 overflow-y-auto">
+          <main className="min-h-[calc(100vh-4rem)] relative">
+            {/* ═══ Desktop Icon Sidebar (Permanently Fixed) ═══ */}
+            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-20 py-4 shrink-0 shadow-xs fixed left-0 top-16 bottom-0 z-30 overflow-y-auto">
               <AppSidebar isAdmin={isAdmin} />
             </aside>
 
             {/* ═══ Main Content Area ═══ */}
-            <div className="grow min-w-0 p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
+            <div className="grow min-w-0 md:pl-20 p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
               <div className="max-w-[1200px] mx-auto">
                 {children}
               </div>
