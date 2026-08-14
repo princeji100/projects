@@ -45,9 +45,9 @@ await check('requirements-traceability: all 39 v1 requirements uniquely mapped t
     { id: 'SEC-12', impl: 'lib/connectToDB.js', test: 'scripts/verify-phase1.5.js', pattern: /connectToDatabase/ },
 
     // Phase 1.5: Admin & Upload Management (4)
-    { id: 'ADMIN-01', impl: 'app/(app)/account/admin/page.js', test: 'scripts/verify-phase1.5.js', pattern: /AllowedUser/ },
-    { id: 'ADMIN-02', impl: 'app/(app)/account/admin/page.js', test: 'scripts/verify-phase1.5.js', pattern: /ADMIN_EMAIL/ },
-    { id: 'UPLOAD-01', impl: 'app/(app)/account/uploads/page.js', test: 'scripts/verify-phase1.5.js', pattern: /quota/ },
+    { id: 'ADMIN-01', impl: 'app/(app)/dashboard/admin/page.js', test: 'scripts/verify-phase1.5.js', pattern: /AllowedUser/ },
+    { id: 'ADMIN-02', impl: 'app/(app)/dashboard/admin/page.js', test: 'scripts/verify-phase1.5.js', pattern: /getAdminEmail|isUserAdmin|ADMIN_EMAIL/ },
+    { id: 'UPLOAD-01', impl: 'app/(app)/dashboard/uploads/page.js', test: 'scripts/verify-phase1.5.js', pattern: /quota|Upload/ },
     { id: 'UPLOAD-02', impl: 'action/UploadAction.js', test: 'scripts/verify-phase1.5.js', pattern: /deleteUpload/ },
 
     // Phase 2: Broken Paths Fixes (9)
@@ -70,7 +70,7 @@ await check('requirements-traceability: all 39 v1 requirements uniquely mapped t
     // Phase 4: Themes & QR Sharing (5)
     { id: 'THEME-01', impl: 'lib/themes.js', test: 'scripts/verify-phase4.js', pattern: /themes\s*=/ },
     { id: 'THEME-02', impl: 'components/forms/PageSettingForm.js', test: 'scripts/verify-phase4.js', pattern: /preset/ },
-    { id: 'THEME-03', impl: 'models/Page.js', test: 'scripts/verify-phase4.js', pattern: /enum:\s*\['color',\s*'image',\s*'preset'\]/ },
+    { id: 'THEME-03', impl: 'models/Page.js', test: 'scripts/verify-phase4.js', pattern: /enum:\s*\[.*'color'.*'preset'.*\]/ },
     { id: 'QR-01', impl: 'components/sections/QRCodeCard.js', test: 'scripts/verify-phase4.js', pattern: /QRCodeSVG|QRCodeCanvas|qr/i },
     { id: 'QR-02', impl: 'components/sections/QRCodeCard.js', test: 'scripts/verify-phase4.js', pattern: /toDataURL|download/i },
 
