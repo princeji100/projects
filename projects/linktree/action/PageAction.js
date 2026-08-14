@@ -5,6 +5,7 @@ import connectToDatabase from "@/lib/connectToDB"
 import { requireSession } from "@/lib/requireSession"
 import * as rateLimit from "@/lib/rateLimit"
 import { validateAndSanitizeLink } from "@/lib/linkLifecycle"
+import { normalizeLinkBadge } from "@/lib/linkBadges"
 import { fonts } from "@/lib/fonts"
 
 // All three saves share ONE bucket. D-19's 30/min is per user for saving a page, not
@@ -130,6 +131,11 @@ const SavePageLinks = async (links) => {
         if (!validation.ok) {
             return { success: false, error: validation.error };
         }
+        const badgeResult = normalizeLinkBadge(link.badge);
+        if (!badgeResult.ok) {
+            return { success: false, error: badgeResult.error };
+        }
+        validation.link.badge = badgeResult.badge;
         sanitizedLinks.push(validation.link);
     }
 

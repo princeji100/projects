@@ -9,6 +9,7 @@ const LinkSchema = new Schema({
     active: { type: Boolean, default: true },
     startsAt: { type: Date, default: null },
     endsAt: { type: Date, default: null },
+    badge: { type: String, enum: ['none', 'hot', 'new', 'pinned', 'offer'], default: 'none' },
 }, { _id: true });
 
 // Define the schema for the Page model
