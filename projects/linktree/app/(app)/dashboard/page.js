@@ -86,6 +86,7 @@ const AccountPage = () => {
         previewLocation: livePreviewState.location,
         previewLinks: liveLinks !== null ? liveLinks : pageData?.links,
         previewButtons: liveButtons !== null ? liveButtons : pageData?.buttons,
+        previewTipJar: livePreviewState.tipJar !== undefined ? livePreviewState.tipJar : pageData?.tipJar,
     };
 
     return (

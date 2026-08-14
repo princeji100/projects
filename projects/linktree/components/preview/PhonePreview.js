@@ -22,6 +22,7 @@ export default function PhonePreview({
   user,
   previewTheme,
   previewFont,
+  previewTipJar,
   previewBgType,
   previewBgColor,
   previewBgGradientFrom,
@@ -31,6 +32,7 @@ export default function PhonePreview({
   previewBgImageOverlay,
   previewTextColor,
   previewAvatar,
+  displayName: _displayName,
   previewDisplayName,
   previewBio,
   previewLocation,
@@ -43,6 +45,7 @@ export default function PhonePreview({
   const themeKey = previewTheme !== undefined ? previewTheme : page?.theme || 'default';
   const fontKey = previewFont !== undefined ? previewFont : page?.font || 'default';
   const currentFont = getFont(fontKey);
+  const tipJar = previewTipJar !== undefined ? previewTipJar : page?.tipJar;
   const bgType = previewBgType !== undefined ? previewBgType : page?.bgType || 'preset';
   const bgColor = previewBgColor !== undefined ? previewBgColor : page?.bgColor || '#000000';
   const bgGradientFrom = previewBgGradientFrom !== undefined ? previewBgGradientFrom : page?.bgGradientFrom || '#3b82f6';
@@ -207,6 +210,34 @@ export default function PhonePreview({
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* Tip Jar Preview CTA */}
+            {tipJar?.enabled && (
+              <div
+                className={`w-full mb-3 p-2.5 rounded-2xl flex items-center justify-between gap-2 transition-all ${
+                  isLightText
+                    ? 'bg-white/20 border border-white/30 text-white backdrop-blur-md shadow-xs'
+                    : 'bg-emerald-50 text-emerald-950 border border-emerald-200/80 shadow-xs'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-xs shrink-0 shadow-2xs font-bold">
+                    ₹
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold truncate">
+                      {tipJar.name ? `Tip ${tipJar.name}` : 'Support / Tip'}
+                    </p>
+                    <p className="text-[9px] opacity-75 truncate">
+                      {tipJar.amount ? `Suggested: ₹${tipJar.amount}` : 'Via UPI App / QR'}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-wider bg-emerald-600/20 text-emerald-700 px-2 py-0.5 rounded-full shrink-0">
+                  Tip
+                </span>
               </div>
             )}
 

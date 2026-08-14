@@ -56,6 +56,13 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [pickerConfig, setPickerConfig] = useState({ isOpen: false, title: '', target: null });
 
+  // Tip Jar Configuration State
+  const [tipJarEnabled, setTipJarEnabled] = useState(Boolean(page?.tipJar?.enabled));
+  const [tipJarUpiId, setTipJarUpiId] = useState(page?.tipJar?.upiId || '');
+  const [tipJarName, setTipJarName] = useState(page?.tipJar?.name || '');
+  const [tipJarAmount, setTipJarAmount] = useState(page?.tipJar?.amount || '');
+  const [tipJarMessage, setTipJarMessage] = useState(page?.tipJar?.message || '');
+
   useEffect(() => {
     if (onStateChange) {
       onStateChange({
@@ -73,6 +80,13 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
         displayName,
         location,
         bio,
+        tipJar: {
+          enabled: tipJarEnabled,
+          upiId: tipJarUpiId,
+          name: tipJarName,
+          amount: tipJarAmount,
+          message: tipJarMessage,
+        },
       });
     }
   }, [
@@ -90,6 +104,11 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
     displayName,
     location,
     bio,
+    tipJarEnabled,
+    tipJarUpiId,
+    tipJarName,
+    tipJarAmount,
+    tipJarMessage,
     onStateChange,
   ]);
 
@@ -108,6 +127,13 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
       formData.set('bgImageOverlay', String(bgImageOverlay));
       formData.set('textColor', textColor);
       formData.set('avatar', avatar);
+
+      // Tip Jar explicit values
+      formData.set('tipJarEnabled', String(tipJarEnabled));
+      formData.set('tipJarUpiId', tipJarUpiId);
+      formData.set('tipJarName', tipJarName);
+      formData.set('tipJarAmount', tipJarAmount);
+      formData.set('tipJarMessage', tipJarMessage);
 
       const result = await SavePageSetting(formData);
 
@@ -677,6 +703,148 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
                 </button>
               );
             })}
+          </div>
+        </div>
+      </SectionBox>
+
+      {/* Support / Tip Jar (UPI) Card */}
+      <SectionBox title="Support / Tip Jar (UPI)">
+        <div className="space-y-5">
+          {/* Header & Enable Toggle */}
+          <div className="flex items-center justify-between p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80">
+            <div className="space-y-0.5 pr-4">
+              <label
+                htmlFor="tipjar-toggle"
+                className="text-sm font-bold text-slate-900 cursor-pointer select-none flex items-center gap-1.5"
+              >
+                <span>Enable Tip Jar</span>
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                  Zero Fee UPI
+                </span>
+              </label>
+              <p className="text-xs text-slate-500">
+                Allow visitors to send appreciation tips directly to your UPI ID via QR or UPI apps.
+              </p>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer min-h-[44px] px-1 shrink-0">
+              <input
+                id="tipjar-toggle"
+                type="checkbox"
+                checked={tipJarEnabled}
+                onChange={(e) => setTipJarEnabled(e.target.checked)}
+                className="sr-only peer"
+                aria-label="Toggle Tip Jar on public profile"
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[12px] after:left-[6px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          {/* Explanatory Disclaimer Note */}
+          <div className="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+            <span className="text-sm shrink-0 mt-0.5" aria-hidden="true">ℹ️</span>
+            <p>
+              Visitors will be able to open their UPI app or scan a QR code. This app does not verify whether a payment was completed.
+            </p>
+          </div>
+
+          {/* Form Fields with Progressive Disclosure */}
+          <div
+            className={`space-y-4 transition-all duration-200 ${
+              tipJarEnabled ? 'opacity-100' : 'opacity-50 pointer-events-none select-none'
+            }`}
+          >
+            {/* UPI ID Field */}
+            <div>
+              <label
+                htmlFor="tipJarUpiId"
+                className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider"
+              >
+                UPI ID / VPA {tipJarEnabled && <span className="text-rose-500">*</span>}
+              </label>
+              <input
+                id="tipJarUpiId"
+                type="text"
+                value={tipJarUpiId}
+                onChange={(e) => setTipJarUpiId(e.target.value)}
+                disabled={!tipJarEnabled}
+                placeholder="e.g. creator@upi"
+                autoComplete="off"
+                spellCheck="false"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-white"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Enter your Google Pay, PhonePe, Paytm, BHIM, or any bank UPI ID (e.g. yourname@okhdfcbank).
+              </p>
+            </div>
+
+            {/* Display / Payee Name & Suggested Amount Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="tipJarName"
+                  className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider"
+                >
+                  Payee / Display Name <span className="text-slate-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  id="tipJarName"
+                  type="text"
+                  value={tipJarName}
+                  onChange={(e) => setTipJarName(e.target.value)}
+                  disabled={!tipJarEnabled}
+                  placeholder="e.g. Prince"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-white"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="tipJarAmount"
+                  className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider"
+                >
+                  Suggested Amount (₹) <span className="text-slate-400 font-normal">(optional)</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
+                    ₹
+                  </span>
+                  <input
+                    id="tipJarAmount"
+                    type="text"
+                    inputMode="decimal"
+                    value={tipJarAmount}
+                    onChange={(e) => setTipJarAmount(e.target.value)}
+                    disabled={!tipJarEnabled}
+                    placeholder="100"
+                    className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Note / Message Field */}
+            <div>
+              <label
+                htmlFor="tipJarMessage"
+                className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider"
+              >
+                Payment Note / Message <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <input
+                id="tipJarMessage"
+                type="text"
+                value={tipJarMessage}
+                onChange={(e) => setTipJarMessage(e.target.value)}
+                disabled={!tipJarEnabled}
+                placeholder="e.g. Buy me a chai!"
+                maxLength={200}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-white"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                A brief message shown to supporters when initiating payment.
+              </p>
+            </div>
           </div>
         </div>
       </SectionBox>
