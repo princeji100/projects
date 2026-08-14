@@ -102,9 +102,10 @@ const PageButtonForm = ({ page }) => {
                 <button
                   type="button"
                   onClick={() => removeButton(b)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 
-                           rounded-r-lg border-y border-r border-slate-200
-                           transition-colors duration-200"
+                  aria-label={`Remove ${b.label} button`}
+                  className="px-4 py-2 min-h-[44px] min-w-[44px] bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 
+                           rounded-r-xl border-y border-r border-slate-200
+                           transition-colors duration-150 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none cursor-pointer"
                 >
                   <FontAwesomeIcon icon={faTrash} />
                 </button>
@@ -113,14 +114,15 @@ const PageButtonForm = ({ page }) => {
           ))}
         </ReactSortable>
 
-        <div className="flex flex-wrap gap-2 mt-6 border-y border-slate-100 py-6">
+        <div className="flex flex-wrap gap-2.5 mt-6 border-y border-slate-100 py-6">
           {availableButtons.map((b) => (
             <button
               key={b.key}
               type="button"
               onClick={() => addButtonToProfile(b)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 
-                       text-slate-700 rounded-lg transition-colors duration-200 border border-slate-200/60"
+              aria-label={`Add ${b.label} button to profile`}
+              className="flex items-center gap-2 px-3.5 py-2.5 min-h-[44px] bg-slate-50 hover:bg-slate-100 active:scale-95 
+                       text-slate-700 rounded-xl transition-all duration-150 border border-slate-200/80 shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer text-sm font-medium"
             >
               <FontAwesomeIcon
                 icon={b.icon}
