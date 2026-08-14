@@ -19,6 +19,7 @@ import {
   faArrowTrendUp,
   faBullseye,
   faDownload,
+  faPrint,
 } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -56,6 +57,12 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
       toast.success('Analytics CSV exported');
     } catch {
       toast.error('Failed to export CSV');
+    }
+  };
+
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
     }
   };
 
@@ -174,6 +181,40 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
               <FontAwesomeIcon icon={faDownload} className="text-slate-500 text-xs" />
               <span>Export CSV</span>
             </button>
+
+            {/* Print / Save PDF Button */}
+            <button
+              type="button"
+              onClick={handlePrint}
+              aria-label="Print or save analytics report as PDF"
+              className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer min-h-[40px] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none shrink-0"
+            >
+              <FontAwesomeIcon icon={faPrint} className="text-white text-xs" />
+              <span>Print / Save PDF</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ═══ Dedicated Print-Only Report Header ═══ */}
+        <div className="hidden print:block mb-4 pb-4 border-b border-slate-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-slate-900">Linktree Traffic & Analytics Report</h1>
+              {uri && (
+                <p className="text-xs font-mono text-slate-600 mt-0.5">
+                  @{uri} {publicUrl ? `(${publicUrl})` : ''}
+                </p>
+              )}
+            </div>
+            <div className="text-right text-xs text-slate-600">
+              <p className="font-semibold text-slate-900">
+                {selectedRange === '30d' ? 'Last 30 Days' : 'Last 7 Days'}
+              </p>
+              <p>{formatDateRange()}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                Generated: {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -325,6 +366,33 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
             <div className="pt-2">
               <AnalyticsAreaChart data={chartData} range={selectedRange} />
             </div>
+
+            {/* Print-Only Daily Breakdown Table */}
+            {chartData.length > 1 && (
+              <div className="hidden print:block mt-4 pt-3 border-t border-slate-300">
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Daily Clicks Summary ({selectedRange === '30d' ? '30 Days' : '7 Days'})
+                </h3>
+                <div className="border border-slate-300 rounded-xl overflow-hidden">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-100 border-b border-slate-300 font-semibold text-slate-700">
+                      <tr>
+                        <th className="py-1.5 px-3">Date (UTC)</th>
+                        <th className="py-1.5 px-3 text-right">Clicks</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {chartData.slice(1).map(([date, clicks]) => (
+                        <tr key={date}>
+                          <td className="py-1 px-3 font-mono">{date}</td>
+                          <td className="py-1 px-3 text-right font-mono font-semibold">{clicks}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </SectionBox>
 
           {/* ═══ 2-Column Audience Intelligence Grid ═══ */}
@@ -402,8 +470,8 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
           </div>
 
           {/* ═══ Link Performance & Rankings Table ═══ */}
-          <SectionBox>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <SectionBox className="print:break-inside-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 print:mb-3">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 tracking-tight">Link Performance Ranking</h2>
                 <p className="text-xs text-slate-500">
@@ -417,11 +485,11 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
                 No active links found on your profile.
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 print:divide-slate-200">
                 {rankedLinks.map((link) => (
                   <div
                     key={link.id}
-                    className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition-colors rounded-2xl px-3"
+                    className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition-colors rounded-2xl px-3 print:break-inside-avoid print:py-2"
                   >
                     {/* Rank Badge + Link Title & URL */}
                     <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -446,13 +514,13 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-slate-400 hover:text-blue-600 text-xs transition"
+                            className="text-slate-400 hover:text-blue-600 text-xs transition print:hidden"
                             title="Open destination URL"
                           >
                             <FontAwesomeIcon icon={faExternalLinkAlt} />
                           </a>
                         </div>
-                        <p className="text-xs text-slate-400 font-mono truncate mt-0.5">{link.url}</p>
+                        <p className="text-xs text-slate-400 font-mono truncate print:whitespace-normal print:break-all mt-0.5">{link.url}</p>
                       </div>
                     </div>
 

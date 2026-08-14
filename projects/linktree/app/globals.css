@@ -37,3 +37,81 @@ body{
     transform: translateX(200%);
   }
 }
+
+/* ═══════════════════════════════════════════════
+   PRINT STYLESHEET (Wave 14: Browser-Native Print)
+   ═══════════════════════════════════════════════ */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10pt;
+    line-height: 1.35;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app navigation chrome, header, sidebar, mobile bar, toasts, buttons, interactive filters */
+  aside,
+  header,
+  nav,
+  .no-print,
+  .print\\:hidden,
+  .Toastify,
+  [role="group"][aria-label="Analytics date range filter"],
+  button {
+    display: none !important;
+  }
+
+  /* Clear sidebar offset and padding for main layout */
+  main {
+    min-height: auto !important;
+  }
+
+  .grow,
+  .max-w-\\[1200px\\] {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Page break safety */
+  .print-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* High-contrast borders & solid backgrounds */
+  .bg-white,
+  .bg-slate-50,
+  .bg-slate-50\\/80 {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure text wrapping for URLs */
+  a,
+  .break-all {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* Repeated table headers on multi-page print */
+  thead {
+    display: table-header-group !important;
+  }
+
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
