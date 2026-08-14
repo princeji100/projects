@@ -18,11 +18,13 @@ import {
   faCalendarAlt,
   faArrowTrendUp,
   faBullseye,
+  faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import SectionBox from '../layout/SectionBox';
 import AnalyticsAreaChart from './AnalyticsAreaChart';
+import { buildAnalyticsCsv, buildAnalyticsCsvFilename } from '@/lib/analyticsCsv';
 
 const deviceIcons = {
   mobile: faMobileAlt,
@@ -38,6 +40,24 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
   const [copied, setCopied] = useState(false);
 
   const selectedRange = analytics.selectedRange || '7d';
+
+  const handleExportCsv = () => {
+    try {
+      const csvContent = buildAnalyticsCsv(analytics);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', buildAnalyticsCsvFilename(uri, selectedRange));
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('Analytics CSV exported');
+    } catch {
+      toast.error('Failed to export CSV');
+    }
+  };
 
   const handleRangeChange = (range) => {
     if (range === selectedRange) return;
@@ -104,8 +124,8 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
             </div>
           </div>
 
-          {/* Right Action Controls: Date Range Toggle */}
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {/* Right Action Controls: Date Range Toggle & Export CSV */}
+          <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap sm:flex-nowrap">
             {/* Formatted Date Range Pill */}
             <div className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-600">
               <FontAwesomeIcon icon={faCalendarAlt} className="text-slate-400 text-xs" />
@@ -143,6 +163,17 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
                 30 Days
               </button>
             </div>
+
+            {/* Export CSV Button */}
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              aria-label="Export analytics report as CSV"
+              className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 rounded-2xl text-xs font-bold text-slate-700 hover:text-slate-900 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer min-h-[40px] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none shrink-0"
+            >
+              <FontAwesomeIcon icon={faDownload} className="text-slate-500 text-xs" />
+              <span>Export CSV</span>
+            </button>
           </div>
         </div>
 
