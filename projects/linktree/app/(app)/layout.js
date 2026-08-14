@@ -17,6 +17,8 @@ import connectToDatabase from "@/lib/connectToDB";
 import PageTitle from "@/components/layout/PageTitle";
 import LinktreeLogo from "@/components/media/LinktreeLogo";
 import UserNavDropdown from "@/components/layout/UserNavDropdown";
+import HeaderShareButton from "@/components/buttons/HeaderShareButton";
+import { getPublicProfileUrl } from "@/lib/siteUrl";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +45,7 @@ export default async function AppLayout({ children }) {
   const page = await Page.findOne({ owner: session?.user?.email });
   const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase()?.trim();
   const isAdmin = Boolean(session?.user?.email && adminEmail && session.user.email.toLowerCase().trim() === adminEmail);
+  const publicUrl = getPublicProfileUrl(page?.uri);
 
   return (
     <html lang="en">
@@ -65,31 +68,18 @@ export default async function AppLayout({ children }) {
               <PageTitle isAdmin={isAdmin} />
             </div>
 
-            {/* Right: Avatar + Share */}
+            {/* Right: Share + Avatar Dropdown */}
             <div className="flex items-center gap-3">
-              {page?.uri ? (
-                <Link
-                  href={`/${page.uri}`}
-                  target="_blank"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full transition-all shadow-xs active:scale-95"
-                >
-                  <FontAwesomeIcon icon={faShareNodes} className="text-xs" />
-                  <span>Share</span>
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-400 text-xs font-semibold rounded-full shadow-xs cursor-not-allowed"
-                >
-                  <FontAwesomeIcon icon={faShareNodes} className="text-xs" />
-                  <span>Share</span>
-                </button>
-              )}
+              <HeaderShareButton
+                uri={page?.uri}
+                publicUrl={publicUrl}
+                size="md"
+              />
               <div className="flex items-center pl-2 border-l border-slate-200">
                 <UserNavDropdown
                   user={session?.user}
                   uri={page?.uri}
+                  publicUrl={publicUrl}
                   isAdmin={isAdmin}
                   size="md"
                 />
@@ -105,28 +95,15 @@ export default async function AppLayout({ children }) {
               </Link>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {page?.uri ? (
-                <Link
-                  href={`/${page.uri}`}
-                  target="_blank"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-full shadow-xs active:scale-95"
-                >
-                  <FontAwesomeIcon icon={faShareNodes} className="text-[10px]" />
-                  <span>Share</span>
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 text-slate-400 text-xs font-semibold rounded-full shadow-xs cursor-not-allowed"
-                >
-                  <FontAwesomeIcon icon={faShareNodes} className="text-[10px]" />
-                  <span>Share</span>
-                </button>
-              )}
+              <HeaderShareButton
+                uri={page?.uri}
+                publicUrl={publicUrl}
+                size="sm"
+              />
               <UserNavDropdown
                 user={session?.user}
                 uri={page?.uri}
+                publicUrl={publicUrl}
                 isAdmin={isAdmin}
                 size="sm"
               />
