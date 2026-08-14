@@ -94,7 +94,7 @@ const AccountPage = () => {
             {/* Page Title & Mobile Tab Switcher */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Settings</h1>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Dashboard</h1>
                     <p className="text-slate-500 text-sm mt-0.5">Customize your profile, themes, links, and preview changes live</p>
                 </div>
 
