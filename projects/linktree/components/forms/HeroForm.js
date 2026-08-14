@@ -5,60 +5,60 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
 const HeroForm = () => {
-    const { data: session } = useSession()
-    const [Username, setUsername] = useState('')
+    const { data: session } = useSession();
+    const [Username, setUsername] = useState('');
 
     useEffect(() => {
         if('localStorage' in window && window.localStorage.getItem('Choiceusername')) {
-           const username = window.localStorage.getItem('Choiceusername')
-           setUsername(username)
-           window.localStorage.removeItem('Choiceusername')
-           redirect(`/account?Choiceusername=${username}`)
+           const username = window.localStorage.getItem('Choiceusername');
+           setUsername(username);
+           window.localStorage.removeItem('Choiceusername');
+           redirect(`/account?Choiceusername=${username}`);
         }
-    }, [])
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (Username.length > 0) {
-            window.localStorage.setItem('Choiceusername', Username)
+        const trimmed = Username.trim().toLowerCase();
+        if (trimmed.length > 0) {
+            window.localStorage.setItem('Choiceusername', trimmed);
             if (session) {
-                redirect(`/account?Choiceusername=${Username}`)
+                redirect(`/account?Choiceusername=${trimmed}`);
             } else {
-                await signIn('google')
-                redirect(`/account?Choiceusername=${Username}`)
+                await signIn('google');
+                redirect(`/account?Choiceusername=${trimmed}`);
             }
         }
-    }
+    };
 
     return (
         <form 
             onSubmit={handleSubmit} 
-            className="flex flex-col md:flex-row w-full max-w-2xl mx-auto"
+            className="flex flex-col sm:flex-row w-full gap-2 sm:gap-0"
         >
-            <div className="flex flex-1 border border-slate-200 rounded-lg md:rounded-r-none overflow-hidden shadow-sm">
-                <span className="bg-slate-50 text-slate-500 py-4 px-4 border-r border-slate-200 hidden md:block">
-                    linktree-princeji.vercel.app/
-                </span>
-                <span className="bg-slate-50 text-slate-500 py-4 px-4 border-r border-slate-200 md:hidden">
+            <div className="flex flex-1 items-center border border-slate-200 rounded-xl sm:rounded-r-none overflow-hidden bg-slate-50 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+                <label htmlFor="hero-claim-input" className="bg-slate-100 text-slate-500 py-3.5 px-3.5 border-r border-slate-200 text-xs sm:text-sm font-mono select-none">
                     linktree/
-                </span>
+                </label>
                 <input 
+                    id="hero-claim-input"
                     type="text" 
                     value={Username} 
                     onChange={e => setUsername(e.target.value)} 
-                    className="flex-1 px-4  py-4 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
-                    placeholder="Username" 
+                    className="flex-1 px-3.5 py-3.5 bg-white text-slate-800 text-sm focus:outline-none min-h-[44px]"
+                    placeholder="yourname" 
                     spellCheck="false"
+                    aria-label="Enter your desired username"
                 />
             </div>
             <button 
                 type="submit" 
-                className="mt-3 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white py-4 px-8 rounded-lg md:rounded-l-none transition duration-200 font-medium shadow-sm hover:shadow-md"
+                className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold py-3.5 px-6 rounded-xl sm:rounded-l-none transition-all shadow-sm min-h-[44px] flex items-center justify-center text-sm cursor-pointer"
             >
-                Join for Free
+                Claim your link
             </button>
         </form>
-    )
-}
+    );
+};
 
-export default HeroForm
+export default HeroForm;

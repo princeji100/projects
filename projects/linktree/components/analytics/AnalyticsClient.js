@@ -70,13 +70,18 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
         </div>
 
         {/* Segmented Range Toggle (ANA-02) */}
-        <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner self-start sm:self-auto">
+        <div 
+          role="group" 
+          aria-label="Analytics date range filter" 
+          className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner self-start sm:self-auto"
+        >
           <button
             type="button"
             onClick={() => handleRangeChange('7d')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            aria-pressed={selectedRange === '7d'}
+            className={`flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer ${
               selectedRange === '7d'
-                ? 'bg-white text-blue-600 shadow-sm'
+                ? 'bg-white text-blue-600 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -86,9 +91,10 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
           <button
             type="button"
             onClick={() => handleRangeChange('30d')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            aria-pressed={selectedRange === '30d'}
+            className={`flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer ${
               selectedRange === '30d'
-                ? 'bg-white text-blue-600 shadow-sm'
+                ? 'bg-white text-blue-600 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -99,9 +105,9 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
             <FontAwesomeIcon icon={faEye} className="text-xl" />
           </div>
           <div className="min-w-0">
@@ -110,8 +116,8 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
             <FontAwesomeIcon icon={faMousePointer} className="text-xl" />
           </div>
           <div className="min-w-0">
@@ -120,8 +126,8 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
             <FontAwesomeIcon icon={faLink} className="text-xl" />
           </div>
           <div className="min-w-0 truncate">
@@ -132,8 +138,8 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
             <FontAwesomeIcon icon={faGlobe} className="text-xl" />
           </div>
           <div className="min-w-0 truncate">

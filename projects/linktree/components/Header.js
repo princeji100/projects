@@ -1,42 +1,69 @@
 'use client';
-import Link from "next/link"
+import Link from "next/link";
 import LogoutButton from "./buttons/LogoutButton";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faLink } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLink } from '@fortawesome/free-solid-svg-icons';
 import { useSession } from "next-auth/react";
+
 const Header = () => {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
+
   return (
-    <header className='bg-white p-4'>
-      <div className="max-w-4xl flex justify-between items-center mx-auto px-6">
-        <div className='flex gap-6 items-center justify-center'>
-          <Link href={'/'} className="flex gap-1 items-center justify-center hover:text-blue-700 text-blue-500">
-            <FontAwesomeIcon icon={faLink} />
-            <span className="font-bold">
-              LinkTree
+    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
+      <div className="max-w-5xl flex justify-between items-center mx-auto px-4 sm:px-6 py-3">
+        <div className="flex gap-4 sm:gap-6 items-center">
+          <Link 
+            href={'/'} 
+            className="flex gap-2 items-center text-blue-600 hover:text-blue-700 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-lg p-1"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
+              <FontAwesomeIcon icon={faLink} className="text-sm" />
+            </div>
+            <span className="font-bold text-lg text-slate-900 tracking-tight">
+              Linktree
             </span>
           </Link>
-          <nav className='flex items-center gap-3 text-slate-500 text-sm'>
-            <Link href={'/about'}>About</Link>
+          <nav className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+            <Link 
+              href={'/about'} 
+              className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors"
+            >
+              About
+            </Link>
           </nav>
         </div>
-        <nav className='flex justify-center items-center gap-3 text-sm text-slate-500'>
-          {session && (
-            <>
-              <Link href={'/account'}>Hello {session.user.name}</Link>
+
+        <nav className="flex items-center gap-2 sm:gap-3 text-sm">
+          {session ? (
+            <div className="flex items-center gap-3">
+              <Link 
+                href={'/account'} 
+                className="hidden sm:inline-flex px-3.5 py-2 font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-colors"
+              >
+                Dashboard
+              </Link>
               <LogoutButton />
-            </>
-          )}
-          {!session && (
-            <>
-              <Link href={'/login'}>Sign In</Link>
-              <Link href={'/login'}>Create Account</Link>
-            </>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link 
+                href={'/login'}
+                className="px-3.5 py-2 min-h-[44px] flex items-center font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link 
+                href={'/login'}
+                className="px-4 py-2 min-h-[44px] flex items-center font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs transition-all active:scale-95"
+              >
+                Create Account
+              </Link>
+            </div>
           )}
         </nav>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

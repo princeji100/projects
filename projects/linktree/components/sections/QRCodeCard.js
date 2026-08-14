@@ -109,14 +109,15 @@ const QRCodeCard = ({ uri, publicUrl }) => {
             </div>
           </div>
 
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-3 max-w-md">
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 max-w-md">
             <span className="text-xs font-mono text-slate-700 truncate">{publicUrl}</span>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <button
                 type="button"
                 onClick={handleCopy}
-                className="text-xs font-medium text-slate-600 hover:text-blue-600 p-1.5 rounded hover:bg-slate-200 transition-colors"
+                className="text-xs font-medium text-slate-600 hover:text-blue-600 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer"
                 title="Copy URL"
+                aria-label="Copy public profile URL"
               >
                 <FontAwesomeIcon icon={copied ? faCheck : faCopy} className={copied ? 'text-green-600' : ''} />
               </button>
@@ -124,8 +125,9 @@ const QRCodeCard = ({ uri, publicUrl }) => {
                 href={publicUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-medium text-slate-600 hover:text-blue-600 p-1.5 rounded hover:bg-slate-200 transition-colors"
+                className="text-xs font-medium text-slate-600 hover:text-blue-600 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                 title="Open in new tab"
+                aria-label="Open public profile in a new browser tab"
               >
                 <FontAwesomeIcon icon={faExternalLinkAlt} />
               </a>
@@ -136,7 +138,7 @@ const QRCodeCard = ({ uri, publicUrl }) => {
             <button
               type="button"
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 min-h-[44px] bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-sm font-semibold transition-all shadow-xs focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer"
             >
               <FontAwesomeIcon icon={faDownload} />
               <span>Download PNG</span>
@@ -145,7 +147,7 @@ const QRCodeCard = ({ uri, publicUrl }) => {
             <button
               type="button"
               onClick={handleCopy}
-              className="flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-all cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 min-h-[44px] border border-slate-200 hover:bg-slate-50 active:scale-95 text-slate-700 rounded-xl text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer"
             >
               <FontAwesomeIcon icon={copied ? faCheck : faCopy} className={copied ? 'text-green-600' : ''} />
               <span>{copied ? 'Copied' : 'Copy Link'}</span>

@@ -180,8 +180,9 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                       href={upload.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute top-2 right-2 p-1.5 bg-black/40 hover:bg-black/60 text-white rounded-lg opacity-0 group-hover:opacity-100 transition text-xs"
+                      className="absolute top-2 right-2 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-lg opacity-80 sm:opacity-0 group-hover:opacity-100 transition text-xs focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white"
                       title="Open full image"
+                      aria-label={`Open ${filename} in new tab`}
                     >
                       <FontAwesomeIcon icon={faExternalLinkAlt} />
                     </a>
@@ -220,7 +221,8 @@ export default function UploadsManagerClient({ initialUploads = [], activeRefere
                     <button
                       type="button"
                       onClick={() => handleDeleteClick(upload)}
-                      className="w-full flex items-center justify-center gap-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 py-2 rounded-lg transition cursor-pointer"
+                      aria-label={`Delete upload ${filename}`}
+                      className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 py-2.5 min-h-[40px] rounded-xl transition focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none cursor-pointer active:scale-95"
                     >
                       <FontAwesomeIcon icon={faTrash} className="text-[11px]" />
                       <span>Delete Upload</span>

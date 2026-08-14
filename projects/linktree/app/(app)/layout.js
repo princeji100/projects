@@ -6,6 +6,8 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import SafeImage from "@/components/media/SafeImage";
 import AppSidebar from "@/components/layout/AppSidebar";
+import MobileNavBar from "@/components/layout/MobileNavBar";
+import LogoutButton from "@/components/buttons/LogoutButton";
 import { ToastContainer } from 'react-toastify';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink, faUser } from "@fortawesome/free-solid-svg-icons";
@@ -31,7 +33,7 @@ export const metadata = {
 export default async function AppLayout({ children }) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return redirect('/login')
+    return redirect('/login');
   }
   
   await connectToDatabase();
@@ -41,21 +43,59 @@ export default async function AppLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900`}>
         <SessionWrapper>
           <ToastContainer 
             position="bottom-right"
             autoClose={3000}
             hideProgressBar={false}
           />
-          <main className="md:flex min-h-screen transition-all">
-            <aside className="bg-white shadow-md min-w-48 p-4 py-8 border-r border-slate-100">
-              <div className="sticky top-0 p-2">
-                <div className="rounded-full bg-slate-100 overflow-hidden w-[90px] h-[90px] mx-auto ring-2 ring-slate-100 flex items-center justify-center">
+
+          {/* Mobile Top Bar */}
+          <header className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="rounded-full bg-slate-100 overflow-hidden w-9 h-9 ring-1 ring-slate-200 shrink-0 flex items-center justify-center">
+                <SafeImage 
+                  src={session?.user?.image} 
+                  width={36} 
+                  height={36} 
+                  alt={session?.user?.name || 'User avatar'}
+                  className="object-cover object-center w-full h-full"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
+                      <FontAwesomeIcon icon={faUser} className="text-sm" />
+                    </div>
+                  }
+                />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-800 truncate">{session?.user?.name || 'Account'}</p>
+                {page?.uri && (
+                  <Link 
+                    href={`/${page.uri}`} 
+                    target="_blank" 
+                    className="text-[11px] text-blue-600 font-medium hover:underline flex items-center gap-1 truncate"
+                  >
+                    <FontAwesomeIcon icon={faLink} className="text-[9px]" />
+                    <span>/{page.uri}</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+            <div className="shrink-0 scale-90 origin-right">
+              <LogoutButton />
+            </div>
+          </header>
+
+          <main className="md:flex min-h-screen">
+            {/* Desktop Left Sidebar */}
+            <aside className="hidden md:block bg-white shadow-xs w-64 p-5 py-8 border-r border-slate-200 shrink-0">
+              <div className="sticky top-6">
+                <div className="rounded-full bg-slate-100 overflow-hidden w-[88px] h-[88px] mx-auto ring-2 ring-slate-200 flex items-center justify-center shadow-xs">
                   <SafeImage 
                     src={session?.user?.image} 
-                    width={90} 
-                    height={90} 
+                    width={88} 
+                    height={88} 
                     alt={session?.user?.name || 'User avatar'}
                     className="object-cover object-center w-full h-full"
                     fallback={
@@ -65,24 +105,34 @@ export default async function AppLayout({ children }) {
                     }
                   />
                 </div>
-                {page && (
-                  <Link 
-                    href={`/${page.uri}`} 
-                    target="_blank" 
-                    className="flex gap-2 mt-4 items-center justify-center text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                  >
-                    <FontAwesomeIcon className="text-blue-500 text-lg" icon={faLink} />
-                    <span className="text-lg text-slate-300">/</span>
-                    <span className="underline font-medium">{page.uri}</span>
-                  </Link>
-                )}
+
+                <div className="text-center mt-3">
+                  <h2 className="text-sm font-bold text-slate-800 truncate px-2">{session?.user?.name}</h2>
+                  {page && (
+                    <Link 
+                      href={`/${page.uri}`} 
+                      target="_blank" 
+                      className="inline-flex items-center gap-1.5 mt-1 text-xs text-slate-500 hover:text-blue-600 transition-colors font-medium"
+                    >
+                      <FontAwesomeIcon className="text-blue-500 text-[10px]" icon={faLink} />
+                      <span className="text-slate-300">/</span>
+                      <span className="underline truncate max-w-[150px]">{page.uri}</span>
+                    </Link>
+                  )}
+                </div>
+
                 <AppSidebar isAdmin={isAdmin} />
               </div>
             </aside>
-            <div className="grow p-6 md:p-8">
+
+            {/* Main Content Area */}
+            <div className="grow min-w-0 p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
               {children}
             </div>
           </main>
+
+          {/* Mobile Bottom Navigation Bar */}
+          <MobileNavBar isAdmin={isAdmin} />
         </SessionWrapper>
       </body>
     </html>

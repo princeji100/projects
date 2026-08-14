@@ -108,25 +108,27 @@ const PageSettingForm = ({ page, user }) => {
                           key={t.id}
                           type="button"
                           onClick={() => setTheme(t.id)}
-                          className={`group relative p-2.5 rounded-lg border text-left transition-all duration-200 flex flex-col items-center gap-1.5 ${
+                          aria-label={`Select ${t.name} theme`}
+                          aria-pressed={isSelected}
+                          className={`group relative p-2.5 min-h-[52px] rounded-xl border text-left transition-all duration-200 flex flex-col items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
                             isSelected
-                              ? 'border-blue-600 ring-2 ring-blue-500/30 bg-blue-50/50 shadow-sm'
+                              ? 'border-blue-600 ring-2 ring-blue-500/30 bg-blue-50/50 shadow-xs'
                               : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50'
                           }`}
                         >
                           <div
-                            className={`w-full h-8 rounded-md bg-gradient-to-r ${t.previewGradient} flex items-center justify-center border border-black/10 shadow-inner`}
+                            className={`w-full h-8 rounded-lg bg-gradient-to-r ${t.previewGradient} flex items-center justify-center border border-black/10 shadow-inner`}
                           >
                             {isSelected && (
                               <FontAwesomeIcon
                                 icon={faCheck}
-                                className="text-white drop-shadow text-xs"
+                                className="text-white drop-shadow-xs text-xs"
                               />
                             )}
                           </div>
                           <span
-                            className={`text-xs font-medium text-center truncate w-full ${
-                              isSelected ? 'text-blue-700 font-semibold' : 'text-slate-700'
+                            className={`text-xs text-center truncate w-full ${
+                              isSelected ? 'text-blue-700 font-bold' : 'text-slate-700 font-medium'
                             }`}
                           >
                             {t.name}
@@ -140,15 +142,19 @@ const PageSettingForm = ({ page, user }) => {
 
               {/* Custom Color Selector */}
               {bgType === 'color' && (
-                <div className="mt-4 bg-slate-50 rounded-lg border border-slate-200 p-3">
+                <div className="mt-4 bg-slate-50 rounded-xl border border-slate-200 p-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-slate-700 text-sm font-medium">Custom Color:</span>
+                    <label htmlFor="bg-color-picker" className="text-slate-700 text-sm font-medium">
+                      Custom Color:
+                    </label>
                     <input
+                      id="bg-color-picker"
                       type="color"
-                      className="w-12 h-8 rounded cursor-pointer border border-slate-300"
+                      className="w-12 h-9 rounded cursor-pointer border border-slate-300 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                       onChange={(e) => setBgColor(e.target.value)}
                       value={bgColor}
                       name="bgColor"
+                      aria-label="Pick custom background color"
                     />
                     <span className="text-xs text-slate-500 font-mono">{bgColor}</span>
                   </div>
@@ -158,15 +164,16 @@ const PageSettingForm = ({ page, user }) => {
               {/* Custom Image Upload */}
               {bgType === 'image' && (
                 <div className="mt-4">
-                  <label className="bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-sm px-4 py-2.5 rounded-lg">
+                  <label className="bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer flex gap-2 items-center justify-center shadow-xs px-4 py-3 min-h-[44px] rounded-xl focus-within:ring-2 focus-within:ring-blue-500">
                     <input type="hidden" name="bgImage" defaultValue={bgImage} />
                     <input
                       type="file"
                       onChange={(e) => handleImageUpload(e, setBgImage)}
                       className="hidden"
                       accept="image/jpeg,image/png,image/webp"
+                      aria-label="Upload custom header banner image"
                     />
-                    <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
+                    <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500 text-sm" />
                     <span className="text-slate-700 text-sm font-medium">
                       {bgImage ? 'Change Image' : 'Upload Image'}
                     </span>
@@ -182,13 +189,17 @@ const PageSettingForm = ({ page, user }) => {
               <div className="bg-white shadow-lg w-32 h-32 rounded-full overflow-hidden ring-4 ring-white">
                 <ProfileAvatar src={avatar} size={128} alt="Profile picture" />
               </div>
-              <label className="absolute bottom-0 right-0 bg-white hover:bg-slate-50 transition-colors p-2 rounded-full shadow-md cursor-pointer">
-                <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
+              <label 
+                className="absolute bottom-0 right-0 bg-white hover:bg-slate-50 transition-colors p-2.5 w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full shadow-md cursor-pointer border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500"
+                aria-label="Upload profile picture"
+              >
+                <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500 text-sm" />
                 <input
                   onChange={(e) => handleImageUpload(e, setAvatar)}
                   type="file"
                   className="hidden"
                   accept="image/jpeg,image/png,image/webp"
+                  aria-label="Upload profile picture"
                 />
                 <input type="hidden" name="avatar" defaultValue={avatar} />
               </label>

@@ -178,16 +178,21 @@ const PageLinkForm = ({ page }) => {
                 className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-4"
               >
                 {/* Top Bar: Handle, Status Badge & Active Toggle */}
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="handle cursor-move text-slate-400 hover:text-slate-600 transition-colors p-1">
-                      <FontAwesomeIcon icon={faGripLines} className="text-lg" />
-                    </div>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <button
+                      type="button"
+                      aria-label="Drag to reorder link"
+                      title="Drag to reorder link"
+                      className="handle cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 transition-colors p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+                    >
+                      <FontAwesomeIcon icon={faGripLines} className="text-base" />
+                    </button>
                     {renderBadge(link)}
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <label className="relative inline-flex items-center cursor-pointer">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <label className="relative inline-flex items-center cursor-pointer min-h-[44px] px-1">
                       <input
                         type="checkbox"
                         checked={link.active !== false}
@@ -195,9 +200,10 @@ const PageLinkForm = ({ page }) => {
                           handelLinkChange(index, 'active', e.target.checked)
                         }
                         className="sr-only peer"
+                        aria-label={`Toggle active state for ${link.title || 'link'}`}
                       />
-                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                      <span className="ml-2 text-xs font-medium text-slate-600 select-none">
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[14px] after:left-[6px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                      <span className="ml-2 text-xs font-semibold text-slate-600 select-none hidden sm:inline">
                         {link.active !== false ? 'Live' : 'Hidden'}
                       </span>
                     </label>
@@ -206,20 +212,21 @@ const PageLinkForm = ({ page }) => {
 
                 {/* Main Link Content */}
                 <div className="flex flex-col md:flex-row gap-6">
-                  <div className="flex flex-col items-center gap-3 min-w-[180px]">
-                    <div className="relative w-16 h-16 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                  <div className="flex flex-col items-center gap-3 min-w-[160px]">
+                    <div className="relative w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
                       {link.icon ? (
                         <Image
                           src={link.icon}
                           fill
+                          unoptimized
                           className="object-cover"
                           alt={link.title || 'Link icon'}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
                           <FontAwesomeIcon
                             icon={faLink}
-                            className="text-2xl text-slate-400"
+                            className="text-xl"
                           />
                         </div>
                       )}
@@ -232,9 +239,10 @@ const PageLinkForm = ({ page }) => {
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         className="hidden"
+                        aria-label={`Change icon for ${link.title || 'link'}`}
                       />
-                      <span className="flex items-center justify-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors">
-                        <FontAwesomeIcon icon={faCloudArrowUp} />
+                      <span className="flex items-center justify-center gap-2 px-3 py-2 min-h-[40px] border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-blue-500 shadow-xs">
+                        <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-500" />
                         Change icon
                       </span>
                     </label>
@@ -242,7 +250,8 @@ const PageLinkForm = ({ page }) => {
                     <button
                       type="button"
                       onClick={() => removeLink(index)}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      aria-label={`Remove ${link.title || 'link'}`}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 min-h-[40px] text-xs font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none cursor-pointer"
                     >
                       <FontAwesomeIcon icon={faTrash} />
                       Remove
