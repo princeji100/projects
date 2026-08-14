@@ -6,6 +6,7 @@ import { requireSession } from "@/lib/requireSession"
 import * as rateLimit from "@/lib/rateLimit"
 import { validateAndSanitizeLink } from "@/lib/linkLifecycle"
 import { normalizeLinkBadge } from "@/lib/linkBadges"
+import { sanitizeTipJarConfig } from "@/lib/tipJar"
 import { fonts } from "@/lib/fonts"
 
 // All three saves share ONE bucket. D-19's 30/min is per user for saving a page, not
@@ -84,6 +85,47 @@ const SavePageSetting = async (formData) => {
             }
             dataToUpdate.font = validFont.id;
         }
+
+        // Tip Jar validation and persistence
+        if (
+            formData.has('tipJar') ||
+            formData.has('tipJarEnabled') ||
+            formData.has('tipJar_enabled') ||
+            formData.has('tipJarUpiId') ||
+            formData.has('tipJar_upiId') ||
+            formData.has('tipJarName') ||
+            formData.has('tipJarAmount') ||
+            formData.has('tipJarMessage')
+        ) {
+            let tipJarInput = {};
+            if (formData.has('tipJar')) {
+                const rawTipJar = formData.get('tipJar');
+                if (typeof rawTipJar === 'string') {
+                    try {
+                        tipJarInput = JSON.parse(rawTipJar);
+                    } catch {
+                        tipJarInput = {};
+                    }
+                } else if (typeof rawTipJar === 'object' && rawTipJar !== null) {
+                    tipJarInput = rawTipJar;
+                }
+            } else {
+                tipJarInput = {
+                    enabled: formData.get('tipJarEnabled') ?? formData.get('tipJar_enabled') ?? false,
+                    upiId: formData.get('tipJarUpiId') ?? formData.get('tipJar_upiId') ?? '',
+                    name: formData.get('tipJarName') ?? formData.get('tipJar_name') ?? '',
+                    amount: formData.get('tipJarAmount') ?? formData.get('tipJar_amount') ?? '',
+                    message: formData.get('tipJarMessage') ?? formData.get('tipJar_message') ?? '',
+                };
+            }
+
+            const tipResult = sanitizeTipJarConfig(tipJarInput);
+            if (!tipResult.ok) {
+                return { success: false, error: tipResult.error };
+            }
+            dataToUpdate.tipJar = tipResult.config;
+        }
+
         await Page.updateOne({ owner: gate.session.user.email }, dataToUpdate);
         if (formData.has('avatar')) {
             const avatarLink = formData.get('avatar');

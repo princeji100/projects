@@ -12,6 +12,14 @@ const LinkSchema = new Schema({
     badge: { type: String, enum: ['none', 'hot', 'new', 'pinned', 'offer'], default: 'none' },
 }, { _id: true });
 
+const TipJarSchema = new Schema({
+    enabled: { type: Boolean, default: false },
+    upiId: { type: String, default: '' },
+    name: { type: String, default: '' },
+    amount: { type: String, default: '' },
+    message: { type: String, default: '' },
+}, { _id: false });
+
 // Define the schema for the Page model
 const PageSchema = new Schema({
     uri: { type: String, required: true, min: 1, unique: true },
@@ -33,6 +41,16 @@ const PageSchema = new Schema({
     font: { type: String, default: 'default' },
     buttons: { type: Object, default: {} },
     links: { type: [LinkSchema], default: [] },
+    tipJar: {
+        type: TipJarSchema,
+        default: () => ({
+            enabled: false,
+            upiId: '',
+            name: '',
+            amount: '',
+            message: '',
+        }),
+    },
 }, {
     timestamps: true,
 });
