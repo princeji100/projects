@@ -111,34 +111,9 @@ export default async function AppLayout({ children }) {
           </header>
 
           <main className="md:flex min-h-[calc(100vh-4rem)]">
-            {/* ═══ Desktop Icon Sidebar (matching screenshot) ═══ */}
-            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-64 py-6 shrink-0 shadow-xs">
-              <div className="sticky top-22 flex flex-col items-center gap-1 flex-1 w-full">
-                {/* User Avatar at top of sidebar */}
-                <div className="rounded-full bg-slate-100 overflow-hidden w-16 h-16 ring-2 ring-slate-200 flex items-center justify-center shadow-xs mb-3">
-                  <SafeImage 
-                    src={session?.user?.image} 
-                    width={64} 
-                    height={64} 
-                    alt={session?.user?.name || 'User avatar'}
-                    className="object-cover object-center w-full h-full"
-                    fallback={
-                      <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
-                        <FontAwesomeIcon icon={faUser} className="text-2xl" />
-                      </div>
-                    }
-                  />
-                </div>
-                {page?.uri && (
-                  <Link 
-                    href={`/${page.uri}`} 
-                    target="_blank" 
-                    className="text-xs text-slate-400 hover:text-blue-600 transition-colors font-medium mb-4 truncate max-w-[200px] text-center"
-                  >
-                    @{page.uri}
-                  </Link>
-                )}
-
+            {/* ═══ Desktop Icon Sidebar (matching profile-settings.png) ═══ */}
+            <aside className="hidden md:flex flex-col items-center bg-white border-r border-slate-200 w-20 py-4 shrink-0 shadow-xs">
+              <div className="sticky top-20 flex flex-col items-center justify-between flex-1 w-full min-h-[calc(100vh-6rem)]">
                 <AppSidebar isAdmin={isAdmin} />
               </div>
             </aside>
