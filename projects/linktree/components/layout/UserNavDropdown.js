@@ -80,7 +80,7 @@ export default function UserNavDropdown({ user, uri, isAdmin = false, size = 'md
           className="absolute right-0 mt-2 w-60 rounded-2xl bg-white shadow-xl ring-1 ring-slate-200/80 border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150"
         >
           {/* User Info Header */}
-          <div className="px-4 py-2.5 border-b border-slate-100">
+          <div className="px-4 py-3 border-b border-slate-100">
             <p className="text-sm font-bold text-slate-900 truncate">
               {user?.name || 'My Account'}
             </p>
@@ -92,63 +92,16 @@ export default function UserNavDropdown({ user, uri, isAdmin = false, size = 'md
                 href={`/${uri}`}
                 target="_blank"
                 onClick={() => setIsOpen(false)}
-                className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+                className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100/80 px-2.5 py-1.5 rounded-lg transition-colors w-full justify-between"
               >
-                <span>View public profile</span>
-                <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[9px]" />
+                <span>View live profile</span>
+                <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
               </Link>
             )}
           </div>
 
-          {/* Navigation Links */}
-          <div className="py-1">
-            <Link
-              href="/account"
-              role="menuitem"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors"
-            >
-              <FontAwesomeIcon icon={faGear} className="text-slate-400 w-4 text-center" />
-              <span>Settings</span>
-            </Link>
-
-            <Link
-              href="/account/uploads"
-              role="menuitem"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors"
-            >
-              <FontAwesomeIcon icon={faImages} className="text-slate-400 w-4 text-center" />
-              <span>Uploads & Media</span>
-            </Link>
-
-            <Link
-              href="/account/analytics"
-              role="menuitem"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors"
-            >
-              <FontAwesomeIcon icon={faChartLine} className="text-slate-400 w-4 text-center" />
-              <span>Analytics</span>
-            </Link>
-
-            {isAdmin && (
-              <Link
-                href="/account/admin"
-                role="menuitem"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-purple-700 hover:bg-purple-50 transition-colors"
-              >
-                <FontAwesomeIcon icon={faUserShield} className="text-purple-500 w-4 text-center" />
-                <span>Admin Allowlist</span>
-              </Link>
-            )}
-          </div>
-
-          <div className="border-t border-slate-100 my-1" />
-
-          {/* Logout Option */}
-          <div className="px-1 py-0.5">
+          {/* Logout Action */}
+          <div className="p-1">
             <button
               type="button"
               role="menuitem"
@@ -156,7 +109,7 @@ export default function UserNavDropdown({ user, uri, isAdmin = false, size = 'md
                 setIsOpen(false);
                 signOut();
               }}
-              className="w-full flex items-center gap-3 px-3.5 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors text-left cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors text-left cursor-pointer"
             >
               <FontAwesomeIcon icon={faRightFromBracket} className="w-4 text-center text-red-500" />
               <span>Sign Out</span>
