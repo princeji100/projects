@@ -24,6 +24,7 @@ import { useState, useEffect } from 'react';
 import upload from '@/lib/upload';
 import SectionBox from '../layout/SectionBox';
 import { themes } from '@/lib/themes';
+import { fonts } from '@/lib/fonts';
 import MediaLibraryPickerModal from '@/components/media/MediaLibraryPickerModal';
 
 const gradientPresets = [
@@ -40,6 +41,7 @@ const gradientPresets = [
 const PageSettingForm = ({ page, user, onStateChange }) => {
   const [bgType, setBgType] = useState(page?.bgType || 'preset');
   const [theme, setTheme] = useState(page?.theme || 'default');
+  const [font, setFont] = useState(page?.font || 'default');
   const [bgColor, setBgColor] = useState(page?.bgColor || '#000000');
   const [bgGradientFrom, setBgGradientFrom] = useState(page?.bgGradientFrom || '#3b82f6');
   const [bgGradientTo, setBgGradientTo] = useState(page?.bgGradientTo || '#9333ea');
@@ -59,6 +61,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
       onStateChange({
         bgType,
         theme,
+        font,
         bgColor,
         bgGradientFrom,
         bgGradientTo,
@@ -75,6 +78,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
   }, [
     bgType,
     theme,
+    font,
     bgColor,
     bgGradientFrom,
     bgGradientTo,
@@ -95,6 +99,7 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
       const formData = new FormData(e.target);
       formData.set('bgType', bgType);
       formData.set('theme', theme);
+      formData.set('font', font);
       formData.set('bgColor', bgColor);
       formData.set('bgGradientFrom', bgGradientFrom);
       formData.set('bgGradientTo', bgGradientTo);
@@ -611,6 +616,67 @@ const PageSettingForm = ({ page, user, onStateChange }) => {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+      </SectionBox>
+
+      {/* Typography & Fonts Card */}
+      <SectionBox title="Typography & Fonts">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+              Profile Font Family
+            </span>
+            <span className="text-xs text-slate-500 font-medium">
+              10+ Curated Google Fonts
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {fonts.map((f) => {
+              const isSelected = font === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setFont(f.id)}
+                  aria-label={`Select ${f.name} font`}
+                  aria-pressed={isSelected}
+                  className={`p-3 rounded-2xl border text-left transition-all duration-150 flex flex-col justify-between gap-2 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none cursor-pointer ${
+                    isSelected
+                      ? 'border-blue-600 ring-2 ring-blue-500/30 bg-blue-50/60 shadow-xs'
+                      : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/80'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-bold text-slate-900 truncate">
+                      {f.name}
+                    </span>
+                    {isSelected && (
+                      <span className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] shrink-0">
+                        <FontAwesomeIcon icon={faCheck} className="w-2.5 h-2.5" />
+                      </span>
+                    )}
+                  </div>
+
+                  <p
+                    style={{
+                      fontFamily: f.fontFamily && f.fontFamily !== 'inherit' ? f.fontFamily : undefined,
+                    }}
+                    className={`text-sm text-slate-700 font-medium truncate ${f.className}`}
+                  >
+                    Aa Bb Gg 123
+                  </p>
+
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                    <span className="truncate">{f.description}</span>
+                    <span className="uppercase text-[9px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-semibold shrink-0 ml-1">
+                      {f.category}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </SectionBox>

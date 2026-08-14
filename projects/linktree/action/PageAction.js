@@ -5,6 +5,7 @@ import connectToDatabase from "@/lib/connectToDB"
 import { requireSession } from "@/lib/requireSession"
 import * as rateLimit from "@/lib/rateLimit"
 import { validateAndSanitizeLink } from "@/lib/linkLifecycle"
+import { fonts } from "@/lib/fonts"
 
 // All three saves share ONE bucket. D-19's 30/min is per user for saving a page, not
 // per form — three separate buckets would let a caller cycle the forms for 90/min.
@@ -75,7 +76,12 @@ const SavePageSetting = async (formData) => {
             dataToUpdate.theme = 'default';
         }
         if (dataToUpdate.font) {
-            dataToUpdate.font = String(dataToUpdate.font).trim().toLowerCase();
+            const normalizedFont = String(dataToUpdate.font).trim().toLowerCase();
+            const validFont = fonts.find((f) => f.id === normalizedFont);
+            if (!validFont) {
+                return { success: false, error: 'Invalid font selection' };
+            }
+            dataToUpdate.font = validFont.id;
         }
         await Page.updateOne({ owner: gate.session.user.email }, dataToUpdate);
         if (formData.has('avatar')) {

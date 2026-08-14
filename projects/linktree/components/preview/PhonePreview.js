@@ -12,6 +12,7 @@ import {
 import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
 import { getTheme } from '@/lib/themes';
+import { getFont } from '@/lib/fonts';
 import { getSocialButton } from '@/lib/socialButtons';
 import { isLinkLive } from '@/lib/linkLifecycle';
 
@@ -19,6 +20,7 @@ export default function PhonePreview({
   page,
   user,
   previewTheme,
+  previewFont,
   previewBgType,
   previewBgColor,
   previewBgGradientFrom,
@@ -38,6 +40,8 @@ export default function PhonePreview({
 
   const uri = page?.uri || 'username';
   const themeKey = previewTheme !== undefined ? previewTheme : page?.theme || 'default';
+  const fontKey = previewFont !== undefined ? previewFont : page?.font || 'default';
+  const currentFont = getFont(fontKey);
   const bgType = previewBgType !== undefined ? previewBgType : page?.bgType || 'preset';
   const bgColor = previewBgColor !== undefined ? previewBgColor : page?.bgColor || '#000000';
   const bgGradientFrom = previewBgGradientFrom !== undefined ? previewBgGradientFrom : page?.bgGradientFrom || '#3b82f6';
@@ -141,8 +145,11 @@ export default function PhonePreview({
         {/* Screen Inner Viewport with independent scroll */}
         <div
           key={refreshKey}
-          style={previewStyle}
-          className={`w-full h-full rounded-[36px] overflow-y-auto overflow-x-hidden ${previewBgClass} ${textColor ? '' : currentTheme.textColor} p-4 pt-11 flex flex-col items-center justify-between no-scrollbar transition-all duration-300 relative`}
+          style={{
+            ...previewStyle,
+            fontFamily: currentFont.fontFamily && currentFont.fontFamily !== 'inherit' ? currentFont.fontFamily : undefined,
+          }}
+          className={`w-full h-full rounded-[36px] overflow-y-auto overflow-x-hidden ${previewBgClass} ${textColor ? '' : currentTheme.textColor} ${currentFont.className} p-4 pt-11 flex flex-col items-center justify-between no-scrollbar transition-all duration-300 relative`}
         >
           {/* Background Contrast Overlay for custom images */}
           {bgType === 'image' && bgImageOverlay && (

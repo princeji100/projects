@@ -18,6 +18,7 @@ import LinkIcon from '@/components/media/LinkIcon';
 import PublicShareButton from '@/components/buttons/PublicShareButton';
 import { isLinkLive } from '@/lib/linkLifecycle';
 import { getTheme } from '@/lib/themes';
+import { getFont } from '@/lib/fonts';
 import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
 import { getBaseUrl } from '@/lib/siteUrl';
@@ -81,9 +82,10 @@ const UserPage = async ({ params }) => {
     }
   };
 
-  // Theme & Background resolution
+  // Theme, Font & Background resolution
   const isPreset = page.bgType === 'preset' || !page.bgType;
   const currentTheme = isPreset ? getTheme(page.theme) : getTheme('default');
+  const currentFont = getFont(page.font);
 
   let pageStyle = {};
   let pageBgClass = '';
@@ -106,6 +108,10 @@ const UserPage = async ({ params }) => {
     pageBgClass = currentTheme.pageBg;
   }
 
+  const fontStyle = currentFont.fontFamily && currentFont.fontFamily !== 'inherit'
+    ? { fontFamily: currentFont.fontFamily }
+    : {};
+
   const renderNow = new Date();
   const liveLinks = (page.links || []).filter((link) => isLinkLive(link, renderNow));
 
@@ -121,8 +127,8 @@ const UserPage = async ({ params }) => {
 
   return (
     <div
-      style={pageStyle}
-      className={`min-h-screen ${pageBgClass} ${textColor ? '' : currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between relative selection:bg-blue-500 selection:text-white`}
+      style={{ ...pageStyle, ...fontStyle }}
+      className={`min-h-screen ${pageBgClass} ${textColor ? '' : currentTheme.textColor} ${currentFont.className} transition-colors duration-300 flex flex-col justify-between relative selection:bg-blue-500 selection:text-white`}
     >
       {/* Background Contrast Overlay for custom images */}
       {page.bgType === 'image' && (page.bgImageOverlay ?? true) && (

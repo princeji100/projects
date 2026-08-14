@@ -71,6 +71,7 @@ const AccountPage = () => {
         page: pageData,
         user: session?.user,
         previewTheme: livePreviewState.theme,
+        previewFont: livePreviewState.font,
         previewBgType: livePreviewState.bgType,
         previewBgColor: livePreviewState.bgColor,
         previewBgGradientFrom: livePreviewState.bgGradientFrom,
