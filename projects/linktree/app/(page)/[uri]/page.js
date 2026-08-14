@@ -9,6 +9,7 @@ import {
   faChevronRight,
   faCircleCheck,
   faLink as faLinkSolid,
+  faSparkles,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
@@ -20,20 +21,43 @@ import { getTheme } from '@/lib/themes';
 import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
 import { getBaseUrl } from '@/lib/siteUrl';
+import LinktreeLogo from '@/components/media/LinktreeLogo';
+
+export async function generateMetadata({ params }) {
+  const { uri } = await params;
+  await connectToDatabase();
+  const page = await Page.findOne({ uri }).lean();
+
+  if (!page) {
+    return {
+      title: 'Profile Not Found | Linktree',
+    };
+  }
+
+  const title = `${page.displayName || `@${uri}`} | Linktree`;
+  const description = page.bio || `Connect with ${page.displayName || uri} on Linktree. Explore links, portfolio, and social channels.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: page.avatar ? [page.avatar] : [],
+    },
+  };
+}
 
 const UserPage = async ({ params }) => {
-  // FIX-06: Next.js 15 requires awaiting dynamic route params
   const { uri } = await params;
 
   await connectToDatabase();
   const page = await Page.findOne({ uri });
 
-  // FIX-03: Unknown /username renders 404 page
   if (!page) {
     notFound();
   }
 
-  // FIX-04 & ANA-01: Event creation is gated strictly behind page existence with normalized metadata
   const headerList = await headers();
   const userAgent = headerList.get('user-agent');
   const referer = headerList.get('referer');
@@ -92,73 +116,97 @@ const UserPage = async ({ params }) => {
 
   const textColor = page.textColor || '';
   const customHeadingStyle = textColor ? { color: textColor } : {};
-  const customSubtextStyle = textColor ? { color: textColor, opacity: 0.85 } : {};
+  const customSubtextStyle = textColor ? { color: textColor, opacity: 0.9 } : {};
   const isLightText = textColor ? textColor.toLowerCase() === '#ffffff' : currentTheme.id !== 'minimal-light';
 
   return (
     <div
       style={pageStyle}
-      className={`min-h-screen ${pageBgClass} ${textColor ? '' : currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between relative`}
+      className={`min-h-screen ${pageBgClass} ${textColor ? '' : currentTheme.textColor} transition-colors duration-300 flex flex-col justify-between relative selection:bg-blue-500 selection:text-white`}
     >
       {/* Background Contrast Overlay for custom images */}
       {page.bgType === 'image' && (page.bgImageOverlay ?? true) && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[0.5px] pointer-events-none z-0" />
       )}
 
-      {/* Top Navbar */}
-      <header className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      {/* Floating Top Header Bar */}
+      <header className="relative z-20 w-full max-w-2xl mx-auto px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
         <Link 
           href="/"
-          className={`flex items-center gap-1.5 font-bold text-lg tracking-tight focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-1 transition-opacity hover:opacity-80 ${
-            isLightText ? 'text-white' : 'text-slate-900'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md transition-all hover:scale-105 active:scale-95 shadow-xs ${
+            isLightText
+              ? 'bg-black/25 hover:bg-black/40 text-white border border-white/15'
+              : 'bg-white/70 hover:bg-white text-slate-900 border border-slate-200/80 shadow-xs'
           }`}
         >
-          <FontAwesomeIcon icon={faLinkSolid} className="text-sm text-blue-500" />
-          <span>linktree</span>
+          <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-xs" />
+          <span className="font-extrabold text-xs tracking-tight">linktree</span>
         </Link>
-        <PublicShareButton 
-          url={typeof window !== 'undefined' ? window.location.href : undefined} 
-          title={resolvedDisplayName} 
-          isDark={isLightText}
-        />
+
+        <div className="flex items-center gap-2">
+          <PublicShareButton 
+            url={typeof window !== 'undefined' ? window.location.href : undefined} 
+            title={resolvedDisplayName} 
+            isDark={isLightText}
+          />
+        </div>
       </header>
 
       {/* Main Profile Container */}
-      <main className="relative z-10 max-w-2xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col items-center">
-        {/* Avatar Section */}
-        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full ring-4 ring-white/30 shadow-2xl overflow-hidden mb-4 shrink-0 bg-slate-800">
-          <ProfileAvatar
-            src={resolvedAvatar}
-            name={resolvedDisplayName}
-            size={128}
-          />
+      <main className="relative z-10 max-w-xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col items-center">
+        {/* Avatar Section with Floating Aura */}
+        <div className="relative mb-5 group">
+          <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-white/40 via-white/10 to-white/40 backdrop-blur-md shadow-2xl shadow-black/30 overflow-hidden shrink-0 transition-transform duration-300 group-hover:scale-105">
+            <div className="w-full h-full rounded-full overflow-hidden bg-slate-900">
+              <ProfileAvatar
+                src={resolvedAvatar}
+                name={resolvedDisplayName}
+                size={128}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Name and Verified Badge */}
         <div className="flex items-center justify-center gap-2 text-center px-2">
           <h1
             style={customHeadingStyle}
-            className={`text-2xl sm:text-3xl font-extrabold ${textColor ? '' : currentTheme.headingColor} tracking-tight break-words`}
+            className={`text-2xl sm:text-3xl font-extrabold ${textColor ? '' : currentTheme.headingColor} tracking-tight break-words drop-shadow-sm`}
           >
             {resolvedDisplayName}
           </h1>
-          <FontAwesomeIcon icon={faCircleCheck} className="text-blue-400 text-lg shrink-0" title="Verified Profile" />
+          <FontAwesomeIcon icon={faCircleCheck} className="text-blue-400 text-lg shrink-0 drop-shadow-xs" title="Verified Creator" />
         </div>
 
-        {/* Handle / Location Subtitle */}
-        <p
-          style={customSubtextStyle}
-          className={`text-xs sm:text-sm font-medium ${textColor ? '' : currentTheme.mutedTextColor} text-center mt-1`}
-        >
-          @{uri} {page.location ? `• ${page.location}` : ''}
-        </p>
+        {/* Handle / Location Capsule Badge */}
+        <div className="mt-1.5 flex items-center justify-center">
+          <span
+            style={customSubtextStyle}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-2xs ${
+              isLightText
+                ? 'bg-black/20 text-white/90 border border-white/10'
+                : 'bg-white/60 text-slate-700 border border-slate-200/70'
+            }`}
+          >
+            <span>@{uri}</span>
+            {page.location && (
+              <>
+                <span className="opacity-40">&bull;</span>
+                <span className="flex items-center gap-1">
+                  <FontAwesomeIcon icon={faMapMarkerAlt} className="text-[10px] text-red-400 opacity-90" />
+                  <span>{page.location}</span>
+                </span>
+              </>
+            )}
+          </span>
+        </div>
 
         {/* Bio */}
         {page.bio && (
-          <div className="max-w-md mx-auto text-center mt-3 mb-6 px-2">
+          <div className="max-w-md mx-auto text-center mt-3.5 mb-6 px-4">
             <p
               style={customSubtextStyle}
-              className={`${textColor ? '' : currentTheme.mutedTextColor} leading-relaxed text-xs sm:text-sm break-words`}
+              className={`${textColor ? '' : currentTheme.mutedTextColor} leading-relaxed text-xs sm:text-sm break-words drop-shadow-2xs`}
             >
               {page.bio}
             </p>
@@ -179,7 +227,7 @@ const UserPage = async ({ params }) => {
                   rel="noopener noreferrer"
                   style={{ backgroundColor: btn.color || '#64748b' }}
                   className="rounded-full flex items-center justify-center text-white
-                           shadow-md hover:shadow-lg transition-all duration-200 w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none hover:brightness-110"
+                           shadow-md hover:shadow-xl transition-all duration-200 w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] hover:scale-115 hover:-translate-y-0.5 active:scale-95 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none hover:brightness-110"
                 >
                   <FontAwesomeIcon
                     className="h-4 w-4 sm:h-5 sm:w-5"
@@ -204,13 +252,13 @@ const UserPage = async ({ params }) => {
                 ping={`${process.env.NEXT_PUBLIC_URL || ''}api/click?url=${btoa(link.url || '')}&page=${page.uri}`}
                 className={`group relative ${
                   isLightText
-                    ? 'bg-white/15 border-white/20 text-white'
-                    : 'bg-white/90 border-slate-200/90 text-slate-900 shadow-sm'
-                } border rounded-2xl flex items-center p-4 sm:p-4.5 gap-4 
-                         transition-all duration-200 backdrop-blur-md hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[68px] w-full`}
+                    ? 'bg-white/15 hover:bg-white/25 border-white/20 hover:border-white/40 text-white shadow-lg shadow-black/10'
+                    : 'bg-white/90 hover:bg-white border-slate-200/90 hover:border-slate-300 text-slate-900 shadow-md shadow-slate-200/50'
+                } border rounded-2xl flex items-center p-3.5 sm:p-4 gap-3.5 sm:gap-4 
+                         transition-all duration-200 backdrop-blur-md hover:scale-[1.02] hover:shadow-2xl active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[64px] w-full cursor-pointer`}
               >
-                <div className={`${currentTheme.iconBg} w-12 h-12 rounded-xl 
-                              flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/15 shadow-inner`}>
+                <div className={`${currentTheme.iconBg} w-11 h-11 sm:w-12 sm:h-12 rounded-xl 
+                              flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/20 shadow-inner`}>
                   <LinkIcon
                     src={link.icon}
                     title={link.title || 'Untitled Link'}
@@ -228,7 +276,7 @@ const UserPage = async ({ params }) => {
                   {link.subtitle && (
                     <p
                       className={`text-xs truncate mt-0.5 ${
-                        isLightText ? 'text-white/75' : 'text-slate-500'
+                        isLightText ? 'text-white/80' : 'text-slate-500'
                       }`}
                     >
                       {link.subtitle}
@@ -238,12 +286,20 @@ const UserPage = async ({ params }) => {
                 <FontAwesomeIcon
                   icon={faChevronRight}
                   className={`text-xs ${
-                    isLightText ? 'text-white/40' : 'text-slate-400'
-                  } group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-1`}
+                    isLightText ? 'text-white/50' : 'text-slate-400'
+                  } group-hover:text-blue-400 group-hover:translate-x-1 transition-all shrink-0 ml-1`}
                 />
               </Link>
             );
           })}
+
+          {liveLinks.length === 0 && (
+            <div className={`p-8 rounded-2xl text-center border backdrop-blur-md ${
+              isLightText ? 'bg-white/10 border-white/10 text-white/70' : 'bg-white/60 border-slate-200 text-slate-500'
+            }`}>
+              <p className="text-xs font-medium">No active links published yet.</p>
+            </div>
+          )}
         </div>
       </main>
 
@@ -253,8 +309,8 @@ const UserPage = async ({ params }) => {
           href="/"
           className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95 ${
             isLightText
-              ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white/90'
-              : 'bg-slate-200/80 hover:bg-slate-300 border-slate-300 text-slate-800'
+              ? 'bg-black/30 hover:bg-black/50 border-white/15 text-white/90 shadow-black/20'
+              : 'bg-white/80 hover:bg-white border-slate-300 text-slate-800 shadow-slate-200'
           }`}
         >
           <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-[11px]" />
