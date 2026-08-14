@@ -342,7 +342,7 @@ export default async function Home() {
               </div>
               <h4 className="font-bold text-slate-900 text-sm">Claim Your Handle</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Choose your custom username (e.g. <code>linktree/yourname</code>) to reserve your profile URL.
+                Choose your custom username (e.g. <code className="bg-slate-100 text-blue-700 px-1.5 py-0.5 rounded font-mono text-[11px]">linktree-princeji.vercel.app/yourname</code>) to reserve your profile URL.
               </p>
             </div>
 
