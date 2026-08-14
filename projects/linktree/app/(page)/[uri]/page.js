@@ -19,6 +19,7 @@ import PublicShareButton from '@/components/buttons/PublicShareButton';
 import { isLinkLive } from '@/lib/linkLifecycle';
 import { getTheme } from '@/lib/themes';
 import { getFont } from '@/lib/fonts';
+import { getLinkBadge } from '@/lib/linkBadges';
 import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
 import { getBaseUrl } from '@/lib/siteUrl';
@@ -272,13 +273,27 @@ const UserPage = async ({ params }) => {
                   />
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <h3
-                    className={`font-bold text-sm sm:text-base truncate ${
-                      isLightText ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    {link.title || 'Untitled Link'}
-                  </h3>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h3
+                      className={`font-bold text-sm sm:text-base truncate ${
+                        isLightText ? 'text-white' : 'text-slate-900'
+                      }`}
+                    >
+                      {link.title || 'Untitled Link'}
+                    </h3>
+                    {link.badge && link.badge !== 'none' && (() => {
+                      const b = getLinkBadge(link.badge);
+                      if (b.id === 'none') return null;
+                      return (
+                        <span
+                          className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider ${b.badgeClass}`}
+                        >
+                          {b.emoji && <span aria-hidden="true">{b.emoji}</span>}
+                          <span>{b.displayText}</span>
+                        </span>
+                      );
+                    })()}
+                  </div>
                   {link.subtitle && (
                     <p
                       className={`text-xs truncate mt-0.5 ${

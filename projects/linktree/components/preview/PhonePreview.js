@@ -13,6 +13,7 @@ import ProfileAvatar from '@/components/media/ProfileAvatar';
 import LinkIcon from '@/components/media/LinkIcon';
 import { getTheme } from '@/lib/themes';
 import { getFont } from '@/lib/fonts';
+import { getLinkBadge } from '@/lib/linkBadges';
 import { getSocialButton } from '@/lib/socialButtons';
 import { isLinkLive } from '@/lib/linkLifecycle';
 
@@ -242,13 +243,27 @@ export default function PhonePreview({
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p
-                        className={`text-xs font-bold truncate ${
-                          isLightText ? 'text-white' : 'text-slate-900'
-                        }`}
-                      >
-                        {link.title || 'Untitled Link'}
-                      </p>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <p
+                          className={`text-xs font-bold truncate ${
+                            isLightText ? 'text-white' : 'text-slate-900'
+                          }`}
+                        >
+                          {link.title || 'Untitled Link'}
+                        </p>
+                        {link.badge && link.badge !== 'none' && (() => {
+                          const b = getLinkBadge(link.badge);
+                          if (b.id === 'none') return null;
+                          return (
+                            <span
+                              className={`shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${b.badgeClass}`}
+                            >
+                              {b.emoji && <span aria-hidden="true">{b.emoji}</span>}
+                              <span>{b.displayText}</span>
+                            </span>
+                          );
+                        })()}
+                      </div>
                       {link.subtitle && (
                         <p
                           className={`text-[10px] truncate ${

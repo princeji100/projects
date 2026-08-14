@@ -27,6 +27,7 @@ import {
   toLocalDatetimeInput,
   fromLocalDatetimeInput,
 } from '@/lib/linkLifecycle';
+import { LINK_BADGES } from '@/lib/linkBadges';
 import MediaLibraryPickerModal from '@/components/media/MediaLibraryPickerModal';
 
 const PageLinkForm = ({ page, onLinksChange }) => {
@@ -41,25 +42,28 @@ const PageLinkForm = ({ page, onLinksChange }) => {
     }
   }, [links, onLinksChange]);
 
-  // Lightweight client timer to keep live status badges visually fresh without page refresh
+  // Keep client clock synchronized for accurate countdowns and scheduled badges
   useEffect(() => {
-    const timer = setInterval(() => {
-      setClientNow(new Date());
-    }, 15000);
-    return () => clearInterval(timer);
+    const interval = setInterval(() => setClientNow(new Date()), 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const save = async (e) => {
-    e.preventDefault();
-    const result = await SavePageLinks(links);
-    if (result?.success) {
-      toast.success('Links saved successfully');
-    } else {
-      toast.error(
-        result?.retryAfter
-          ? `${result.error} (${result.retryAfter}s)`
-          : result?.error || 'Failed to save links'
-      );
+  const save = async () => {
+    try {
+      const result = await SavePageLinks(links);
+
+      if (result?.success) {
+        toast.success('Links saved successfully');
+      } else {
+        toast.error(
+          result?.retryAfter
+            ? `${result.error} (${result.retryAfter}s)`
+            : result?.error || 'Failed to save links'
+        );
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      toast.error('An unexpected error occurred');
     }
   };
 
@@ -74,6 +78,7 @@ const PageLinkForm = ({ page, onLinksChange }) => {
         active: true,
         startsAt: null,
         endsAt: null,
+        badge: 'none',
       },
     ]);
   };
@@ -333,6 +338,36 @@ const PageLinkForm = ({ page, onLinksChange }) => {
                         placeholder="https://example.com"
                         spellCheck="false"
                       />
+                    </div>
+
+                    {/* Badge Selection */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
+                        Callout Badge (optional)
+                      </label>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {LINK_BADGES.map((b) => {
+                          const currentBadgeId = link.badge || 'none';
+                          const isSelected = currentBadgeId === b.id;
+                          return (
+                            <button
+                              key={b.id}
+                              type="button"
+                              onClick={() => handelLinkChange(index, 'badge', b.id)}
+                              aria-label={`Set badge to ${b.label}`}
+                              aria-pressed={isSelected}
+                              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[36px] ${
+                                isSelected
+                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs ring-2 ring-slate-900/20'
+                                  : b.pillClass
+                              }`}
+                            >
+                              {b.emoji && <span aria-hidden="true">{b.emoji}</span>}
+                              <span>{b.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
