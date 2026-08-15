@@ -4,7 +4,7 @@ import Page from '@/models/Page';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { getAnalyticsData } from '@/lib/analyticsData';
-import { getPublicProfileUrl } from '@/lib/siteUrl';
+import { getCanonicalProfileUrl } from '@/lib/siteUrl';
 import AnalyticsClient from '@/components/analytics/AnalyticsClient';
 import UserNameForm from '@/components/forms/UserNameForm';
 
@@ -29,7 +29,7 @@ const AnalyticsPage = async ({ searchParams }) => {
     );
   }
 
-  const publicUrl = getPublicProfileUrl(page.uri);
+  const publicUrl = getCanonicalProfileUrl(page);
   const analytics = await getAnalyticsData(page.uri, page.links || [], rangeParam);
 
   return (

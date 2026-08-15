@@ -23,7 +23,7 @@ import { validateUpiId } from '@/lib/tipJar';
 import { parseMediaUrl } from '@/lib/mediaEmbeds';
 import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
-import { getBaseUrl } from '@/lib/siteUrl';
+import { getBaseUrl, getCanonicalProfileUrl } from '@/lib/siteUrl';
 import LinktreeLogo from '@/components/media/LinktreeLogo';
 import PublicTipJar from '@/components/tipjar/PublicTipJar';
 import YouTubeEmbed from '@/components/media/YouTubeEmbed';
@@ -44,13 +44,16 @@ export async function generateMetadata({ params }) {
 
   const title = `${page.displayName || `@${uri}`} | Linktree`;
   const description = page.bio || `Connect with ${page.displayName || uri} on Linktree. Explore links, portfolio, and social channels.`;
+  const canonicalUrl = getCanonicalProfileUrl(page || { uri });
 
   return {
     title,
     description,
+    alternates: canonicalUrl ? { canonical: canonicalUrl } : undefined,
     openGraph: {
       title,
       description,
+      url: canonicalUrl || undefined,
       images: page.avatar ? [page.avatar] : [],
     },
   };
@@ -172,7 +175,7 @@ const UserPage = async ({ params }) => {
 
         <div className="flex items-center gap-2">
           <PublicShareButton 
-            url={typeof window !== 'undefined' ? window.location.href : undefined} 
+            url={getCanonicalProfileUrl(page || { uri }) || undefined} 
             title={resolvedDisplayName} 
             isDark={isLightText}
           />
