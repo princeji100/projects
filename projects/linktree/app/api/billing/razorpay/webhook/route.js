@@ -70,20 +70,27 @@ export async function POST(request) {
     );
   }
 
-  // 5. Extract event ID and metadata
-  const eventIdHeader = request.headers.get('x-razorpay-event-id');
+  // 5. Extract event ID and metadata strictly from header authority
+  const eventId = (request.headers.get('x-razorpay-event-id') || '').trim();
   const metadata = extractWebhookSubscriptionMetadata(parsedPayload);
-  const eventId = (eventIdHeader || metadata.eventId || '').trim();
+  const eventType = metadata.eventType || (parsedPayload?.event || '').trim();
+  const isSupported = isSupportedRazorpaySubscriptionEvent(eventType);
 
-  if (!eventId) {
+  // For supported subscription events, x-razorpay-event-id header is strictly required
+  if (isSupported && !eventId) {
     return Response.json(
-      { error: 'MISSING_EVENT_ID', message: 'Missing event identifier' },
+      { error: 'MISSING_EVENT_ID', message: 'Missing required x-razorpay-event-id header' },
       { status: 400 }
     );
   }
 
-  const eventType = metadata.eventType || (parsedPayload?.event || '').trim();
-  const isSupported = isSupportedRazorpaySubscriptionEvent(eventType);
+  // For unsupported events without an event ID, safely ignore without ledger writes
+  if (!isSupported && !eventId) {
+    return Response.json(
+      { received: true, status: 'ignored', eventType },
+      { status: 200 }
+    );
+  }
 
   // 6. Connect to database
   await connectToDatabase();

@@ -89,24 +89,22 @@ export function verifyRazorpayWebhookSignature({
 
 /**
  * Safely extracts minimal correlation metadata from a verified Razorpay webhook payload.
+ * Note: Webhook event idempotency is strictly governed by the x-razorpay-event-id header,
+ * not payload body fields.
  *
  * @param {Object} payload - Parsed JSON webhook payload
- * @returns {{ eventType: string, eventId: string | null, providerSubscriptionId: string | null, providerCreatedAt: Date | null }}
+ * @returns {{ eventType: string, providerSubscriptionId: string | null, providerCreatedAt: Date | null }}
  */
 export function extractWebhookSubscriptionMetadata(payload) {
   if (!payload || typeof payload !== 'object') {
     return {
       eventType: '',
-      eventId: null,
       providerSubscriptionId: null,
       providerCreatedAt: null,
     };
   }
 
   const eventType = typeof payload.event === 'string' ? payload.event.trim() : '';
-  const eventId = typeof payload.event_id === 'string'
-    ? payload.event_id.trim()
-    : (typeof payload.id === 'string' ? payload.id.trim() : null);
 
   // Razorpay subscription payload standard shape: payload.subscription.entity.id
   let providerSubscriptionId = null;
@@ -124,7 +122,6 @@ export function extractWebhookSubscriptionMetadata(payload) {
 
   return {
     eventType,
-    eventId,
     providerSubscriptionId,
     providerCreatedAt,
   };
