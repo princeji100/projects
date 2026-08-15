@@ -7,6 +7,7 @@ import {
   faLink,
   faPaintBrush,
   faGear,
+  faCreditCard,
 } from '@fortawesome/free-solid-svg-icons';
 
 /**
@@ -21,6 +22,7 @@ export function getNavItems(isAdmin = false) {
     { href: '/dashboard', label: 'Dashboard', icon: faHouse },
     { href: '/dashboard/uploads', label: 'Uploads', icon: faImages },
     { href: '/dashboard/analytics', label: 'Analytics', icon: faChartLine },
+    { href: '/dashboard/billing', label: 'Billing', icon: faCreditCard },
   ];
 
   if (isAdmin) {
