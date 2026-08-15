@@ -149,3 +149,29 @@ export function hasFeature(subscription, featureKey, options = {}) {
   const entitlements = resolveEntitlements(subscription, options);
   return Boolean(entitlements.features[normalizedKey]);
 }
+
+/**
+ * Projects an entitlement snapshot or arbitrary feature map into a client-safe,
+ * serializable boolean capability map.
+ * 
+ * Rules:
+ * - Only canonical keys from FEATURE_KEYS are included.
+ * - Values are strictly boolean primitives.
+ * - All billing records, plan names, user IDs, and metadata are stripped.
+ * - Fails closed to false for missing or malformed inputs.
+ *
+ * @param {Object | null | undefined} entitlements
+ * @returns {Record<string, boolean>}
+ */
+export function toClientFeatureFlags(entitlements) {
+  const sourceFeatures = (entitlements && typeof entitlements === 'object')
+    ? (entitlements.features || entitlements)
+    : {};
+
+  const flags = {};
+  for (const key of Object.values(FEATURE_KEYS)) {
+    flags[key] = Boolean(sourceFeatures[key]);
+  }
+  return flags;
+}
+
