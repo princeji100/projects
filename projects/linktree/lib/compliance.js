@@ -10,7 +10,8 @@ export const COMMERCIAL_IDENTITY = Object.freeze({
   operatorName: 'PRINCE',
   brandName: 'princeji',
   businessType: 'Individual',
-  supportEmail: 'support@princeji.com',
+  supportEmail: 'contact@princeji.com',
+  contactEmail: 'contact@princeji.com',
   lastUpdated: 'August 15, 2026',
 });
 

@@ -34,7 +34,7 @@ await check('compliance: shared commercial identity constants match approved fac
   assert.equal(COMMERCIAL_IDENTITY.operatorName, 'PRINCE');
   assert.equal(COMMERCIAL_IDENTITY.brandName, 'princeji');
   assert.equal(COMMERCIAL_IDENTITY.businessType, 'Individual');
-  assert.equal(COMMERCIAL_IDENTITY.supportEmail, 'support@princeji.com');
+  assert.equal(COMMERCIAL_IDENTITY.supportEmail, 'contact@princeji.com');
   assert.equal(COMMERCIAL_IDENTITY.platformDomain, 'https://links.princeji.com');
   assert.equal(COMMERCIAL_IDENTITY.platformHost, 'links.princeji.com');
   assert.equal(COMMERCIAL_IDENTITY.lastUpdated, 'August 15, 2026');

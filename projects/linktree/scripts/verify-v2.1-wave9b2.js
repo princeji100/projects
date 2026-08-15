@@ -83,13 +83,13 @@ await check('identity: operator is PRINCE under princeji brand and product is Pr
   assert.equal(COMMERCIAL_IDENTITY.businessType, 'Individual');
 });
 
-await check('support: public support email is support@princeji.com with mailto link', () => {
-  assert.equal(COMMERCIAL_IDENTITY.supportEmail, 'support@princeji.com');
+await check('support: public support email is contact@princeji.com with mailto link', () => {
+  assert.equal(COMMERCIAL_IDENTITY.supportEmail, 'contact@princeji.com');
   const footerSrc = fs.readFileSync(path.join(projectRoot, 'components/Footer.js'), 'utf-8');
-  assert.ok(footerSrc.includes('mailto:support@princeji.com') || footerSrc.includes('COMMERCIAL_IDENTITY.supportEmail'));
+  assert.ok(footerSrc.includes('mailto:contact@princeji.com') || footerSrc.includes('COMMERCIAL_IDENTITY.supportEmail'));
 });
 
-await check('support: reviewer email is NOT published on any public page', () => {
+await check('support: reviewer email and old support email are NOT published on any public page', () => {
   const publicFiles = [
     'components/Header.js',
     'components/Footer.js',
@@ -106,7 +106,9 @@ await check('support: reviewer email is NOT published on any public page', () =>
 
   for (const relPath of publicFiles) {
     const src = fs.readFileSync(path.join(projectRoot, relPath), 'utf-8');
+    assert.ok(!src.includes('support@princeji.com'), `${relPath} must not publish old support email`);
     assert.ok(!src.includes('razorpay-review@princeji.com'), `${relPath} must not publish reviewer email`);
+    assert.ok(!src.includes('help@princeji.com'), `${relPath} must not publish help@ reviewer email as public support`);
     assert.ok(!src.includes('linktree-princeji.vercel.app'), `${relPath} must not contain old Vercel URL`);
   }
 });
