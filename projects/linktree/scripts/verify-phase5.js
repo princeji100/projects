@@ -318,7 +318,7 @@ await check('utc-day-boundaries: enforces half-open [windowStart, windowEnd), ex
 await check('invalid-range-fallback: invalid or missing range parameters fallback safely to 7d', async () => {
   const testUri = `test-fallback-${Date.now()}`;
 
-  const res1 = await getAnalyticsData(testUri, [], '90d');
+  const res1 = await getAnalyticsData(testUri, [], '999d');
   assert.equal(res1.selectedRange, '7d');
   assert.equal(res1.rangeDays, 7);
 

@@ -144,12 +144,20 @@ export default function AnalyticsAreaChart({ data = [], range = '7d' }) {
           filter="url(#shadow)"
         />
 
-        {/* Bottom Date Labels (Step sampled for readability) */}
+        {/* Bottom Date Labels (Step sampled for readability across 7d, 30d, 90d, 365d) */}
         {points.map((pt, i) => {
-          const showLabel =
-            range === '30d'
-              ? i % 5 === 0 || i === points.length - 1
-              : true;
+          let showLabel = false;
+          if (range === '7d') {
+            showLabel = true;
+          } else if (range === '30d') {
+            showLabel = i % 5 === 0 || i === points.length - 1;
+          } else if (range === '90d') {
+            showLabel = i % 15 === 0 || i === points.length - 1;
+          } else if (range === '365d') {
+            showLabel = i % 60 === 0 || i === points.length - 1;
+          } else {
+            showLabel = i % 5 === 0 || i === points.length - 1;
+          }
 
           if (!showLabel) return null;
 
@@ -169,6 +177,7 @@ export default function AnalyticsAreaChart({ data = [], range = '7d' }) {
         {/* Interactive Data Point Nodes */}
         {points.map((pt, i) => {
           const isHovered = hoveredPoint?.index === i;
+          const defaultRadius = range === '365d' ? 1.5 : (range === '90d' ? 2.5 : 3.5);
           return (
             <g
               key={i}
@@ -183,7 +192,7 @@ export default function AnalyticsAreaChart({ data = [], range = '7d' }) {
               <circle
                 cx={pt.x}
                 cy={pt.y}
-                r={isHovered ? '6' : '3.5'}
+                r={isHovered ? '6' : defaultRadius}
                 fill="#ffffff"
                 stroke="#2563eb"
                 strokeWidth={isHovered ? '3' : '2'}

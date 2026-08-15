@@ -1,4 +1,5 @@
 import Event from '../models/Event.js';
+import { getAnalyticsRangeConfig } from './analyticsRanges.js';
 
 /**
  * Server-authoritative analytics data aggregation engine with explicit UTC day boundaries
@@ -6,14 +7,15 @@ import Event from '../models/Event.js';
  *
  * @param {string} pageUri
  * @param {Array} links
- * @param {string | undefined} rangeParam - '7d' | '30d' (defaults safely to '7d')
+ * @param {string | undefined} rangeParam - '7d' | '30d' | '90d' | '365d' (defaults safely to '7d')
  * @param {Date | string | undefined} referenceDate - Optional reference date (defaults to current time)
  * @returns {Promise<Object>}
  */
 export async function getAnalyticsData(pageUri, links = [], rangeParam = '7d', referenceDate = null) {
-  // 1. Strict range validation with safe fallback (ANA-02)
-  const selectedRange = rangeParam === '30d' ? '30d' : '7d';
-  const rangeDays = selectedRange === '30d' ? 30 : 7;
+  // 1. Strict range resolution using centralized policy (ANA-02, Wave 8)
+  const rangeConfig = getAnalyticsRangeConfig(rangeParam);
+  const selectedRange = rangeConfig.id;
+  const rangeDays = rangeConfig.days;
 
   // 2. Exact UTC day-boundary semantics: half-open window [windowStart, windowEnd)
   const now = referenceDate ? new Date(referenceDate) : new Date();

@@ -20,8 +20,8 @@ export const PRO_ROADMAP_FEATURES = Object.freeze([
     key: 'extended_analytics',
     title: 'Extended Analytics History',
     description: 'Access 90-day and 365-day engagement analytics, views, clicks, and trend insights.',
-    status: 'Upcoming (Wave 8)',
-    statusVariant: 'info',
+    status: 'Available with Pro',
+    statusVariant: 'success',
   },
   {
     key: 'custom_domain',

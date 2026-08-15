@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEye,
@@ -20,12 +21,14 @@ import {
   faBullseye,
   faDownload,
   faPrint,
+  faLock,
 } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import SectionBox from '../layout/SectionBox';
 import AnalyticsAreaChart from './AnalyticsAreaChart';
 import { buildAnalyticsCsv, buildAnalyticsCsvFilename } from '@/lib/analyticsCsv';
+import { getAnalyticsRangeConfig } from '@/lib/analyticsRanges';
 
 const deviceIcons = {
   mobile: faMobileAlt,
@@ -35,7 +38,7 @@ const deviceIcons = {
   Unknown: faQuestionCircle,
 };
 
-const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
+const AnalyticsClient = ({ analytics, publicUrl, uri, canUseExtendedAnalytics = false, isRestricted = false }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [copied, setCopied] = useState(false);
@@ -94,11 +97,17 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
       const end = new Date(windowEnd);
       // windowEnd is exclusive (tomorrow 00:00), so subtract 1 day for inclusive label
       end.setDate(end.getDate() - 1);
-      const startStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const startYear = start.getUTCFullYear();
+      const endYear = end.getUTCFullYear();
+      const startStr = start.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: startYear !== endYear ? 'numeric' : undefined,
+      });
       const endStr = end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
       return `${startStr} – ${endStr}`;
     } catch {
-      return selectedRange === '30d' ? 'Last 30 Days' : 'Last 7 Days';
+      return getAnalyticsRangeConfig(selectedRange).printLabel;
     }
   };
 
@@ -143,13 +152,14 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
             <div
               role="group"
               aria-label="Analytics date range filter"
-              className="inline-flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-inner"
+              className="inline-flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-inner flex-wrap sm:flex-nowrap"
             >
+              {/* 7 Days */}
               <button
                 type="button"
                 onClick={() => handleRangeChange('7d')}
                 aria-pressed={selectedRange === '7d'}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   selectedRange === '7d'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -157,17 +167,67 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
               >
                 7 Days
               </button>
+
+              {/* 30 Days */}
               <button
                 type="button"
                 onClick={() => handleRangeChange('30d')}
                 aria-pressed={selectedRange === '30d'}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   selectedRange === '30d'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 30 Days
+              </button>
+
+              {/* 90 Days */}
+              <button
+                type="button"
+                onClick={() => handleRangeChange('90d')}
+                aria-pressed={selectedRange === '90d'}
+                disabled={!canUseExtendedAnalytics}
+                title={!canUseExtendedAnalytics ? 'Pro feature: Upgrade to unlock 90-day analytics' : '90 Days'}
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                  selectedRange === '90d'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : canUseExtendedAnalytics
+                    ? 'text-slate-600 hover:text-slate-900 cursor-pointer'
+                    : 'text-slate-400 cursor-not-allowed opacity-75'
+                }`}
+              >
+                <span>90 Days</span>
+                {!canUseExtendedAnalytics && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                    <FontAwesomeIcon icon={faLock} className="text-[8px]" />
+                    <span>PRO</span>
+                  </span>
+                )}
+              </button>
+
+              {/* 1 Year */}
+              <button
+                type="button"
+                onClick={() => handleRangeChange('365d')}
+                aria-pressed={selectedRange === '365d'}
+                disabled={!canUseExtendedAnalytics}
+                title={!canUseExtendedAnalytics ? 'Pro feature: Upgrade to unlock 1-year analytics' : '1 Year'}
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                  selectedRange === '365d'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : canUseExtendedAnalytics
+                    ? 'text-slate-600 hover:text-slate-900 cursor-pointer'
+                    : 'text-slate-400 cursor-not-allowed opacity-75'
+                }`}
+              >
+                <span>1 Year</span>
+                {!canUseExtendedAnalytics && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                    <FontAwesomeIcon icon={faLock} className="text-[8px]" />
+                    <span>PRO</span>
+                  </span>
+                )}
               </button>
             </div>
 
@@ -195,6 +255,24 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
           </div>
         </div>
 
+        {/* ═══ Optional Notice Banner for Manipulated Restricted Range ═══ */}
+        {isRestricted && (
+          <div className="p-4 bg-amber-50 border border-amber-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 no-print">
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faLock} className="text-amber-600 text-sm" />
+              <span>
+                <strong>Extended analytics is available with Pro.</strong> Showing the last 30 days of traffic instead.
+              </span>
+            </div>
+            <Link
+              href="/dashboard/billing"
+              className="inline-flex items-center gap-1 font-bold text-amber-800 hover:text-amber-950 underline self-start sm:self-auto shrink-0"
+            >
+              <span>View Pro Plans &rarr;</span>
+            </Link>
+          </div>
+        )}
+
         {/* ═══ Dedicated Print-Only Report Header ═══ */}
         <div className="hidden print:block mb-4 pb-4 border-b border-slate-300">
           <div className="flex items-center justify-between">
@@ -208,7 +286,7 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
             </div>
             <div className="text-right text-xs text-slate-600">
               <p className="font-semibold text-slate-900">
-                {selectedRange === '30d' ? 'Last 30 Days' : 'Last 7 Days'}
+                {getAnalyticsRangeConfig(selectedRange).printLabel}
               </p>
               <p>{formatDateRange()}</p>
               <p className="text-[10px] text-slate-500 mt-0.5">
@@ -315,7 +393,7 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
               <h3 className="text-lg font-bold text-slate-900">No Analytics Activity Yet</h3>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                 We haven&apos;t recorded any visitors or link clicks for this{' '}
-                {selectedRange === '30d' ? '30-day' : '7-day'} window. Share your public profile link
+                {getAnalyticsRangeConfig(selectedRange).label.toLowerCase()} window. Share your public profile link
                 to start gathering real-time performance insights!
               </p>
             </div>
@@ -371,7 +449,7 @@ const AnalyticsClient = ({ analytics, publicUrl, uri }) => {
             {chartData.length > 1 && (
               <div className="hidden print:block mt-4 pt-3 border-t border-slate-300">
                 <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
-                  Daily Clicks Summary ({selectedRange === '30d' ? '30 Days' : '7 Days'})
+                  Daily Clicks Summary ({getAnalyticsRangeConfig(selectedRange).label})
                 </h3>
                 <div className="border border-slate-300 rounded-xl overflow-hidden">
                   <table className="w-full text-xs text-left">

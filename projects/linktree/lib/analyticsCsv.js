@@ -4,6 +4,8 @@
  * using the authoritative server-aggregated analytics dataset.
  */
 
+import { getAnalyticsRangeConfig } from './analyticsRanges.js';
+
 const FORMULA_PREFIXES = ['=', '+', '-', '@', '\t', '\r'];
 
 /**
@@ -48,7 +50,8 @@ export function escapeCsvCell(value) {
  * @returns {string}
  */
 export function buildAnalyticsCsvFilename(uri, selectedRange = '7d', date = new Date()) {
-  const range = selectedRange === '30d' ? '30d' : '7d';
+  const rangeConfig = getAnalyticsRangeConfig(selectedRange);
+  const range = rangeConfig.id;
   const yyyy = date.getUTCFullYear();
   const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
   const dd = String(date.getUTCDate()).padStart(2, '0');
@@ -90,7 +93,7 @@ export function buildAnalyticsCsv(analytics, options = {}) {
   } = analytics;
 
   const nowIso = options.generatedAt || new Date().toISOString();
-  const rangeLabel = selectedRange === '30d' ? 'Last 30 Days' : 'Last 7 Days';
+  const rangeLabel = getAnalyticsRangeConfig(selectedRange).printLabel;
 
   // 1. Report Metadata Section
   lines.push([escapeCsvCell('Report'), escapeCsvCell('Linktree Traffic & Analytics Report')].join(','));

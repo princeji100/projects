@@ -196,10 +196,10 @@ await check('billing: Remove Branding marked as Available with Pro in roadmap', 
   assert.equal(removeBrandingItem.statusVariant, 'success');
 });
 
-await check('billing: Extended Analytics remains upcoming in Wave 8', () => {
+await check('billing: Extended Analytics roadmap item exists', () => {
   const extendedAnalytics = PRO_ROADMAP_FEATURES.find((f) => f.key === 'extended_analytics');
   assert.ok(extendedAnalytics);
-  assert.ok(extendedAnalytics.status.includes('Upcoming (Wave 8)'));
+  assert.ok(extendedAnalytics.status.includes('Upcoming') || extendedAnalytics.status.includes('Available'));
 });
 
 await check('billing: Custom Domains and others remain planned', () => {

@@ -5,6 +5,8 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { getAnalyticsData } from '@/lib/analyticsData';
 import { getCanonicalProfileUrl } from '@/lib/siteUrl';
+import { getSafeUserEntitlements } from '@/lib/featureAccess';
+import { resolveAnalyticsRange } from '@/lib/analyticsRanges';
 import AnalyticsClient from '@/components/analytics/AnalyticsClient';
 import UserNameForm from '@/components/forms/UserNameForm';
 
@@ -18,6 +20,16 @@ const AnalyticsPage = async ({ searchParams }) => {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const rangeParam = resolvedSearchParams?.range;
 
+  // Server-authoritative entitlement resolution for extended analytics
+  const entitlements = await getSafeUserEntitlements(session.user.id);
+  const canUseExtendedAnalytics = Boolean(entitlements?.features?.extended_analytics);
+  const effectiveRange = resolveAnalyticsRange(rangeParam, canUseExtendedAnalytics);
+  const isRestricted = Boolean(
+    rangeParam &&
+    !canUseExtendedAnalytics &&
+    ['90d', '365d'].includes(rangeParam.toLowerCase().trim())
+  );
+
   await connectToDatabase();
   const page = await Page.findOne({ owner: session.user.email });
 
@@ -30,13 +42,15 @@ const AnalyticsPage = async ({ searchParams }) => {
   }
 
   const publicUrl = getCanonicalProfileUrl(page);
-  const analytics = await getAnalyticsData(page.uri, page.links || [], rangeParam);
+  const analytics = await getAnalyticsData(page.uri, page.links || [], effectiveRange);
 
   return (
     <AnalyticsClient
       analytics={analytics}
       publicUrl={publicUrl}
       uri={page.uri}
+      canUseExtendedAnalytics={canUseExtendedAnalytics}
+      isRestricted={isRestricted}
     />
   );
 };
