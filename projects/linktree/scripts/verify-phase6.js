@@ -26,8 +26,10 @@ const monorepoRoot = path.resolve(projectRoot, '../..');
 
 // 1. Explicit Traceability Matrix: All 39 v1 Requirements uniquely mapped to implementation & verification evidence
 await check('requirements-traceability: all 39 v1 requirements uniquely mapped to implementation & test evidence', async () => {
-  const reqPath = path.join(projectRoot, '.planning/REQUIREMENTS.md');
-  assert.ok(fs.existsSync(reqPath), 'REQUIREMENTS.md must exist');
+  const reqPath = fs.existsSync(path.join(projectRoot, '.planning/REQUIREMENTS.md'))
+    ? path.join(projectRoot, '.planning/REQUIREMENTS.md')
+    : path.join(projectRoot, '.planning/milestones/v1.0-REQUIREMENTS.md');
+  assert.ok(fs.existsSync(reqPath), 'REQUIREMENTS.md or v1.0-REQUIREMENTS.md must exist');
   const reqContent = fs.readFileSync(reqPath, 'utf-8');
 
   // Explicit mapping of all 39 v1 requirements
