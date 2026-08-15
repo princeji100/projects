@@ -278,20 +278,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      {/* ═══ FOOTER ═══ */}
-      <footer className="border-t border-slate-200 bg-white py-8 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-3">
-            <LinktreeLogo boxSize="w-6 h-6" iconSize="text-[10px]" textSize="text-sm" />
-            <span>&copy; {new Date().getFullYear()} Prince Links. Main Portfolio: <a href="https://princeji.com" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-700 hover:text-blue-600 transition underline">princeji.com</a></span>
-          </div>
-          <div className="flex items-center gap-4 font-semibold text-slate-600">
-            <Link href="/" className="hover:text-blue-600 transition">Home</Link>
-            <Link href="/login" className="hover:text-blue-600 transition">Sign In</Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import PolicyLayout from '@/components/compliance/PolicyLayout';
 import { COMMERCIAL_IDENTITY } from '@/lib/compliance';
 
@@ -163,6 +164,15 @@ export default function PrivacyPage() {
               {COMMERCIAL_IDENTITY.supportEmail}
             </a>.
           </p>
+        </section>
+
+        {/* Section 10 - Related Policies */}
+        <section className="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-600">
+          <Link href="/terms" className="hover:text-blue-600 transition">Terms of Service</Link>
+          <Link href="/pricing" className="hover:text-blue-600 transition">Pricing Plans</Link>
+          <Link href="/refund-policy" className="hover:text-blue-600 transition">Refunds &amp; Cancellation</Link>
+          <Link href="/delivery-policy" className="hover:text-blue-600 transition">Digital Delivery Policy</Link>
+          <Link href="/contact" className="hover:text-blue-600 transition">Contact Us</Link>
         </section>
       </div>
     </PolicyLayout>

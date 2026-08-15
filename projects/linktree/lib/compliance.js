@@ -18,7 +18,7 @@ export const PRICING_DETAILS = Object.freeze({
   free: {
     name: 'Free',
     price: '₹0',
-    interval: 'forever',
+    interval: 'month',
     headline: 'Baseline Creator Toolkit',
   },
   pro: {

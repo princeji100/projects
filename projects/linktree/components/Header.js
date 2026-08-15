@@ -20,6 +20,7 @@ const Header = () => {
 
   const isLoginPage = pathname === '/login';
   const isAboutPage = pathname === '/about';
+  const isPricingPage = pathname === '/pricing';
   const isHomePage = pathname === '/';
 
   return (
@@ -44,6 +45,16 @@ const Header = () => {
               }`}
             >
               Home
+            </Link>
+            <Link
+              href="/pricing"
+              className={`px-3 py-1.5 rounded-xl transition-colors text-xs font-semibold ${
+                isPricingPage
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              Pricing
             </Link>
             <Link
               href="/about"

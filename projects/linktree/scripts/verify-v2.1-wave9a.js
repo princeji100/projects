@@ -65,9 +65,10 @@ await check('homepage: title uses Prince Links metadata', () => {
 
 await check('homepage: old customer-facing Linktree branding removed', () => {
   const homeSrc = fs.readFileSync(path.join(projectRoot, 'app/(default)/page.js'), 'utf-8');
+  const footerSrc = fs.readFileSync(path.join(projectRoot, 'components/Footer.js'), 'utf-8');
   assert.ok(!homeSrc.includes('Powered by Linktree'));
   assert.ok(homeSrc.includes('Powered by Prince Links'));
-  assert.ok(homeSrc.includes('Prince Links. All rights reserved.'));
+  assert.ok(homeSrc.includes('Prince Links') && (homeSrc.includes('All rights reserved') || footerSrc.includes('All rights reserved')));
 });
 
 await check('homepage: old Vercel hostname removed from customer-facing copy', () => {
@@ -106,12 +107,13 @@ await check('onboarding: UserNameForm fallback prefix uses production domain and
 
 await check('about: customer-facing branding updated to Prince Links and truthful Free plan copy', () => {
   const aboutSrc = fs.readFileSync(path.join(projectRoot, 'app/(default)/about/page.js'), 'utf-8');
+  const footerSrc = fs.readFileSync(path.join(projectRoot, 'components/Footer.js'), 'utf-8');
   assert.ok(aboutSrc.includes('About | Prince Links Platform & Creator Info'));
   assert.ok(aboutSrc.includes('Why is this Prince Links platform invite-only?'));
   assert.ok(aboutSrc.includes('Join Prince Links'));
   assert.ok(aboutSrc.includes('generous Free plan'));
   assert.ok(!aboutSrc.includes('Yes, 100% free with unlimited links'));
-  assert.ok(aboutSrc.includes('Prince Links. Main Portfolio:'));
+  assert.ok(aboutSrc.includes('Prince Links') && (aboutSrc.includes('princeji.com') || footerSrc.includes('princeji')));
 });
 
 await check('auth: login portal header uses Prince Links Access Portal', () => {

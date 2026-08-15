@@ -19,8 +19,7 @@ export const metadata = {
 
 export default function PricingPage() {
   const freeFeatures = [
-    'Custom creator profile handle (links.princeji.com/yourname)',
-    'Unlimited links with status badges (HOT, NEW, PIN, OFFER)',
+    'Create and manage profile links with status badges (HOT, NEW, PIN, OFFER)',
     'Link scheduling & start/end time windows',
     '8+ curated gradient themes & typography presets',
     'Peer-to-peer creator UPI Tip Jar integration',
@@ -28,7 +27,7 @@ export default function PricingPage() {
     '1024px print-ready QR code downloads',
     '7-day and 30-day continuous engagement analytics',
     'Raw CSV report export & Print / Save PDF formatting',
-    '25 MB encrypted file storage for avatars & backgrounds',
+    '25 MB file storage for avatars & backgrounds',
   ];
 
   const proWorkingFeatures = [
@@ -101,11 +100,11 @@ export default function PricingPage() {
                 <span className="text-4xl font-extrabold text-slate-900 font-mono">
                   {PRICING_DETAILS.free.price}
                 </span>
-                <span className="text-xs text-slate-500 ml-2 font-medium">/ forever</span>
+                <span className="text-xs text-slate-500 ml-2 font-medium">/ month</span>
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
-                Full access to all baseline {PRODUCT_NAME} features. Free access remains permanently available for approved creators.
+                Full access to baseline {PRODUCT_NAME} features. Baseline Free tier access is available for approved creators.
               </p>
 
               {/* Included Free Features */}
@@ -222,28 +221,32 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Commercial Operator Note */}
-        <div className="mt-12 p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-slate-600">
-          <div>
-            <p className="font-bold text-slate-800">
-              {COMMERCIAL_IDENTITY.productName} is operated by {COMMERCIAL_IDENTITY.operatorName} under the {COMMERCIAL_IDENTITY.brandName} brand.
-            </p>
-            <p className="text-slate-500 mt-0.5">
-              Have questions about plans or billing? Contact us at{' '}
-              <a
-                href={`mailto:${COMMERCIAL_IDENTITY.supportEmail}`}
-                className="text-blue-600 hover:underline font-semibold"
-              >
-                {COMMERCIAL_IDENTITY.supportEmail}
-              </a>
-            </p>
+        {/* Commercial Operator & Compliance Cross-Links */}
+        <div className="mt-12 p-6 sm:p-8 bg-white rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-bold text-slate-900 text-sm">
+                {COMMERCIAL_IDENTITY.productName} &bull; Commercial Operations
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Operated by <strong className="text-slate-700">{COMMERCIAL_IDENTITY.operatorName}</strong> ({COMMERCIAL_IDENTITY.businessType}) under the <strong className="text-slate-700">{COMMERCIAL_IDENTITY.brandName}</strong> brand.
+              </p>
+            </div>
+            <a
+              href={`mailto:${COMMERCIAL_IDENTITY.supportEmail}`}
+              className="text-xs text-blue-600 hover:underline font-semibold flex items-center gap-1"
+            >
+              <span>{COMMERCIAL_IDENTITY.supportEmail}</span>
+            </a>
           </div>
-          <Link
-            href="/terms"
-            className="text-slate-700 hover:text-blue-600 font-semibold underline shrink-0"
-          >
-            Terms of Service &rarr;
-          </Link>
+
+          <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-600">
+            <Link href="/terms" className="hover:text-blue-600 transition">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-blue-600 transition">Privacy Policy</Link>
+            <Link href="/refund-policy" className="hover:text-blue-600 transition">Refunds &amp; Cancellation</Link>
+            <Link href="/delivery-policy" className="hover:text-blue-600 transition">Digital Delivery Policy</Link>
+            <Link href="/contact" className="hover:text-blue-600 transition">Contact Us</Link>
+          </div>
         </div>
       </section>
     </div>

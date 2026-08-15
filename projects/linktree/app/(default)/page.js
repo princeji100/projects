@@ -384,20 +384,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* ═══ FOOTER ═══ */}
-      <footer className="border-t border-slate-200 bg-white py-8 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-3">
-            <LinktreeLogo boxSize="w-6 h-6" iconSize="text-[10px]" textSize="text-sm" />
-            <span>&copy; {new Date().getFullYear()} Prince Links. All rights reserved.</span>
-          </div>
-          <div className="flex items-center gap-4 font-semibold text-slate-600">
-            <Link href="/about" className="hover:text-blue-600 transition">About</Link>
-            <Link href="/login" className="hover:text-blue-600 transition">Sign In</Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

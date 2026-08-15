@@ -106,7 +106,7 @@ export default function TermsPage() {
         <section className="space-y-2.5">
           <h2 className="text-base font-bold text-slate-900">7. Free Tier &amp; Paid Pro Subscriptions</h2>
           <p>
-            We offer a generous Free tier providing baseline creator capabilities, including profile customization, unlimited links, themes, media embeds, QR codes, and 30-day analytics.
+            We offer a generous Free tier providing baseline creator capabilities, including profile customization, profile links, themes, media embeds, QR codes, and 30-day analytics.
           </p>
           <p>
             Our optional Pro subscription is available at <strong>{PRICING_DETAILS.pro.price} / month</strong> on a recurring monthly billing basis. Pro grants advanced capabilities such as complete platform branding removal and 90-day / 1-year analytics history.
@@ -162,6 +162,15 @@ export default function TermsPage() {
               {COMMERCIAL_IDENTITY.supportEmail}
             </a>.
           </p>
+        </section>
+
+        {/* Section 13 - Related Policies */}
+        <section className="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-600">
+          <Link href="/pricing" className="hover:text-blue-600 transition">Pricing Plans</Link>
+          <Link href="/privacy" className="hover:text-blue-600 transition">Privacy Policy</Link>
+          <Link href="/refund-policy" className="hover:text-blue-600 transition">Refunds &amp; Cancellation</Link>
+          <Link href="/delivery-policy" className="hover:text-blue-600 transition">Digital Delivery Policy</Link>
+          <Link href="/contact" className="hover:text-blue-600 transition">Contact Us</Link>
         </section>
       </div>
     </PolicyLayout>

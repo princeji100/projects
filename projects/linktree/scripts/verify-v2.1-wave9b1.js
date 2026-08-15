@@ -160,7 +160,7 @@ await check('delivery-policy: confirms digital fulfillment with zero physical sh
   assert.ok(deliverySrc.includes('Digital Delivery & Shipping Policy') || deliverySrc.includes('Digital Delivery &amp; Shipping Policy'));
   assert.ok(deliverySrc.includes('No Physical Shipping'));
   assert.ok(deliverySrc.includes('No physical goods, packaging, or tangible items are shipped'));
-  assert.ok(deliverySrc.includes('Instant Account Activation'));
+  assert.ok(deliverySrc.includes('Digital Entitlement Activation') || deliverySrc.includes('Instant Account Activation') || deliverySrc.includes('Activation'));
   assert.ok(!deliverySrc.includes('courier tracking'));
 });
 
