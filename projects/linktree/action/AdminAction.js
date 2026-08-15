@@ -7,6 +7,10 @@ import InviteRequest from '@/models/InviteRequest';
 import Feedback from '@/models/Feedback';
 import clientPromise from '@/lib/db';
 import { revalidatePath } from 'next/cache';
+import {
+  grantManualProByUserId,
+  revokeManualProByUserId,
+} from '@/lib/subscriptionRepository';
 
 import { isUserAdmin, getAdminEmail } from '@/lib/admin';
 
@@ -238,3 +242,68 @@ export async function deleteFeedback(feedbackId) {
     return { success: false, error: 'Failed to delete feedback' };
   }
 }
+
+/**
+ * Grants Pro manually to a specific target user account.
+ * Privileged admin Server Action.
+ *
+ * @param {string} targetUserId
+ * @returns {Promise<{ success: boolean, message?: string, error?: string, code?: string, effectivePlan?: string }>}
+ */
+export async function grantManualProAction(targetUserId) {
+  const auth = await verifyAdminCaller();
+  if (!auth.ok) {
+    return { success: false, error: auth.error, code: 'NOT_AUTHORIZED' };
+  }
+
+  try {
+    const res = await grantManualProByUserId(targetUserId);
+    revalidatePath('/dashboard/admin');
+    revalidatePath('/dashboard/billing');
+    return {
+      success: true,
+      message: 'Pro access granted.',
+      effectivePlan: res.effectivePlan,
+    };
+  } catch (err) {
+    console.error('Error granting manual Pro:', err);
+    return {
+      success: false,
+      error: err.message || 'Failed to grant Pro access',
+      code: err.code || 'MUTATION_FAILED',
+    };
+  }
+}
+
+/**
+ * Revokes manually granted Pro access from a user account.
+ * Privileged admin Server Action.
+ *
+ * @param {string} targetUserId
+ * @returns {Promise<{ success: boolean, message?: string, error?: string, code?: string, effectivePlan?: string }>}
+ */
+export async function revokeManualProAction(targetUserId) {
+  const auth = await verifyAdminCaller();
+  if (!auth.ok) {
+    return { success: false, error: auth.error, code: 'NOT_AUTHORIZED' };
+  }
+
+  try {
+    const res = await revokeManualProByUserId(targetUserId);
+    revalidatePath('/dashboard/admin');
+    revalidatePath('/dashboard/billing');
+    return {
+      success: true,
+      message: 'Manual Pro access revoked.',
+      effectivePlan: res.effectivePlan,
+    };
+  } catch (err) {
+    console.error('Error revoking manual Pro:', err);
+    return {
+      success: false,
+      error: err.message || 'Failed to revoke Pro access',
+      code: err.code || 'MUTATION_FAILED',
+    };
+  }
+}
+

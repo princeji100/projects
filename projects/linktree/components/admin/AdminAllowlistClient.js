@@ -25,6 +25,7 @@ import {
   faArrowUpRightFromSquare,
   faLink,
   faCircleDot,
+  faCrown,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import {
@@ -35,6 +36,8 @@ import {
   deleteInviteRequest,
   updateFeedbackStatus,
   deleteFeedback,
+  grantManualProAction,
+  revokeManualProAction,
 } from '@/action/AdminAction';
 import SectionBox from '@/components/layout/SectionBox';
 
@@ -52,6 +55,8 @@ export default function AdminAllowlistClient({
   const [requestList, setRequestList] = useState(initialInviteRequests);
   const [feedbackList, setFeedbackList] = useState(initialFeedbacks);
   const [pendingUser, setPendingUser] = useState(null); // User to delete confirmation
+  const [pendingProGrant, setPendingProGrant] = useState(null); // User to grant Pro
+  const [pendingProRevoke, setPendingProRevoke] = useState(null); // User to revoke Pro
   const [pendingFeedback, setPendingFeedback] = useState(null);
   const [isPending, startTransition] = useTransition();
 
@@ -125,6 +130,40 @@ export default function AdminAllowlistClient({
         setPendingUser(null);
       } else {
         toast.error(res.error || 'Failed to remove user');
+      }
+    });
+  };
+
+  // 2b. Grant Manual Pro
+  const handleConfirmGrantPro = async () => {
+    if (!pendingProGrant?.userId) return;
+    startTransition(async () => {
+      const res = await grantManualProAction(pendingProGrant.userId);
+      if (res.success) {
+        toast.success(res.message);
+        setUserList((prev) =>
+          prev.map((u) => (u.userId === pendingProGrant.userId ? { ...u, planTier: 'manual_pro' } : u))
+        );
+        setPendingProGrant(null);
+      } else {
+        toast.error(res.error || 'Failed to grant Pro access');
+      }
+    });
+  };
+
+  // 2c. Revoke Manual Pro
+  const handleConfirmRevokePro = async () => {
+    if (!pendingProRevoke?.userId) return;
+    startTransition(async () => {
+      const res = await revokeManualProAction(pendingProRevoke.userId);
+      if (res.success) {
+        toast.info(res.message);
+        setUserList((prev) =>
+          prev.map((u) => (u.userId === pendingProRevoke.userId ? { ...u, planTier: 'free' } : u))
+        );
+        setPendingProRevoke(null);
+      } else {
+        toast.error(res.error || 'Failed to revoke Pro access');
       }
     });
   };
@@ -506,6 +545,7 @@ export default function AdminAllowlistClient({
                       <th className="py-3 px-4 rounded-l-xl">User Google Account</th>
                       <th className="py-3 px-4">Claimed Username / Handle</th>
                       <th className="py-3 px-4">Published Links</th>
+                      <th className="py-3 px-4">SaaS Tier</th>
                       <th className="py-3 px-4">Whitelisted Date</th>
                       <th className="py-3 px-4 text-right rounded-r-xl">Action</th>
                     </tr>
@@ -513,6 +553,10 @@ export default function AdminAllowlistClient({
                   <tbody className="divide-y divide-slate-100">
                     {filteredUsers.map((user) => {
                       const isSelf = user.email.toLowerCase() === adminEmail.toLowerCase();
+                      const hasAccount = Boolean(user.userId);
+                      const isManualPro = user.planTier === 'manual_pro';
+                      const isProviderPro = user.planTier === 'provider_pro';
+
                       return (
                         <tr key={user._id} className="hover:bg-slate-50/80 transition-colors">
                           <td className="py-3.5 px-4">
@@ -558,22 +602,77 @@ export default function AdminAllowlistClient({
                             )}
                           </td>
 
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-2">
+                              {isManualPro ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  <FontAwesomeIcon icon={faCrown} className="text-[9px]" />
+                                  <span>Pro (Manual)</span>
+                                </span>
+                              ) : isProviderPro ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                  <FontAwesomeIcon icon={faCrown} className="text-[9px]" />
+                                  <span>Pro (Provider)</span>
+                                </span>
+                              ) : hasAccount ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                  Free
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-400">
+                                  Pending Login
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
                           <td className="py-3.5 px-4 text-slate-500 font-mono">
                             {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Active'}
                           </td>
 
                           <td className="py-3.5 px-4 text-right">
-                            {isSelf ? (
-                              <span className="text-[11px] text-slate-400 italic">Protected</span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setPendingUser(user)}
-                                className="px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium cursor-pointer"
-                              >
-                                Remove
-                              </button>
-                            )}
+                            <div className="flex items-center justify-end gap-2">
+                              {hasAccount && (
+                                <>
+                                  {isManualPro ? (
+                                    <button
+                                      type="button"
+                                      disabled={isPending}
+                                      onClick={() => setPendingProRevoke(user)}
+                                      className="px-2.5 py-1 text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors font-medium cursor-pointer"
+                                    >
+                                      Revoke Pro
+                                    </button>
+                                  ) : isProviderPro ? (
+                                    <span className="text-[11px] text-slate-400 italic">
+                                      Provider Managed
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      disabled={isPending}
+                                      onClick={() => setPendingProGrant(user)}
+                                      className="px-2.5 py-1 text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors font-semibold cursor-pointer flex items-center gap-1"
+                                    >
+                                      <FontAwesomeIcon icon={faCrown} className="text-[10px]" />
+                                      <span>Grant Pro</span>
+                                    </button>
+                                  )}
+                                </>
+                              )}
+
+                              {isSelf ? (
+                                <span className="text-[11px] text-slate-400 italic">Protected</span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setPendingUser(user)}
+                                  className="px-2.5 py-1 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium cursor-pointer"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -802,6 +901,79 @@ export default function AdminAllowlistClient({
           </div>
         </div>
       )}
+
+      {/* ═══ Confirmation Modal: Grant Pro ═══ */}
+      {pendingProGrant && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto text-xl">
+              <FontAwesomeIcon icon={faCrown} className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">Grant Pro Access?</h3>
+              <p className="text-xs text-slate-500">
+                Grant manual Pro entitlements to{' '}
+                <span className="font-bold text-slate-800 font-mono">{pendingProGrant.email}</span>?
+                This activates all current and upcoming Pro capabilities for testing without payment.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setPendingProGrant(null)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={handleConfirmGrantPro}
+                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+              >
+                {isPending ? 'Granting...' : 'Grant Pro'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Confirmation Modal: Revoke Pro ═══ */}
+      {pendingProRevoke && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-xl">
+              <FontAwesomeIcon icon={faCrown} className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">Revoke Pro Access?</h3>
+              <p className="text-xs text-slate-500">
+                Revoke manual Pro entitlements from{' '}
+                <span className="font-bold text-slate-800 font-mono">{pendingProRevoke.email}</span>?
+                The account will return to the Free plan. Creator profile and links remain untouched.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setPendingProRevoke(null)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={handleConfirmRevokePro}
+                className="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+              >
+                {isPending ? 'Revoking...' : 'Revoke Pro'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
