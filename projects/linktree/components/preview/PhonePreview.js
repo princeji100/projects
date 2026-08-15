@@ -38,6 +38,7 @@ export default function PhonePreview({
   previewLocation,
   previewLinks,
   previewButtons,
+  hideBranding = false,
 }) {
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -316,16 +317,18 @@ export default function PhonePreview({
           </div>
 
           {/* Phone Footer Branding */}
-          <div className="relative z-10 pt-4 pb-1 text-center">
-            <span
-              style={customSubtextStyle}
-              className={`text-[9px] font-semibold tracking-wider uppercase ${
-                isLightText ? 'text-white/40' : 'text-slate-400'
-              }`}
-            >
-              linktree
-            </span>
-          </div>
+          {!hideBranding && (
+            <div className="relative z-10 pt-4 pb-1 text-center">
+              <span
+                style={customSubtextStyle}
+                className={`text-[9px] font-semibold tracking-wider uppercase ${
+                  isLightText ? 'text-white/40' : 'text-slate-400'
+                }`}
+              >
+                linktree
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Home Indicator Bar */}

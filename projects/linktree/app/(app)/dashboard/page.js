@@ -87,6 +87,7 @@ const AccountPage = () => {
         previewLinks: liveLinks !== null ? liveLinks : pageData?.links,
         previewButtons: liveButtons !== null ? liveButtons : pageData?.buttons,
         previewTipJar: livePreviewState.tipJar !== undefined ? livePreviewState.tipJar : pageData?.tipJar,
+        hideBranding: Boolean(pageData?.flags?.remove_branding),
     };
 
     return (

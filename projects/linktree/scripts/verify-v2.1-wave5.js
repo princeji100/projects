@@ -222,7 +222,7 @@ await check('ui: PRO_ROADMAP_FEATURES contains planned monetization capabilities
   for (const item of PRO_ROADMAP_FEATURES) {
     assert.ok(item.title, 'Pro item must have title');
     assert.ok(item.description, 'Pro item must have description');
-    assert.ok(item.status.includes('Upcoming') || item.status.includes('Planned'), 'Must have upcoming or planned status');
+    assert.ok(item.status.includes('Upcoming') || item.status.includes('Planned') || item.status.includes('Available'), 'Must have available, upcoming, or planned status');
   }
 });
 

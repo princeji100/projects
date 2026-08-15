@@ -3,6 +3,7 @@ import connectToDatabase from "@/lib/connectToDB";
 import Page from "@/models/Page";
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getCanonicalProfileUrl } from "@/lib/siteUrl";
+import { getClientFeatureFlags } from "@/lib/featureAccess";
 
 export async function GET() {
     try {
@@ -19,10 +20,12 @@ export async function GET() {
             return Response.json(null);
         }
 
+        const flags = await getClientFeatureFlags(session.user.id);
         const pageObj = page.toObject ? page.toObject() : page;
         return Response.json({
             ...pageObj,
             publicUrl: getCanonicalProfileUrl(page),
+            flags,
         });
     } catch (error) {
         return Response.json({ error: "Internal Server Error" }, { status: 500 });

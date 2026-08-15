@@ -24,6 +24,8 @@ import { parseMediaUrl } from '@/lib/mediaEmbeds';
 import { getSocialButton } from '@/lib/socialButtons';
 import { parseDevice, normalizeReferrer } from '@/lib/analyticsParser';
 import { getBaseUrl, getCanonicalProfileUrl } from '@/lib/siteUrl';
+import { getPageOwnerUserId } from '@/lib/pageOwnerResolver';
+import { getSafeUserEntitlements } from '@/lib/featureAccess';
 import LinktreeLogo from '@/components/media/LinktreeLogo';
 import PublicTipJar from '@/components/tipjar/PublicTipJar';
 import YouTubeEmbed from '@/components/media/YouTubeEmbed';
@@ -78,6 +80,9 @@ const UserPage = async ({ params }) => {
   await Event.create({ url: uri, page: uri, type: 'view', device, referrer });
 
   const user = await User.findOne({ email: page.owner });
+  const ownerUserId = await getPageOwnerUserId(page);
+  const entitlements = await getSafeUserEntitlements(ownerUserId);
+  const canRemoveBranding = Boolean(entitlements?.features?.remove_branding);
 
   const buttonLink = (key, value) => {
     switch (key) {
@@ -161,17 +166,21 @@ const UserPage = async ({ params }) => {
 
       {/* Floating Top Header Bar */}
       <header className="relative z-20 w-full max-w-2xl mx-auto px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
-        <Link 
-          href="/"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md transition-all hover:scale-105 active:scale-95 shadow-xs ${
-            isLightText
-              ? 'bg-black/25 hover:bg-black/40 text-white border border-white/15'
-              : 'bg-white/70 hover:bg-white text-slate-900 border border-slate-200/80 shadow-xs'
-          }`}
-        >
-          <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-xs" />
-          <span className="font-extrabold text-xs tracking-tight">linktree</span>
-        </Link>
+        {!canRemoveBranding ? (
+          <Link 
+            href="/"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md transition-all hover:scale-105 active:scale-95 shadow-xs ${
+              isLightText
+                ? 'bg-black/25 hover:bg-black/40 text-white border border-white/15'
+                : 'bg-white/70 hover:bg-white text-slate-900 border border-slate-200/80 shadow-xs'
+            }`}
+          >
+            <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-xs" />
+            <span className="font-extrabold text-xs tracking-tight">linktree</span>
+          </Link>
+        ) : (
+          <div />
+        )}
 
         <div className="flex items-center gap-2">
           <PublicShareButton 
@@ -411,19 +420,21 @@ const UserPage = async ({ params }) => {
       </main>
 
       {/* Made with Linktree Footer */}
-      <footer className="relative z-10 text-center py-6 pb-8">
-        <Link
-          href="/"
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95 ${
-            isLightText
-              ? 'bg-black/30 hover:bg-black/50 border-white/15 text-white/90 shadow-black/20'
-              : 'bg-white/80 hover:bg-white border-slate-300 text-slate-800 shadow-slate-200'
-          }`}
-        >
-          <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-[11px]" />
-          <span>Made with Linktree</span>
-        </Link>
-      </footer>
+      {!canRemoveBranding && (
+        <footer className="relative z-10 text-center py-6 pb-8">
+          <Link
+            href="/"
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold backdrop-blur-md transition-all shadow-xs hover:scale-105 active:scale-95 ${
+              isLightText
+                ? 'bg-black/30 hover:bg-black/50 border-white/15 text-white/90 shadow-black/20'
+                : 'bg-white/80 hover:bg-white border-slate-300 text-slate-800 shadow-slate-200'
+            }`}
+          >
+            <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-[11px]" />
+            <span>Made with Linktree</span>
+          </Link>
+        </footer>
+      )}
     </div>
   );
 };
