@@ -87,22 +87,31 @@ export function formatBillingPresentation(entitlements, subscription = null) {
       statusBadge = 'Active';
       statusVariant = 'success';
     }
+  } else if (rawStatus === 'paused') {
+    displayStatus = 'Free Account';
+    statusBadge = 'Subscription Paused';
+    statusVariant = 'amber';
   } else if (rawStatus === 'canceled') {
     displayStatus = 'Free Account';
     statusBadge = 'Subscription Canceled';
     statusVariant = 'amber';
   } else if (rawStatus === 'expired') {
     displayStatus = 'Free Account';
-    statusBadge = 'Previous Pro Expired';
+    statusBadge = 'Subscription Ended';
     statusVariant = 'amber';
   } else if (rawStatus === 'past_due') {
     displayStatus = 'Free Account';
-    statusBadge = 'Payment Past Due';
+    statusBadge = 'Payment Issue';
     statusVariant = 'amber';
   } else if (rawStatus === 'incomplete') {
     displayStatus = 'Free Account';
-    statusBadge = 'Setup Incomplete';
-    statusVariant = 'amber';
+    if (subscription?.providerAuthorizationVerifiedAt) {
+      statusBadge = 'Awaiting Activation';
+      statusVariant = 'indigo';
+    } else {
+      statusBadge = 'Setup Incomplete';
+      statusVariant = 'amber';
+    }
   }
 
   let periodEndLabel = null;
@@ -117,6 +126,12 @@ export function formatBillingPresentation(entitlements, subscription = null) {
     }
   }
 
+  const isAwaitingActivation = Boolean(
+    !isEntitledPro &&
+    rawStatus === 'incomplete' &&
+    subscription?.providerAuthorizationVerifiedAt
+  );
+
   return {
     effectivePlan: isEntitledPro ? 'pro' : 'free',
     effectivePlanName: isEntitledPro ? 'Pro' : 'Free',
@@ -125,6 +140,7 @@ export function formatBillingPresentation(entitlements, subscription = null) {
     statusVariant,
     isPro: isEntitledPro,
     isManualPro: Boolean(isEntitledPro && subscription?.provider === 'manual'),
+    isAwaitingActivation,
     cancelAtPeriodEnd: Boolean(subscription?.cancelAtPeriodEnd),
     periodEndLabel,
     features: toClientFeatureFlags(entitlements),

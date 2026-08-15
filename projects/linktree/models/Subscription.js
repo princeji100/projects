@@ -10,6 +10,7 @@ export const SUBSCRIPTION_STATUSES = Object.freeze([
   'canceled',
   'incomplete',
   'expired',
+  'paused',
 ]);
 
 export const SUBSCRIPTION_PROVIDERS = Object.freeze([
@@ -58,6 +59,14 @@ const SubscriptionSchema = new Schema({
   },
   providerSubscriptionId: {
     type: String,
+    default: undefined,
+  },
+  providerStateUpdatedAt: {
+    type: Date,
+    default: undefined,
+  },
+  providerAuthorizationVerifiedAt: {
+    type: Date,
     default: undefined,
   },
   currentPeriodStart: {

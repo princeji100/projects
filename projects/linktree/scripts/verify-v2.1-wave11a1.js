@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import { execSync } from 'node:child_process';
 
 import BillingWebhookEvent from '../models/BillingWebhookEvent.js';
+import Subscription from '../models/Subscription.js';
 import {
   RAZORPAY_SUBSCRIPTION_EVENTS,
   isSupportedRazorpaySubscriptionEvent,
@@ -33,8 +34,11 @@ console.log('--- Running Milestone v2.1 Wave 11A-1: Strict Razorpay Event-ID Ide
 
 const projectRoot = path.resolve(import.meta.dirname, '..');
 
-// Mock mongoose connection for hermetic execution
+// Mock mongoose connection and models for hermetic execution
 mongoose.connect = async () => mongoose.connection;
+BillingWebhookEvent.updateOne = async () => ({ modifiedCount: 1 });
+BillingWebhookEvent.create = async (doc) => doc;
+Subscription.findOne = () => ({ lean: async () => null });
 
 const testWebhookSecret = 'whsec_test_secret_11a1_hardening_abc123';
 

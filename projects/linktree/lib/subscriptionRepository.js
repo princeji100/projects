@@ -324,3 +324,147 @@ export async function saveRazorpayPendingSubscriptionByUserId(
   return savedDoc;
 }
 
+/**
+ * Records that a Razorpay checkout authorization/mandate signature was successfully verified server-side.
+ *
+ * Invariants:
+ * - Keyed strictly on User._id.
+ * - Does NOT grant Pro (status remains 'incomplete').
+ * - Sets providerAuthorizationVerifiedAt = now.
+ *
+ * @param {string | mongoose.Types.ObjectId} userId
+ * @param {Object} [options]
+ * @returns {Promise<Object | null>}
+ */
+export async function markRazorpayAuthorizationVerified(userId, options = {}) {
+  const normalizedId = normalizeUserId(userId);
+  if (!normalizedId) {
+    const err = new Error('Invalid user ID provided');
+    err.code = 'INVALID_USER_ID';
+    throw err;
+  }
+
+  await connectToDatabase();
+
+  const saver = typeof options.saveSubscription === 'function'
+    ? options.saveSubscription
+    : async (id, update) => Subscription.findOneAndUpdate(
+        { userId: id, provider: 'razorpay' },
+        update,
+        { new: true, runValidators: true }
+      ).lean();
+
+  const updated = await saver(normalizedId, {
+    $set: {
+      providerAuthorizationVerifiedAt: new Date(),
+    },
+  });
+
+  return updated;
+}
+
+/**
+ * Applies a normalized Razorpay lifecycle event atomically to the local subscription.
+ *
+ * Invariants:
+ * - Looks up subscription exclusively via provider='razorpay' and providerSubscriptionId.
+ * - Rejects unknown providerSubscriptionId without mutating or creating a subscription.
+ * - Validates provider plan_id against expected Pro plan ID.
+ * - Protects against stale/out-of-order events using providerStateUpdatedAt.
+ * - Protects terminal states (canceled/expired) against accidental revival from stale events.
+ * - Never alters userId, provider, or providerSubscriptionId.
+ * - Propagates database errors.
+ *
+ * @param {string} providerSubscriptionId
+ * @param {Object} normalizedLifecycle - From normalizeRazorpayLifecycleEvent
+ * @param {Object} [options]
+ * @param {string} [options.expectedPlanId]
+ * @param {Function} [options.findSubscription]
+ * @param {Function} [options.saveSubscription]
+ * @returns {Promise<{ success: boolean, reason?: string, ignored?: boolean, subscription?: Object }>}
+ */
+export async function applyRazorpayLifecycleState(
+  providerSubscriptionId,
+  normalizedLifecycle,
+  options = {}
+) {
+  if (!providerSubscriptionId || typeof providerSubscriptionId !== 'string') {
+    return { success: false, reason: 'INVALID_PROVIDER_SUBSCRIPTION_ID', ignored: true };
+  }
+
+  if (!normalizedLifecycle || typeof normalizedLifecycle !== 'object' || !normalizedLifecycle.isValid) {
+    return { success: false, reason: 'INVALID_NORMALIZED_LIFECYCLE', ignored: true };
+  }
+
+  await connectToDatabase();
+
+  const finder = typeof options.findSubscription === 'function'
+    ? options.findSubscription
+    : async (subId) => Subscription.findOne({ provider: 'razorpay', providerSubscriptionId: subId }).lean();
+
+  const existing = await finder(providerSubscriptionId.trim());
+  if (!existing) {
+    return { success: false, reason: 'LOCAL_SUBSCRIPTION_NOT_FOUND', ignored: true };
+  }
+
+  // 1. Plan ID validation
+  const expectedPlanId = options.expectedPlanId || process.env.RAZORPAY_PRO_MONTHLY_PLAN_ID?.trim();
+  if (expectedPlanId && normalizedLifecycle.planId && normalizedLifecycle.planId !== expectedPlanId) {
+    return { success: false, reason: 'PLAN_MISMATCH', ignored: true };
+  }
+
+  // 2. Out-of-order / Stale event protection
+  if (existing.providerStateUpdatedAt && normalizedLifecycle.providerStateUpdatedAt) {
+    const existingTime = new Date(existing.providerStateUpdatedAt).getTime();
+    const incomingTime = new Date(normalizedLifecycle.providerStateUpdatedAt).getTime();
+    if (!isNaN(existingTime) && !isNaN(incomingTime) && incomingTime < existingTime) {
+      return { success: false, reason: 'STALE_EVENT', ignored: true };
+    }
+  }
+
+  // 3. Terminal state protection: canceled and expired states cannot be revived by active/charged events
+  if (existing.status === 'canceled' || existing.status === 'expired') {
+    if (normalizedLifecycle.status === 'active') {
+      const existingTime = existing.providerStateUpdatedAt ? new Date(existing.providerStateUpdatedAt).getTime() : 0;
+      const incomingTime = normalizedLifecycle.providerStateUpdatedAt ? new Date(normalizedLifecycle.providerStateUpdatedAt).getTime() : 0;
+      if (incomingTime <= existingTime) {
+        return { success: false, reason: 'TERMINAL_STATE_PROTECTED', ignored: true };
+      }
+    }
+  }
+
+  // 4. Build atomic update document
+  const updateFields = {};
+
+  if (normalizedLifecycle.status !== undefined) {
+    updateFields.status = normalizedLifecycle.status;
+  }
+  if (normalizedLifecycle.providerCustomerId) {
+    updateFields.providerCustomerId = normalizedLifecycle.providerCustomerId;
+  }
+  if (normalizedLifecycle.currentPeriodStart) {
+    updateFields.currentPeriodStart = normalizedLifecycle.currentPeriodStart;
+  }
+  if (normalizedLifecycle.currentPeriodEnd) {
+    updateFields.currentPeriodEnd = normalizedLifecycle.currentPeriodEnd;
+  }
+  if (normalizedLifecycle.providerStateUpdatedAt) {
+    updateFields.providerStateUpdatedAt = normalizedLifecycle.providerStateUpdatedAt;
+  }
+
+  if (Object.keys(updateFields).length === 0) {
+    return { success: true, subscription: existing, noop: true };
+  }
+
+  const saver = typeof options.saveSubscription === 'function'
+    ? options.saveSubscription
+    : async (id, update) => Subscription.findOneAndUpdate(
+        { _id: id },
+        { $set: update },
+        { new: true, runValidators: true }
+      ).lean();
+
+  const updatedDoc = await saver(existing._id, updateFields);
+  return { success: true, subscription: updatedDoc };
+}
+

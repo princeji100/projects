@@ -9,7 +9,7 @@
 import { PLAN_IDS, FEATURE_KEYS, PLANS, isValidFeature } from './plans.js';
 
 export const ENTITLED_STATUSES = Object.freeze(new Set(['active', 'trialing']));
-export const NON_ENTITLED_STATUSES = Object.freeze(new Set(['past_due', 'canceled', 'incomplete', 'expired']));
+export const NON_ENTITLED_STATUSES = Object.freeze(new Set(['past_due', 'canceled', 'incomplete', 'expired', 'paused']));
 
 /**
  * Safely parses and validates a currentPeriodEnd date value.

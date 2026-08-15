@@ -5,9 +5,11 @@ import {
   isSupportedRazorpaySubscriptionEvent,
   extractWebhookSubscriptionMetadata,
 } from '../../../../../lib/billing/webhook.js';
+import { normalizeRazorpayLifecycleEvent } from '../../../../../lib/billing/providers/razorpayLifecycle.js';
+import { applyRazorpayLifecycleState } from '../../../../../lib/subscriptionRepository.js';
 
 /**
- * Public Razorpay Webhook Ingestion Endpoint (Wave 11A)
+ * Public Razorpay Webhook Ingestion & Lifecycle Endpoint (Wave 11B)
  *
  * Endpoint: POST /api/billing/razorpay/webhook
  *
@@ -16,7 +18,8 @@ import {
  * - Reads raw request body text BEFORE parsing JSON for signature verification.
  * - Enforces event idempotency via unique index on BillingWebhookEvent (provider + eventId).
  * - Safely returns 200 on duplicate delivery without re-processing.
- * - NON-NEGOTIABLE: Wave 11A performs ZERO Subscription mutations or entitlement grants.
+ * - Correlates strictly via providerSubscriptionId to atomic local Subscription records.
+ * - Normalizes provider lifecycle events to canonical local Subscription status.
  */
 export async function POST(request) {
   // 1. Validate signature header presence
@@ -95,7 +98,7 @@ export async function POST(request) {
   // 6. Connect to database
   await connectToDatabase();
 
-  // 7. Persist webhook event record idempotently
+  // 7. Persist webhook event record idempotently in ledger
   try {
     await BillingWebhookEvent.create({
       provider: 'razorpay',
@@ -121,13 +124,64 @@ export async function POST(request) {
     );
   }
 
-  // 8. Return fast 200 acknowledgement without performing lifecycle mutations
+  // 8. Process subscription lifecycle transitions (Wave 11B)
+  let processingStatus = isSupported ? 'processed' : 'ignored';
+
+  if (isSupported && metadata.providerSubscriptionId) {
+    const normalizedLifecycle = normalizeRazorpayLifecycleEvent({
+      eventType,
+      subscriptionEntity: parsedPayload?.payload?.subscription?.entity,
+      eventCreatedAt: metadata.providerCreatedAt || (parsedPayload?.created_at ? new Date(parsedPayload.created_at * 1000) : new Date()),
+    });
+
+    const expectedPlanId = process.env.RAZORPAY_PRO_MONTHLY_PLAN_ID?.trim();
+
+    try {
+      const result = await applyRazorpayLifecycleState(
+        metadata.providerSubscriptionId,
+        normalizedLifecycle,
+        { expectedPlanId }
+      );
+
+      if (result.success) {
+        processingStatus = 'processed';
+        await BillingWebhookEvent.updateOne(
+          { provider: 'razorpay', eventId },
+          { $set: { processingStatus: 'processed', processedAt: new Date() } }
+        );
+      } else if (result.ignored) {
+        processingStatus = 'ignored';
+        await BillingWebhookEvent.updateOne(
+          { provider: 'razorpay', eventId },
+          { $set: { processingStatus: 'ignored', processedAt: new Date() } }
+        );
+      } else {
+        processingStatus = 'failed';
+        await BillingWebhookEvent.updateOne(
+          { provider: 'razorpay', eventId },
+          { $set: { processingStatus: 'failed', processedAt: new Date() } }
+        );
+      }
+    } catch (processErr) {
+      await BillingWebhookEvent.updateOne(
+        { provider: 'razorpay', eventId },
+        { $set: { processingStatus: 'failed', processedAt: new Date() } }
+      );
+
+      return Response.json(
+        { error: 'LIFECYCLE_PROCESSING_FAILED', message: 'Failed to process subscription lifecycle' },
+        { status: 500 }
+      );
+    }
+  }
+
+  // 9. Return fast 200 acknowledgement
   return Response.json(
     {
       received: true,
       eventId,
       eventType,
-      status: isSupported ? 'received' : 'ignored',
+      status: processingStatus,
     },
     { status: 200 }
   );

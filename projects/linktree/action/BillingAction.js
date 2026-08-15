@@ -7,6 +7,7 @@ import User from '@/models/User';
 import {
   getSubscriptionByUserId,
   saveRazorpayPendingSubscriptionByUserId,
+  markRazorpayAuthorizationVerified,
   normalizeUserId,
 } from '@/lib/subscriptionRepository';
 import {
@@ -23,17 +24,19 @@ import { PRODUCT_NAME } from '@/lib/brand';
  * - Operates strictly under session.user.id authority (zero client-supplied userId/amount/plan).
  * - Enforces existing-state protections (blocks manual Pro, blocks Stripe, blocks active Razorpay).
  * - Reuses existing pending Razorpay subscription ID when available to prevent duplicate provider subscriptions.
- * - Persists normalized local pending state (plan: pro, status: incomplete, provider: razorpay).
+ * - Blocks repeat checkout if authorization is already verified and awaiting activation.
+ * - Saves normalized pending state (status: 'incomplete', plan: 'pro') via repository.
+ * - Never returns key secret, plan ID, or raw subscription entity to the client.
  *
- * @returns {Promise<Object>} Safe client checkout payload
+ * @returns {Promise<{ success: boolean, keyId?: string, subscriptionId?: string, error?: string, message?: string }>}
  */
 export async function createRazorpayTestCheckoutAction() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return {
       success: false,
-      error: 'UNAUTHENTICATED',
-      message: 'You must be signed in to start subscription checkout.',
+      error: 'UNAUTHORIZED',
+      message: 'You must be signed in to access billing features.',
     };
   }
 
@@ -101,7 +104,7 @@ export async function createRazorpayTestCheckoutAction() {
       };
     }
 
-    // D. Safe reuse of existing pending Razorpay subscription ID
+    // D. Safe reuse of existing pending Razorpay subscription ID (or block if already verified)
     if (
       existingSub.provider === 'razorpay' &&
       existingSub.status === 'incomplete' &&
@@ -109,6 +112,14 @@ export async function createRazorpayTestCheckoutAction() {
       typeof existingSub.providerSubscriptionId === 'string' &&
       existingSub.providerSubscriptionId.startsWith('sub_')
     ) {
+      if (existingSub.providerAuthorizationVerifiedAt) {
+        return {
+          success: false,
+          error: 'AUTHORIZATION_ALREADY_VERIFIED',
+          message: 'Payment authorization has already been verified and is awaiting activation.',
+        };
+      }
+
       return {
         success: true,
         keyId: config.keyId,
@@ -143,14 +154,15 @@ export async function createRazorpayTestCheckoutAction() {
       normalizedUserId,
       createdSub.subscriptionId
     );
-  } catch {
+  } catch (dbErr) {
     return {
       success: false,
-      error: 'SUBSCRIPTION_SAVE_FAILED',
+      error: dbErr.code || 'SUBSCRIPTION_SAVE_FAILED',
       message: 'Failed to record pending subscription state.',
     };
   }
 
+  // 6. Return minimal checkout client configuration
   return {
     success: true,
     keyId: config.keyId,
@@ -165,32 +177,29 @@ export async function createRazorpayTestCheckoutAction() {
 }
 
 /**
- * Verifies Razorpay checkout payment authorization signature for the authenticated user.
+ * Server action to verify Razorpay checkout client response.
  *
  * Invariants:
- * - Authenticates session.user.id.
- * - Compares incoming razorpay_subscription_id against local persisted providerSubscriptionId.
- * - Verifies HMAC-SHA256 signature using server-only secret.
- * - CRITICAL: Successful signature verification DOES NOT activate Pro in Wave 10. Status remains incomplete.
+ * - Operates strictly on authenticated session.user.id.
+ * - Validates signature using server-only RAZORPAY_KEY_SECRET.
+ * - Stores providerAuthorizationVerifiedAt timestamp upon cryptographic verification.
+ * - Keeps local Subscription status strictly 'incomplete' (fail-closed).
+ * - Authoritative 'active' status is deferred to verified webhook event intake.
  *
- * @param {Object} payload
- * @param {string} payload.razorpay_payment_id
- * @param {string} payload.razorpay_subscription_id
- * @param {string} payload.razorpay_signature
- * @returns {Promise<{ success: boolean, verified: boolean, message: string, error?: string }>}
+ * @param {Object} params
+ * @param {string} params.razorpay_payment_id
+ * @param {string} params.razorpay_subscription_id
+ * @param {string} params.razorpay_signature
+ * @returns {Promise<{ success: boolean, verified: boolean, message?: string, error?: string }>}
  */
-export async function verifyRazorpayTestCheckoutAction({
-  razorpay_payment_id,
-  razorpay_subscription_id,
-  razorpay_signature,
-}) {
+export async function verifyRazorpayTestCheckoutAction(params) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return {
       success: false,
       verified: false,
-      error: 'UNAUTHENTICATED',
-      message: 'You must be signed in to verify subscription authorization.',
+      error: 'UNAUTHORIZED',
+      message: 'You must be signed in to verify payment.',
     };
   }
 
@@ -203,6 +212,12 @@ export async function verifyRazorpayTestCheckoutAction({
       message: 'Invalid session user identity.',
     };
   }
+
+  const {
+    razorpay_payment_id,
+    razorpay_subscription_id,
+    razorpay_signature,
+  } = params || {};
 
   if (!razorpay_payment_id || !razorpay_subscription_id || !razorpay_signature) {
     return {
@@ -249,13 +264,16 @@ export async function verifyRazorpayTestCheckoutAction({
     };
   }
 
-  // NOTE (Wave 10): Local subscription status remains 'incomplete'.
-  // Authoritative 'active' status is deferred to Wave 11 webhook processing.
+  // Persist providerAuthorizationVerifiedAt timestamp upon successful checkout signature verification
+  await markRazorpayAuthorizationVerified(normalizedUserId);
+
+  // NOTE: Local subscription status remains 'incomplete'.
+  // Authoritative 'active' status is deferred to webhook processing.
 
   return {
     success: true,
     verified: true,
     message:
-      'Test authorisation verified. Subscription lifecycle activation will be confirmed by webhook in the next integration step.',
+      'Test authorisation verified. Subscription lifecycle activation will be confirmed by webhook.',
   };
 }

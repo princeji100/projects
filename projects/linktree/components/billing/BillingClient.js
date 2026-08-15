@@ -252,6 +252,15 @@ export default function BillingClient({ presentation }) {
               >
                 Manual Pro access is already active
               </button>
+            ) : (presentation.isAwaitingActivation || verifiedMessage) ? (
+              <button
+                type="button"
+                disabled
+                className="w-full py-3.5 px-4 rounded-2xl text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 cursor-default flex items-center justify-center gap-2"
+              >
+                <FontAwesomeIcon icon={faClock} className="text-xs" />
+                <span>Authorization verified — awaiting subscription activation</span>
+              </button>
             ) : (
               <RazorpayTestCheckoutButton
                 onVerified={(msg) => setVerifiedMessage(msg)}
