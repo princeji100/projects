@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCheck,
   faClock,
-  faSparkles,
+  faCrown,
   faShieldHalved,
   faArrowRight,
   faCircleInfo,
@@ -140,7 +140,7 @@ export default function PricingPage() {
           <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl shadow-slate-900/30 flex flex-col justify-between relative space-y-6">
             {/* Top Popular Badge */}
             <div className="absolute -top-3.5 right-6 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[11px] font-bold px-3.5 py-1 rounded-full shadow-md flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faSparkles} className="text-[10px]" />
+              <FontAwesomeIcon icon={faCrown} className="text-[10px]" />
               <span>Creator Pro</span>
             </div>
 

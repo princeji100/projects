@@ -124,6 +124,7 @@ export function formatBillingPresentation(entitlements, subscription = null) {
     statusBadge,
     statusVariant,
     isPro: isEntitledPro,
+    isManualPro: Boolean(isEntitledPro && subscription?.provider === 'manual'),
     cancelAtPeriodEnd: Boolean(subscription?.cancelAtPeriodEnd),
     periodEndLabel,
     features: toClientFeatureFlags(entitlements),

@@ -242,3 +242,85 @@ export async function revokeManualProByUserId(userId, options = {}) {
   return { success: true, effectivePlan: 'free' };
 }
 
+/**
+ * Persists a pending Razorpay subscription for an authenticated user.
+ * Sets status: 'incomplete', provider: 'razorpay', plan: 'pro'.
+ * 
+ * Invariants:
+ * - Operates strictly on User._id.
+ * - Validates providerSubscriptionId format (sub_...).
+ * - Verifies that target User exists.
+ * - Does NOT grant Pro entitlements (status remains incomplete).
+ *
+ * @param {string | mongoose.Types.ObjectId} userId
+ * @param {string} providerSubscriptionId
+ * @param {Object} [options]
+ * @param {Function} [options.findUser]
+ * @param {Function} [options.saveSubscription]
+ * @returns {Promise<Object>} Lean persisted subscription document
+ */
+export async function saveRazorpayPendingSubscriptionByUserId(
+  userId,
+  providerSubscriptionId,
+  options = {}
+) {
+  const normalizedId = normalizeUserId(userId);
+  if (!normalizedId) {
+    const err = new Error('Invalid user ID provided');
+    err.code = 'INVALID_USER_ID';
+    throw err;
+  }
+
+  if (
+    !providerSubscriptionId ||
+    typeof providerSubscriptionId !== 'string' ||
+    !providerSubscriptionId.trim().startsWith('sub_')
+  ) {
+    const err = new Error('Invalid Razorpay subscription ID format');
+    err.code = 'INVALID_PROVIDER_SUBSCRIPTION_ID';
+    throw err;
+  }
+
+  await connectToDatabase();
+
+  // 1. Verify user exists
+  const userFinder = typeof options.findUser === 'function'
+    ? options.findUser
+    : async (id) => User.findById(id).lean();
+
+  const existingUser = await userFinder(normalizedId);
+  if (!existingUser) {
+    const err = new Error('Target user does not exist');
+    err.code = 'USER_NOT_FOUND';
+    throw err;
+  }
+
+  // 2. Persist normalized pending Razorpay state
+  const cleanSubId = providerSubscriptionId.trim();
+  const updateData = {
+    $set: {
+      plan: 'pro',
+      status: 'incomplete',
+      provider: 'razorpay',
+      providerSubscriptionId: cleanSubId,
+      cancelAtPeriodEnd: false,
+    },
+    $unset: {
+      providerCustomerId: '',
+      currentPeriodStart: '',
+      currentPeriodEnd: '',
+    },
+  };
+
+  const saver = typeof options.saveSubscription === 'function'
+    ? options.saveSubscription
+    : async (id, update) => Subscription.findOneAndUpdate(
+        { userId: id },
+        update,
+        { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
+      ).lean();
+
+  const savedDoc = await saver(normalizedId, updateData);
+  return savedDoc;
+}
+

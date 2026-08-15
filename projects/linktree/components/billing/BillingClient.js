@@ -11,17 +11,20 @@ import {
   faClock,
   faXmark,
   faShieldHalved,
-  faSparkles,
+  faFlask,
 } from '@fortawesome/free-solid-svg-icons';
 import { FREE_BASELINE_FEATURES, PRO_ROADMAP_FEATURES } from '@/lib/billingPresentation';
+import RazorpayTestCheckoutButton from './RazorpayTestCheckoutButton';
 
 /**
  * Interactive Billing and Plan Comparison Component
- * Displays current plan status, comparison cards, and non-destructive launch info modal.
+ * Displays current plan status, comparison cards, and Razorpay test checkout integration.
  */
 export default function BillingClient({ presentation }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [verifiedMessage, setVerifiedMessage] = useState(null);
   const isPro = presentation?.isPro ?? false;
+  const isManualPro = presentation?.isManualPro ?? false;
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
@@ -52,7 +55,9 @@ export default function BillingClient({ presentation }) {
             </h2>
             <p className="text-sm text-slate-500">
               {isPro
-                ? 'Your account has full access to all available Pro capabilities.'
+                ? (isManualPro
+                    ? 'Manual Pro access is active on your account.'
+                    : 'Your account has full access to all available Pro capabilities.')
                 : 'You are currently on the Free plan with complete access to all baseline creator tools.'}
             </p>
           </div>
@@ -149,26 +154,46 @@ export default function BillingClient({ presentation }) {
               </div>
               {isPro ? (
                 <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3 py-1 rounded-full">
-                  Active
+                  {isManualPro ? 'Manual Grant' : 'Active'}
                 </span>
               ) : (
-                <span className="bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs font-bold px-3 py-1 rounded-full">
-                  Coming Soon
+                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                  <FontAwesomeIcon icon={faFlask} className="text-[10px]" />
+                  <span>Test Mode</span>
                 </span>
               )}
             </div>
 
-            <div className="py-2 border-y border-white/10">
-              <span className="text-2xl font-black text-white">Pro Plan</span>
-              <span className="text-xs font-medium text-slate-400 block mt-0.5">
-                Pricing will be available when subscriptions launch.
-              </span>
+            {/* Test Mode Notice Banner */}
+            {!isPro && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-amber-300 text-xs">
+                  <FontAwesomeIcon icon={faShieldHalved} className="text-xs" />
+                  <span>Razorpay Test Mode</span>
+                </div>
+                <p className="text-[11px] text-amber-200/80 leading-relaxed">
+                  No real money will be charged. Use Razorpay test cards/methods to test recurring subscription creation.
+                </p>
+              </div>
+            )}
+
+            {/* Price Box */}
+            <div className="py-2 border-y border-white/10 flex items-baseline justify-between">
+              <div>
+                <span className="text-3xl font-black text-white">₹149</span>
+                <span className="text-xs font-semibold text-slate-400"> / month</span>
+              </div>
+              {!isPro && (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                  Recurring Billing
+                </span>
+              )}
             </div>
 
             {/* Feature List */}
             <div className="space-y-3.5">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                Upcoming &amp; Planned Pro Features
+                Pro Capabilities &amp; Roadmap
               </span>
               <ul className="space-y-3">
                 {PRO_ROADMAP_FEATURES.map((item) => (
@@ -180,8 +205,8 @@ export default function BillingClient({ presentation }) {
                       </div>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                          item.statusVariant === 'info'
-                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                          item.statusVariant === 'success'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                             : 'bg-white/10 text-slate-300 border border-white/10'
                         }`}
                       >
@@ -195,6 +220,19 @@ export default function BillingClient({ presentation }) {
                 ))}
               </ul>
             </div>
+
+            {/* Verified Post-Authorisation State Notice */}
+            {verifiedMessage && (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 space-y-1.5">
+                <div className="font-bold flex items-center gap-1.5 text-emerald-300 text-xs">
+                  <FontAwesomeIcon icon={faCircleCheck} className="text-xs" />
+                  <span>Test Authorisation Verified</span>
+                </div>
+                <p className="text-[11px] text-emerald-200/90 leading-relaxed">
+                  {verifiedMessage}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="pt-8 mt-6 border-t border-white/10 relative z-10">
@@ -202,19 +240,22 @@ export default function BillingClient({ presentation }) {
               <button
                 type="button"
                 disabled
-                className="w-full py-3 px-4 rounded-2xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default"
+                className="w-full py-3.5 px-4 rounded-2xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default"
               >
-                Pro Plan Active
+                {isManualPro ? 'Manual Pro Active' : 'Pro Plan Active'}
               </button>
-            ) : (
+            ) : isManualPro ? (
               <button
                 type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="w-full py-3.5 px-4 rounded-2xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white shadow-lg shadow-blue-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
+                disabled
+                className="w-full py-3.5 px-4 rounded-2xl text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed"
               >
-                <FontAwesomeIcon icon={faRocket} className="text-xs" />
-                <span>Upgrade to Pro</span>
+                Manual Pro access is already active
               </button>
+            ) : (
+              <RazorpayTestCheckoutButton
+                onVerified={(msg) => setVerifiedMessage(msg)}
+              />
             )}
           </div>
         </div>
