@@ -198,16 +198,19 @@ export function normalizeRazorpayLifecycleEvent({
     }
   }
 
+  const isTerminal = status === 'canceled' || status === 'expired';
+
   return {
     isValid: true,
     eventType: cleanEventType,
     providerSubscriptionId,
     planId: subscriptionEntity.plan_id ? String(subscriptionEntity.plan_id).trim() : undefined,
     status,
+    cancelAtPeriodEnd: isTerminal ? false : undefined,
     providerCustomerId,
     currentPeriodStart,
     currentPeriodEnd,
     providerStateUpdatedAt,
-    isTerminal: status === 'canceled' || status === 'expired',
+    isTerminal,
   };
 }

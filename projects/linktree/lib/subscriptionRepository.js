@@ -439,6 +439,9 @@ export async function applyRazorpayLifecycleState(
   if (normalizedLifecycle.status !== undefined) {
     updateFields.status = normalizedLifecycle.status;
   }
+  if (normalizedLifecycle.cancelAtPeriodEnd !== undefined) {
+    updateFields.cancelAtPeriodEnd = normalizedLifecycle.cancelAtPeriodEnd;
+  }
   if (normalizedLifecycle.providerCustomerId) {
     updateFields.providerCustomerId = normalizedLifecycle.providerCustomerId;
   }
@@ -467,4 +470,61 @@ export async function applyRazorpayLifecycleState(
   const updatedDoc = await saver(existing._id, updateFields);
   return { success: true, subscription: updatedDoc };
 }
+
+/**
+ * Sets cancelAtPeriodEnd flag to true for an active Razorpay subscription.
+ *
+ * Invariants:
+ * - Operates strictly on User._id authority.
+ * - Requires provider === 'razorpay' and status === 'active'.
+ * - Preserves plan = 'pro', status = 'active', provider = 'razorpay'.
+ * - Optionally updates/preserves currentPeriodStart and currentPeriodEnd.
+ * - Never changes userId, provider, or providerSubscriptionId.
+ *
+ * @param {string | mongoose.Types.ObjectId} userId
+ * @param {Object} [periodData]
+ * @param {Date} [periodData.currentPeriodStart]
+ * @param {Date} [periodData.currentPeriodEnd]
+ * @param {Object} [options]
+ * @returns {Promise<Object>} Lean updated subscription document
+ */
+export async function setSubscriptionCancelAtPeriodEnd(userId, periodData = {}, options = {}) {
+  const normalizedId = normalizeUserId(userId);
+  if (!normalizedId) {
+    const err = new Error('Invalid user ID provided');
+    err.code = 'INVALID_USER_ID';
+    throw err;
+  }
+
+  await connectToDatabase();
+
+  const updateFields = {
+    cancelAtPeriodEnd: true,
+  };
+
+  if (periodData.currentPeriodStart instanceof Date && !isNaN(periodData.currentPeriodStart.getTime())) {
+    updateFields.currentPeriodStart = periodData.currentPeriodStart;
+  }
+  if (periodData.currentPeriodEnd instanceof Date && !isNaN(periodData.currentPeriodEnd.getTime())) {
+    updateFields.currentPeriodEnd = periodData.currentPeriodEnd;
+  }
+
+  const saver = typeof options.saveSubscription === 'function'
+    ? options.saveSubscription
+    : async (id, update) => Subscription.findOneAndUpdate(
+        { userId: id, provider: 'razorpay', status: 'active' },
+        { $set: update },
+        { new: true, runValidators: true }
+      ).lean();
+
+  const updated = await saver(normalizedId, updateFields);
+  if (!updated) {
+    const err = new Error('No active Razorpay subscription found to schedule cancellation');
+    err.code = 'SUBSCRIPTION_NOT_ACTIVE';
+    throw err;
+  }
+
+  return updated;
+}
+
 

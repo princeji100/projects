@@ -8,12 +8,14 @@ import {
   getSubscriptionByUserId,
   saveRazorpayPendingSubscriptionByUserId,
   markRazorpayAuthorizationVerified,
+  setSubscriptionCancelAtPeriodEnd,
   normalizeUserId,
 } from '@/lib/subscriptionRepository';
 import {
   getRazorpayConfig,
   createRazorpaySubscription,
   verifyRazorpaySubscriptionSignature,
+  cancelRazorpaySubscriptionAtPeriodEnd,
 } from '@/lib/billing/providers/razorpay';
 import { PRODUCT_NAME } from '@/lib/brand';
 
@@ -275,5 +277,155 @@ export async function verifyRazorpayTestCheckoutAction(params) {
     verified: true,
     message:
       'Test authorisation verified. Subscription lifecycle activation will be confirmed by webhook.',
+  };
+}
+
+/**
+ * Cancels the authenticated user's active Razorpay Pro subscription at the end of the current billing cycle.
+ *
+ * Invariants:
+ * - Operates strictly under session.user.id authority (zero client-supplied parameters).
+ * - Enforces strict eligibility: must have active Razorpay subscription with cancelAtPeriodEnd != true.
+ * - Always calls Razorpay cancel endpoint with cancel_at_cycle_end: true (never immediate).
+ * - Persists local cancelAtPeriodEnd: true while maintaining active status and Pro entitlements.
+ * - Returns sanitized presentation message.
+ *
+ * @returns {Promise<{ success: boolean, cancelAtPeriodEnd?: boolean, message?: string, error?: string }>}
+ */
+export async function cancelRazorpayAtPeriodEndAction() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return {
+      success: false,
+      error: 'UNAUTHORIZED',
+      message: 'You must be signed in to manage your subscription.',
+    };
+  }
+
+  const normalizedUserId = normalizeUserId(session.user.id);
+  if (!normalizedUserId) {
+    return {
+      success: false,
+      error: 'INVALID_SESSION_USER',
+      message: 'Invalid session user identity.',
+    };
+  }
+
+  await connectToDatabase();
+
+  const sub = await getSubscriptionByUserId(normalizedUserId);
+  if (!sub) {
+    return {
+      success: false,
+      error: 'NO_PAID_SUBSCRIPTION',
+      message: 'No subscription found for your account.',
+    };
+  }
+
+  if (sub.provider === 'manual') {
+    return {
+      success: false,
+      error: 'MANUAL_SUBSCRIPTION',
+      message: 'Manual Pro grants cannot be cancelled via payment provider.',
+    };
+  }
+
+  if (sub.provider === 'stripe') {
+    return {
+      success: false,
+      error: 'PROVIDER_MANAGED_ELSEWHERE',
+      message: 'Your subscription is managed through another payment provider.',
+    };
+  }
+
+  if (sub.provider !== 'razorpay') {
+    return {
+      success: false,
+      error: 'UNSUPPORTED_PROVIDER',
+      message: 'Unsupported subscription provider.',
+    };
+  }
+
+  if (sub.status === 'incomplete') {
+    return {
+      success: false,
+      error: 'SUBSCRIPTION_INCOMPLETE',
+      message: 'Your subscription setup is incomplete.',
+    };
+  }
+
+  if (sub.status === 'canceled' || sub.status === 'expired') {
+    return {
+      success: false,
+      error: 'SUBSCRIPTION_ALREADY_ENDED',
+      message: 'Your subscription has already ended.',
+    };
+  }
+
+  if (sub.status === 'past_due' || sub.status === 'paused') {
+    return {
+      success: false,
+      error: 'SUBSCRIPTION_NOT_ACTIVE',
+      message: 'Only active subscriptions can be cancelled.',
+    };
+  }
+
+  if (sub.status !== 'active') {
+    return {
+      success: false,
+      error: 'SUBSCRIPTION_NOT_ACTIVE',
+      message: 'Only active subscriptions can be cancelled.',
+    };
+  }
+
+  if (sub.cancelAtPeriodEnd) {
+    return {
+      success: true,
+      cancelAtPeriodEnd: true,
+      message: 'Cancellation has already been scheduled for the end of your billing cycle.',
+    };
+  }
+
+  if (!sub.providerSubscriptionId || typeof sub.providerSubscriptionId !== 'string' || !sub.providerSubscriptionId.startsWith('sub_')) {
+    return {
+      success: false,
+      error: 'INVALID_PROVIDER_SUBSCRIPTION_ID',
+      message: 'Subscription record is missing a valid provider identifier.',
+    };
+  }
+
+  // 1. Call Razorpay API to schedule cancellation at cycle end
+  let cancelRes;
+  try {
+    cancelRes = await cancelRazorpaySubscriptionAtPeriodEnd(sub.providerSubscriptionId);
+  } catch (apiErr) {
+    return {
+      success: false,
+      error: apiErr.code || 'RAZORPAY_CANCEL_FAILED',
+      message: apiErr.message || 'Failed to schedule cancellation with payment provider.',
+    };
+  }
+
+  // 2. Persist local cancellation marker
+  try {
+    await setSubscriptionCancelAtPeriodEnd(normalizedUserId, {
+      currentPeriodStart: cancelRes.currentPeriodStart,
+      currentPeriodEnd: cancelRes.currentPeriodEnd,
+    });
+  } catch (dbErr) {
+    // Known operational reconciliation edge case: provider accepted, local update failed
+    return {
+      success: false,
+      error: 'CANCELLATION_SYNC_PENDING',
+      message:
+        'Cancellation was scheduled with payment provider, but local database synchronization is pending. Your access remains intact.',
+    };
+  }
+
+  return {
+    success: true,
+    cancelAtPeriodEnd: true,
+    message:
+      'Your subscription cancellation has been scheduled for the end of your billing cycle. Pro capabilities remain active until your paid period ends.',
   };
 }

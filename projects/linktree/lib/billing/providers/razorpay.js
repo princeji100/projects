@@ -207,3 +207,118 @@ export function verifyRazorpaySubscriptionSignature({
     return false;
   }
 }
+
+/**
+ * Requests scheduled cancellation at the end of the current billing cycle for a Razorpay Subscription.
+ *
+ * Invariants:
+ * - Hard commercial policy: always enforces cancel_at_cycle_end = true (never immediate).
+ * - Key ID must start with 'rzp_test_' (rejects 'rzp_live_').
+ * - Validates provider subscription ID format (sub_...).
+ * - Uses Basic Auth with server-only key secret.
+ * - Validates response object, matching subscription ID and expected plan ID.
+ *
+ * @param {string} providerSubscriptionId - Razorpay Subscription ID (sub_...)
+ * @param {Object} [options]
+ * @param {Function} [options.fetchFn=fetch]
+ * @param {Object} [options.env=process.env]
+ * @returns {Promise<{ subscriptionId: string, status: string, planId: string, cancelAtCycleEnd: boolean, currentPeriodStart?: Date, currentPeriodEnd?: Date }>}
+ */
+export async function cancelRazorpaySubscriptionAtPeriodEnd(
+  providerSubscriptionId,
+  options = {}
+) {
+  if (
+    !providerSubscriptionId ||
+    typeof providerSubscriptionId !== 'string' ||
+    !providerSubscriptionId.trim().startsWith('sub_')
+  ) {
+    const err = new Error('Valid Razorpay subscription ID is required to cancel');
+    err.code = 'INVALID_PROVIDER_SUBSCRIPTION_ID';
+    throw err;
+  }
+
+  const cleanSubId = providerSubscriptionId.trim();
+  const env = options.env || process.env;
+  const config = getRazorpayConfig(env);
+  const fetchFn = options.fetchFn || fetch;
+
+  const authHeader = `Basic ${Buffer.from(`${config.keyId}:${config.keySecret}`).toString('base64')}`;
+
+  // Hard commercial policy invariant: always cancel at cycle end
+  const requestPayload = {
+    cancel_at_cycle_end: true,
+  };
+
+  let res;
+  try {
+    res = await fetchFn(`${RAZORPAY_API_BASE_URL}/subscriptions/${cleanSubId}/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authHeader,
+      },
+      body: JSON.stringify(requestPayload),
+    });
+  } catch (netErr) {
+    const err = new Error('Failed to communicate with Razorpay payment service');
+    err.code = 'RAZORPAY_NETWORK_ERROR';
+    err.originalMessage = netErr.message;
+    throw err;
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    const err = new Error('Malformed non-JSON response received from payment provider');
+    err.code = 'RAZORPAY_RESPONSE_MALFORMED';
+    err.status = res.status;
+    throw err;
+  }
+
+  if (!res.ok) {
+    const err = new Error(data?.error?.description || 'Razorpay subscription cancellation failed');
+    err.code = 'RAZORPAY_API_ERROR';
+    err.status = res.status;
+    err.providerErrorCode = data?.error?.code;
+    throw err;
+  }
+
+  if (!data || typeof data !== 'object' || typeof data.id !== 'string' || !data.id.startsWith('sub_')) {
+    const err = new Error('Invalid subscription response received from Razorpay');
+    err.code = 'RAZORPAY_RESPONSE_INVALID';
+    throw err;
+  }
+
+  if (data.id !== cleanSubId) {
+    const err = new Error('Returned subscription ID does not match requested cancellation ID');
+    err.code = 'RAZORPAY_SUBSCRIPTION_MISMATCH';
+    throw err;
+  }
+
+  if (data.plan_id && data.plan_id !== config.planId) {
+    const err = new Error('Returned subscription plan ID does not match expected Pro plan');
+    err.code = 'RAZORPAY_PLAN_MISMATCH';
+    throw err;
+  }
+
+  let currentPeriodStart;
+  if (typeof data.current_start === 'number' && !isNaN(data.current_start) && data.current_start > 0) {
+    currentPeriodStart = new Date(data.current_start * 1000);
+  }
+
+  let currentPeriodEnd;
+  if (typeof data.current_end === 'number' && !isNaN(data.current_end) && data.current_end > 0) {
+    currentPeriodEnd = new Date(data.current_end * 1000);
+  }
+
+  return {
+    subscriptionId: data.id,
+    status: data.status || 'active',
+    planId: data.plan_id || config.planId,
+    cancelAtCycleEnd: true,
+    currentPeriodStart,
+    currentPeriodEnd,
+  };
+}

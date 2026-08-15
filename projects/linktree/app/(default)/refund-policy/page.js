@@ -46,15 +46,15 @@ export default function RefundPolicyPage() {
 
         {/* Section 3 */}
         <section className="space-y-2.5">
-          <h2 className="text-base font-bold text-slate-900">3. Current Cancellation Support Process</h2>
+          <h2 className="text-base font-bold text-slate-900">3. Cancellation Process</h2>
           <p>
-            While self-service automated billing management is being finalized for full public launch, subscription cancellation and billing management requests can be submitted directly by emailing our support team at{' '}
+            You can cancel your recurring Pro subscription directly at any time from your account <strong>Billing dashboard</strong>. Alternatively, subscription cancellation and billing management requests can be submitted directly by emailing our support team at{' '}
             <a href={`mailto:${COMMERCIAL_IDENTITY.supportEmail}`} className="text-blue-600 hover:underline font-semibold">
               {COMMERCIAL_IDENTITY.supportEmail}
             </a>.
           </p>
           <p className="text-xs text-slate-500">
-            Please include your registered Google email address and handle. Cancellation requests are processed promptly upon receipt.
+            When emailing for assistance, please include your registered Google email address and handle. Requests are processed promptly.
           </p>
         </section>
 

@@ -77,11 +77,17 @@ export function formatBillingPresentation(entitlements, subscription = null) {
   let statusBadge = 'Active';
   let statusVariant = 'neutral';
 
+  const cancelAtPeriodEnd = Boolean(subscription?.cancelAtPeriodEnd);
+
   if (isEntitledPro) {
     if (rawStatus === 'trialing') {
       displayStatus = 'Pro Trial';
       statusBadge = 'Trialing';
       statusVariant = 'indigo';
+    } else if (cancelAtPeriodEnd) {
+      displayStatus = 'Pro Plan';
+      statusBadge = 'Cancellation scheduled';
+      statusVariant = 'amber';
     } else {
       displayStatus = 'Pro Plan';
       statusBadge = 'Active';
@@ -132,6 +138,13 @@ export function formatBillingPresentation(entitlements, subscription = null) {
     subscription?.providerAuthorizationVerifiedAt
   );
 
+  const canCancelSubscription = Boolean(
+    isEntitledPro &&
+    subscription?.provider === 'razorpay' &&
+    rawStatus === 'active' &&
+    !cancelAtPeriodEnd
+  );
+
   return {
     effectivePlan: isEntitledPro ? 'pro' : 'free',
     effectivePlanName: isEntitledPro ? 'Pro' : 'Free',
@@ -141,7 +154,8 @@ export function formatBillingPresentation(entitlements, subscription = null) {
     isPro: isEntitledPro,
     isManualPro: Boolean(isEntitledPro && subscription?.provider === 'manual'),
     isAwaitingActivation,
-    cancelAtPeriodEnd: Boolean(subscription?.cancelAtPeriodEnd),
+    canCancelSubscription,
+    cancelAtPeriodEnd,
     periodEndLabel,
     features: toClientFeatureFlags(entitlements),
   };
