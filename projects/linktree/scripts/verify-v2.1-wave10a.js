@@ -192,8 +192,7 @@ await check('16. live Razorpay key remains rejected', () => {
 // 4. Boundaries & Clean Architecture
 // ==========================================
 
-await check('17. no webhook route exists', () => {
-  assert.ok(!fs.existsSync(path.join(projectRoot, 'app/api/billing/razorpay/webhook/route.js')));
+await check('17. no legacy webhook route exists', () => {
   assert.ok(!fs.existsSync(path.join(projectRoot, 'app/api/webhook/razorpay/route.js')));
 });
 

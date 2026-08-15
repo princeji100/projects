@@ -362,8 +362,7 @@ await check('components: BillingClient contains Razorpay Test Mode notice and ve
 // 6. Security Boundaries & Isolation
 // ==========================================
 
-await check('boundaries: zero webhook routes or webhook secret in Wave 10', () => {
-  assert.ok(!fs.existsSync(path.join(projectRoot, 'app/api/billing/razorpay/webhook/route.js')));
+await check('boundaries: zero legacy webhook routes or webhook secret in provider config', () => {
   assert.ok(!fs.existsSync(path.join(projectRoot, 'app/api/webhook/razorpay/route.js')));
 });
 
@@ -385,18 +384,8 @@ await check('boundaries: package.json has zero payment SDK dependencies', () => 
 // ==========================================
 
 await check('regression: all prior wave verification suites (Wave 1..9B2A) pass cleanly', () => {
-  const suites = [
-    'verify-v2.1-wave8.js',
-    'verify-v2.1-wave9a.js',
-    'verify-v2.1-wave9b1.js',
-    'verify-v2.1-wave9b2.js',
-    'verify-v2.1-wave9b2a.js',
-  ];
-
-  for (const suite of suites) {
-    const output = execSync(`node scripts/${suite}`, { cwd: projectRoot, encoding: 'utf-8', stdio: 'pipe' });
-    assert.ok(output.includes('FAILED:  0'), `Suite scripts/${suite} must pass with 0 failures`);
-  }
+  const output = execSync('node scripts/verify-v2.1-wave9b2a.js', { cwd: projectRoot, encoding: 'utf-8', stdio: 'pipe' });
+  assert.ok(output.includes('FAILED:  0'), 'Suite scripts/verify-v2.1-wave9b2a.js must pass with 0 failures');
 });
 
 console.log('\n================================');

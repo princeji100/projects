@@ -1,0 +1,127 @@
+import connectToDatabase from '../../../../../lib/connectToDB.js';
+import BillingWebhookEvent from '../../../../../models/BillingWebhookEvent.js';
+import {
+  verifyRazorpayWebhookSignature,
+  isSupportedRazorpaySubscriptionEvent,
+  extractWebhookSubscriptionMetadata,
+} from '../../../../../lib/billing/webhook.js';
+
+/**
+ * Public Razorpay Webhook Ingestion Endpoint (Wave 11A)
+ *
+ * Endpoint: POST /api/billing/razorpay/webhook
+ *
+ * Invariants:
+ * - Public route: authenticates exclusively through x-razorpay-signature (no NextAuth).
+ * - Reads raw request body text BEFORE parsing JSON for signature verification.
+ * - Enforces event idempotency via unique index on BillingWebhookEvent (provider + eventId).
+ * - Safely returns 200 on duplicate delivery without re-processing.
+ * - NON-NEGOTIABLE: Wave 11A performs ZERO Subscription mutations or entitlement grants.
+ */
+export async function POST(request) {
+  // 1. Validate signature header presence
+  const signature = request.headers.get('x-razorpay-signature');
+  if (!signature) {
+    return Response.json(
+      { error: 'MISSING_SIGNATURE', message: 'Missing x-razorpay-signature header' },
+      { status: 400 }
+    );
+  }
+
+  // 2. Read raw request body as text BEFORE JSON parsing
+  let rawBody;
+  try {
+    rawBody = await request.text();
+  } catch {
+    return Response.json(
+      { error: 'READ_BODY_FAILED', message: 'Could not read request body' },
+      { status: 400 }
+    );
+  }
+
+  if (!rawBody || !rawBody.trim()) {
+    return Response.json(
+      { error: 'EMPTY_BODY', message: 'Request body cannot be empty' },
+      { status: 400 }
+    );
+  }
+
+  // 3. Cryptographically verify signature using raw body and webhook secret
+  const isValidSignature = verifyRazorpayWebhookSignature({
+    rawBody,
+    signature,
+  });
+
+  if (!isValidSignature) {
+    return Response.json(
+      { error: 'INVALID_SIGNATURE', message: 'Webhook signature verification failed' },
+      { status: 401 }
+    );
+  }
+
+  // 4. Parse JSON only AFTER signature verification
+  let parsedPayload;
+  try {
+    parsedPayload = JSON.parse(rawBody);
+  } catch {
+    return Response.json(
+      { error: 'MALFORMED_JSON', message: 'Invalid JSON payload structure' },
+      { status: 400 }
+    );
+  }
+
+  // 5. Extract event ID and metadata
+  const eventIdHeader = request.headers.get('x-razorpay-event-id');
+  const metadata = extractWebhookSubscriptionMetadata(parsedPayload);
+  const eventId = (eventIdHeader || metadata.eventId || '').trim();
+
+  if (!eventId) {
+    return Response.json(
+      { error: 'MISSING_EVENT_ID', message: 'Missing event identifier' },
+      { status: 400 }
+    );
+  }
+
+  const eventType = metadata.eventType || (parsedPayload?.event || '').trim();
+  const isSupported = isSupportedRazorpaySubscriptionEvent(eventType);
+
+  // 6. Connect to database
+  await connectToDatabase();
+
+  // 7. Persist webhook event record idempotently
+  try {
+    await BillingWebhookEvent.create({
+      provider: 'razorpay',
+      eventId,
+      eventType: eventType || 'unknown',
+      providerSubscriptionId: metadata.providerSubscriptionId || undefined,
+      providerCreatedAt: metadata.providerCreatedAt || undefined,
+      receivedAt: new Date(),
+      processingStatus: isSupported ? 'received' : 'ignored',
+    });
+  } catch (err) {
+    // Duplicate event delivery (MongoDB duplicate key error code 11000)
+    if (err?.code === 11000) {
+      return Response.json(
+        { received: true, duplicate: true, eventId },
+        { status: 200 }
+      );
+    }
+
+    return Response.json(
+      { error: 'EVENT_PERSISTENCE_FAILED', message: 'Failed to record event' },
+      { status: 500 }
+    );
+  }
+
+  // 8. Return fast 200 acknowledgement without performing lifecycle mutations
+  return Response.json(
+    {
+      received: true,
+      eventId,
+      eventType,
+      status: isSupported ? 'received' : 'ignored',
+    },
+    { status: 200 }
+  );
+}
