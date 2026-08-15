@@ -10,8 +10,8 @@ import {
 import LinktreeLogo from '@/components/media/LinktreeLogo';
 
 export const metadata = {
-  title: 'Profile Not Found | Linktree',
-  description: 'The requested Linktree creator profile does not exist or is waiting to be claimed.',
+  title: 'Profile Not Found | Prince Links',
+  description: 'The requested Prince Links creator profile does not exist or is waiting to be claimed.',
 };
 
 export default function ProfileNotFound() {
@@ -72,7 +72,7 @@ export default function ProfileNotFound() {
               Profile Not Found
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
-              This Linktree profile does not exist, may have been renamed, or is waiting to be claimed by a creator.
+              This Prince Links profile does not exist, may have been renamed, or is waiting to be claimed by a creator.
             </p>
           </div>
 
@@ -105,7 +105,7 @@ export default function ProfileNotFound() {
 
       {/* ═══ FOOTER ═══ */}
       <footer className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 z-10">
-        <span>&copy; {new Date().getFullYear()} Linktree. Main Portfolio: <a href="https://princeji.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-blue-400 underline transition">princeji.com</a></span>
+        <span>&copy; {new Date().getFullYear()} Prince Links. Main Portfolio: <a href="https://princeji.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-blue-400 underline transition">princeji.com</a></span>
         <div className="flex items-center gap-4">
           <Link href="/about" className="hover:text-slate-300 transition">About</Link>
           <Link href="/login" className="hover:text-slate-300 transition">Apply for Invite</Link>

@@ -21,7 +21,7 @@ const UserNameForm = () => {
   const router = useRouter();
   const [name, setName] = useState(searchParams.get('Choiceusername') || '');
   const [errorMessage, setErrorMessage] = useState('');
-  const [hostPrefix, setHostPrefix] = useState('linktree-princeji.vercel.app/');
+  const [hostPrefix, setHostPrefix] = useState('links.princeji.com/');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.host) {
@@ -159,7 +159,7 @@ const UserNameForm = () => {
           </div>
           <div className="flex items-center gap-1">
             <FontAwesomeIcon icon={faShieldHalved} className="text-indigo-500" />
-            <span>100% Free</span>
+            <span>Start Free</span>
           </div>
         </div>
       </div>

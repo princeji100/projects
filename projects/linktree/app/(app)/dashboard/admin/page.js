@@ -11,7 +11,7 @@ import AdminAllowlistClient from '@/components/admin/AdminAllowlistClient';
 import { isUserAdmin, getAdminEmail } from '@/lib/admin';
 
 export const metadata = {
-  title: 'Admin Control Center | Linktree',
+  title: 'Admin Control Center | Prince Links',
   description: 'Manage invite-only access, handles, user feedback, and manual Pro entitlements',
 };
 

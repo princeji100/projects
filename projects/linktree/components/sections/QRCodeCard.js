@@ -42,8 +42,8 @@ const QRCodeCard = ({ uri, publicUrl, user }) => {
     try {
       if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({
-          title: `${user?.name || uri}'s Linktree`,
-          text: `Check out my links and profile on Linktree!`,
+          title: `${user?.name || uri}'s Prince Links`,
+          text: `Check out my links and profile on Prince Links!`,
           url: publicUrl,
         });
         toast.success('Shared successfully!');
@@ -146,7 +146,7 @@ const QRCodeCard = ({ uri, publicUrl, user }) => {
         <div className="flex items-center justify-between gap-4 pb-2">
           <div className="flex items-center gap-2">
             <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">
-              Share Your Linktree
+              Share Your Prince Links Profile
             </h3>
             <button
               type="button"

@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLink } from '@fortawesome/free-solid-svg-icons';
+import { PRODUCT_NAME } from '@/lib/brand';
 
 export default function LinktreeLogo({ className = "", boxSize = "w-8 h-8", iconSize = "text-sm", textSize = "text-lg", showText = true }) {
   return (
@@ -9,7 +10,7 @@ export default function LinktreeLogo({ className = "", boxSize = "w-8 h-8", icon
       </div>
       {showText && (
         <span className={`${textSize} font-bold text-slate-900 tracking-tight`}>
-          Linktree
+          {PRODUCT_NAME}
         </span>
       )}
     </div>

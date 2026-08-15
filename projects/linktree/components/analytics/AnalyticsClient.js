@@ -277,7 +277,7 @@ const AnalyticsClient = ({ analytics, publicUrl, uri, canUseExtendedAnalytics = 
         <div className="hidden print:block mb-4 pb-4 border-b border-slate-300">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-slate-900">Linktree Traffic & Analytics Report</h1>
+              <h1 className="text-xl font-bold text-slate-900">Prince Links Traffic & Analytics Report</h1>
               {uri && (
                 <p className="text-xs font-mono text-slate-600 mt-0.5">
                   @{uri} {publicUrl ? `(${publicUrl})` : ''}

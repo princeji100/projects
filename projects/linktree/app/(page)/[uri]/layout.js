@@ -11,8 +11,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title:'Linktree',
-  description: "linktree whrere you can find all my social media links",
+  title: 'Prince Links',
+  description: 'Prince Links — connect with creator profiles, links, and content',
 };
 
 export default function RootLayout({ children }) {

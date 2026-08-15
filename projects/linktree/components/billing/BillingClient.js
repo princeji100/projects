@@ -82,7 +82,7 @@ export default function BillingClient({ presentation }) {
                 </span>
                 <h3 className="text-2xl font-black text-slate-900 mt-1">Free</h3>
                 <p className="text-sm text-slate-500 mt-1">
-                  Full access to the baseline Linktree creator toolkit
+                  Full access to the baseline Prince Links creator toolkit
                 </p>
               </div>
               {!isPro && (
@@ -255,7 +255,7 @@ export default function BillingClient({ presentation }) {
             <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2 text-xs text-slate-600">
               <div className="flex items-center gap-2 font-bold text-slate-800">
                 <FontAwesomeIcon icon={faShieldHalved} className="text-blue-500" />
-                <span>100% Free Baseline Continuity</span>
+                <span>Free Baseline Continuity</span>
               </div>
               <p className="leading-relaxed">
                 All existing v2.0 features (tip jars, rich embeds, typography, themes, analytics) remain permanently available for free.

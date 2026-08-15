@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Linktree",
-  description: "Linktree where you can find all my links",
+  title: "Prince Links",
+  description: "Prince Links — create your customized creator profile, links, content, and analytics.",
 };
 
 export default function RootLayout({ children }) {

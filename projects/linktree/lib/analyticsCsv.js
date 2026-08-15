@@ -96,7 +96,7 @@ export function buildAnalyticsCsv(analytics, options = {}) {
   const rangeLabel = getAnalyticsRangeConfig(selectedRange).printLabel;
 
   // 1. Report Metadata Section
-  lines.push([escapeCsvCell('Report'), escapeCsvCell('Linktree Traffic & Analytics Report')].join(','));
+  lines.push([escapeCsvCell('Report'), escapeCsvCell('Prince Links Traffic & Analytics Report')].join(','));
   lines.push([escapeCsvCell('Selected Range'), escapeCsvCell(rangeLabel)].join(','));
   if (windowStart) {
     lines.push([escapeCsvCell('Window Start UTC'), escapeCsvCell(windowStart)].join(','));

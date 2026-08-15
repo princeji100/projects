@@ -32,8 +32,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: `Dashboard | Linktree`,
-  description: "Manage your Linktree profile and links",
+  title: `Dashboard | Prince Links`,
+  description: "Manage your Prince Links profile and links",
 };
 
 export default async function AppLayout({ children }) {

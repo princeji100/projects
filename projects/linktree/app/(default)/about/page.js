@@ -24,14 +24,14 @@ import {
 import LinktreeLogo from "@/components/media/LinktreeLogo";
 
 export const metadata = {
-  title: "About | Linktree Platform & Creator Info",
-  description: "Learn about the invite-only Linktree platform architecture, features, and developer Prince Ji (main portfolio: princeji.com).",
+  title: "About | Prince Links Platform & Creator Info",
+  description: "Learn about the Prince Links platform architecture, features, and developer Prince Ji (main portfolio: princeji.com).",
 };
 
 export default function AboutPage() {
   const faqs = [
     {
-      q: "Why is this Linktree platform invite-only?",
+      q: "Why is this Prince Links platform invite-only?",
       a: "To ensure maximum performance, zero bot traffic, and guaranteed high-speed AWS edge delivery, access is strictly limited to verified creators and approved portfolios.",
     },
     {
@@ -40,7 +40,7 @@ export default function AboutPage() {
     },
     {
       q: "Is the platform free for invited creators?",
-      a: "Yes, 100% free with unlimited links, custom gradient themes, 1024px print QR code exports, and real-time click analytics.",
+      a: "Yes, generous Free plan with unlimited links, custom gradient themes, 1024px print QR code exports, and real-time click analytics.",
     },
     {
       q: "Where is user data and uploaded media stored?",
@@ -61,7 +61,7 @@ export default function AboutPage() {
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-2xl mx-auto">
-          About <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">Linktree</span>
+          About <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">Prince Links</span>
         </h1>
 
         <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
@@ -109,7 +109,7 @@ export default function AboutPage() {
               </div>
 
               <p className="text-slate-600 text-sm leading-relaxed">
-                Full-Stack Software Engineer specializing in modern web ecosystems, cloud infrastructure, and interactive developer platforms. This Linktree application is built from scratch as an exclusive, multi-tenant link platform.
+                Full-Stack Software Engineer specializing in modern web ecosystems, cloud infrastructure, and interactive developer platforms. This Prince Links application is built from scratch as an exclusive, multi-tenant link platform.
               </p>
 
               {/* Primary Portfolio & External Social Badges */}
@@ -257,7 +257,7 @@ export default function AboutPage() {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-16 w-full">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-7 sm:p-9 rounded-3xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div className="space-y-1">
-            <h3 className="text-xl sm:text-2xl font-extrabold">Join Linktree</h3>
+            <h3 className="text-xl sm:text-2xl font-extrabold">Join Prince Links</h3>
             <p className="text-blue-100 text-xs sm:text-sm max-w-md">
               Claim your unique handle today or request early access if you need an invite.
             </p>
@@ -284,7 +284,7 @@ export default function AboutPage() {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-3">
             <LinktreeLogo boxSize="w-6 h-6" iconSize="text-[10px]" textSize="text-sm" />
-            <span>&copy; {new Date().getFullYear()} Linktree. Main Portfolio: <a href="https://princeji.com" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-700 hover:text-blue-600 transition underline">princeji.com</a></span>
+            <span>&copy; {new Date().getFullYear()} Prince Links. Main Portfolio: <a href="https://princeji.com" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-700 hover:text-blue-600 transition underline">princeji.com</a></span>
           </div>
           <div className="flex items-center gap-4 font-semibold text-slate-600">
             <Link href="/" className="hover:text-blue-600 transition">Home</Link>

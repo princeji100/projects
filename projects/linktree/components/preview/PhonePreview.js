@@ -325,7 +325,7 @@ export default function PhonePreview({
                   isLightText ? 'text-white/40' : 'text-slate-400'
                 }`}
               >
-                linktree
+                Prince Links
               </span>
             </div>
           )}

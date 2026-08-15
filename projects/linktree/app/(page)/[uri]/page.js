@@ -40,12 +40,12 @@ export async function generateMetadata({ params }) {
 
   if (!page) {
     return {
-      title: 'Profile Not Found | Linktree',
+      title: 'Profile Not Found | Prince Links',
     };
   }
 
-  const title = `${page.displayName || `@${uri}`} | Linktree`;
-  const description = page.bio || `Connect with ${page.displayName || uri} on Linktree. Explore links, portfolio, and social channels.`;
+  const title = `${page.displayName || `@${uri}`} | Prince Links`;
+  const description = page.bio || `Connect with ${page.displayName || uri} on Prince Links. Explore links, portfolio, and social channels.`;
   const canonicalUrl = getCanonicalProfileUrl(page || { uri });
 
   return {
@@ -176,7 +176,7 @@ const UserPage = async ({ params }) => {
             }`}
           >
             <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-xs" />
-            <span className="font-extrabold text-xs tracking-tight">linktree</span>
+            <span className="font-extrabold text-xs tracking-tight">Prince Links</span>
           </Link>
         ) : (
           <div />
@@ -419,7 +419,7 @@ const UserPage = async ({ params }) => {
         </div>
       </main>
 
-      {/* Made with Linktree Footer */}
+      {/* Made with Prince Links Footer */}
       {!canRemoveBranding && (
         <footer className="relative z-10 text-center py-6 pb-8">
           <Link
@@ -431,7 +431,7 @@ const UserPage = async ({ params }) => {
             }`}
           >
             <FontAwesomeIcon icon={faLinkSolid} className="text-blue-500 text-[11px]" />
-            <span>Made with Linktree</span>
+            <span>Made with Prince Links</span>
           </Link>
         </footer>
       )}

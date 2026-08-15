@@ -512,7 +512,7 @@ export default function AdminAllowlistClient({
               <div>
                 <h2 className="text-lg font-bold text-slate-900">Whitelisted Accounts &amp; Usernames</h2>
                 <p className="text-xs text-slate-500">
-                  Total approved users and their associated public Linktree profiles.
+                  Total approved users and their associated public Prince Links profiles.
                 </p>
               </div>
 

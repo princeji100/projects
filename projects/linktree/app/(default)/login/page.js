@@ -146,7 +146,7 @@ const Login = () => {
               <FontAwesomeIcon icon={faShieldHalved} />
             </div>
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              Linktree Access Portal
+              Prince Links Access Portal
             </h1>
             <p className="text-xs font-medium text-slate-500 max-w-xs mx-auto">
               Multi-Tenant Invite-Only Creator Platform

@@ -8,7 +8,7 @@ const HeroForm = () => {
     const { data: session } = useSession();
     const [Username, setUsername] = useState('');
 
-    const [hostPrefix, setHostPrefix] = useState('linktree-princeji.vercel.app/');
+    const [hostPrefix, setHostPrefix] = useState('links.princeji.com/');
 
     useEffect(() => {
         if (typeof window !== 'undefined' && window.location.host) {

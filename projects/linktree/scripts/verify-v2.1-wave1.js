@@ -301,7 +301,10 @@ check('safety: User and Page schemas unchanged in Wave 1', () => {
 
 check('safety: public profile branding rendering remains present in Wave 1', () => {
   const publicPageSrc = fs.readFileSync(path.join(projectRoot, 'app/(page)/[uri]/page.js'), 'utf-8');
-  assert.ok(publicPageSrc.includes('Made with Linktree'), 'Public profile branding remains present in Wave 1');
+  assert.ok(
+    publicPageSrc.includes('Made with Prince Links') || publicPageSrc.includes('Made with Linktree'),
+    'Public profile branding remains present in Wave 1'
+  );
 });
 
 check('safety: existing v2.0 features remain ungated in Wave 1', () => {

@@ -28,8 +28,8 @@ import Link from "next/link";
 import LinktreeLogo from "@/components/media/LinktreeLogo";
 
 export const metadata = {
-  title: "Linktree | Exclusive Link in Bio Platform for Creators",
-  description: "Share your links, custom gradient themes, social media, and 1024px scannable QR codes on a single verified profile.",
+  title: "Prince Links — Links, Content & Creator Analytics",
+  description: "Create a customizable creator page for your links, content, UPI tips and audience analytics.",
 };
 
 export default async function Home() {
@@ -92,7 +92,7 @@ export default async function Home() {
             <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs font-semibold text-slate-600">
               <div className="flex items-center gap-1.5">
                 <FontAwesomeIcon icon={faCheckCircle} className="text-blue-600" />
-                <span>100% Free for Invited Users</span>
+                <span>Free access for approved creators</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <FontAwesomeIcon icon={faCheckCircle} className="text-blue-600" />
@@ -183,7 +183,7 @@ export default async function Home() {
                 {/* Footer Brand Tag */}
                 <div className="pt-2 flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  <span>Powered by Linktree</span>
+                  <span>Powered by Prince Links</span>
                 </div>
               </div>
             </div>
@@ -342,7 +342,7 @@ export default async function Home() {
               </div>
               <h4 className="font-bold text-slate-900 text-sm">Claim Your Handle</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Choose your custom username (e.g. <code className="bg-slate-100 text-blue-700 px-1.5 py-0.5 rounded font-mono text-[11px]">linktree-princeji.vercel.app/yourname</code>) to reserve your profile URL.
+                Choose your custom username (e.g. <code className="bg-slate-100 text-blue-700 px-1.5 py-0.5 rounded font-mono text-[11px]">links.princeji.com/yourname</code>) to reserve your profile URL.
               </p>
             </div>
 
@@ -390,7 +390,7 @@ export default async function Home() {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-3">
             <LinktreeLogo boxSize="w-6 h-6" iconSize="text-[10px]" textSize="text-sm" />
-            <span>&copy; {new Date().getFullYear()} Linktree. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} Prince Links. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-4 font-semibold text-slate-600">
             <Link href="/about" className="hover:text-blue-600 transition">About</Link>

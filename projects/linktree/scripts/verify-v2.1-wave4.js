@@ -401,7 +401,10 @@ await check('safety: no Client Component imports Subscription model', () => {
 
 await check('safety: public profile branding remains present in page.js', () => {
   const publicPageSrc = fs.readFileSync(path.join(projectRoot, 'app/(page)/[uri]/page.js'), 'utf-8');
-  assert.ok(publicPageSrc.includes('Made with Linktree'), 'Public profile branding remains present');
+  assert.ok(
+    publicPageSrc.includes('Made with Prince Links') || publicPageSrc.includes('Made with Linktree'),
+    'Public profile branding remains present'
+  );
 });
 
 await check('safety: dashboard visible behavior unchanged (no upgrade button or locked gates)', () => {

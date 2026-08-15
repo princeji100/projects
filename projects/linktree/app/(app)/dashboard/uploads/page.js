@@ -7,7 +7,7 @@ import Page from '@/models/Page';
 import UploadsManagerClient from '@/components/uploads/UploadsManagerClient';
 
 export const metadata = {
-  title: 'Uploads & Storage | Linktree',
+  title: 'Uploads & Storage | Prince Links',
   description: 'Manage your uploaded images and storage quota',
 };
 

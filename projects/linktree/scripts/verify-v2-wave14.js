@@ -120,7 +120,11 @@ await check('print-report-elements: contains print header with selected range an
     'utf8'
   );
 
-  assert.ok(clientSrc.includes('Linktree Traffic & Analytics Report'), 'Must render print report header');
+  assert.ok(
+    clientSrc.includes('Prince Links Traffic & Analytics Report') ||
+      clientSrc.includes('Linktree Traffic & Analytics Report'),
+    'Must render print report header'
+  );
   assert.ok(clientSrc.includes('hidden print:block'), 'Print-specific elements must be hidden on screen');
   assert.ok(clientSrc.includes('Daily Clicks Summary'), 'Must render daily breakdown table in print');
   assert.ok(clientSrc.includes('chartData.slice(1).map'), 'Daily table consumes authoritative chartData points');

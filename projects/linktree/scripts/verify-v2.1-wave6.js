@@ -303,7 +303,7 @@ await check('e2e: admin status alone does not grant Pro entitlements', () => {
 
 await check('safety: public profile branding remains present in page.js', () => {
   const publicPageSrc = fs.readFileSync(path.join(projectRoot, 'app/(page)/[uri]/page.js'), 'utf-8');
-  assert.ok(publicPageSrc.includes('Made with Linktree'));
+  assert.ok(publicPageSrc.includes('Made with Prince Links') || publicPageSrc.includes('Made with Linktree'));
 });
 
 await check('safety: zero checkout or payment SDK dependencies added', () => {

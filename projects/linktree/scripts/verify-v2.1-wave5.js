@@ -272,7 +272,7 @@ await check('safety: zero custom-domain or extended analytics controls in Billin
 
 await check('safety: public profile branding and existing features remain untouched', () => {
   const publicPageSrc = fs.readFileSync(path.join(projectRoot, 'app/(page)/[uri]/page.js'), 'utf-8');
-  assert.ok(publicPageSrc.includes('Made with Linktree'));
+  assert.ok(publicPageSrc.includes('Made with Prince Links') || publicPageSrc.includes('Made with Linktree'));
 });
 
 await check('safety: zero new npm dependencies in package.json', () => {

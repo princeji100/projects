@@ -12,7 +12,7 @@ export const PRO_ROADMAP_FEATURES = Object.freeze([
   {
     key: 'remove_branding',
     title: 'Remove Platform Branding',
-    description: 'Hide "Made with Linktree" badge and watermark on your public profile and preview.',
+    description: 'Hide "Made with Prince Links" badge and watermark on your public profile and preview.',
     status: 'Available with Pro',
     statusVariant: 'success',
   },
