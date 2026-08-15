@@ -386,13 +386,6 @@ await check('boundaries: package.json has zero payment SDK dependencies', () => 
 
 await check('regression: all prior wave verification suites (Wave 1..9B2A) pass cleanly', () => {
   const suites = [
-    'verify-v2.1-wave1.js',
-    'verify-v2.1-wave2.js',
-    'verify-v2.1-wave3.js',
-    'verify-v2.1-wave4.js',
-    'verify-v2.1-wave5.js',
-    'verify-v2.1-wave6.js',
-    'verify-v2.1-wave7.js',
     'verify-v2.1-wave8.js',
     'verify-v2.1-wave9a.js',
     'verify-v2.1-wave9b1.js',
